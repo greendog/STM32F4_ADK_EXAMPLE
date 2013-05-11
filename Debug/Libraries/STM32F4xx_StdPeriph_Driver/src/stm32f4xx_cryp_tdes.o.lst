@@ -1,0 +1,1427 @@
+   1              		.syntax unified
+   2              		.cpu cortex-m4
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 6
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.file	"stm32f4xx_cryp_tdes.c"
+  15              		.text
+  16              	.Ltext0:
+  17              		.cfi_sections	.debug_frame
+  18              		.align	2
+  19              		.global	CRYP_TDES_ECB
+  20              		.thumb
+  21              		.thumb_func
+  23              	CRYP_TDES_ECB:
+  24              	.LFB110:
+  25              		.file 1 "../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c"
+   1:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c **** /**
+   2:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   ******************************************************************************
+   3:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   * @file    stm32f4xx_cryp_tdes.c
+   4:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   * @author  MCD Application Team
+   5:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   * @version V1.0.2
+   6:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   * @date    05-March-2012
+   7:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   * @brief   This file provides high level functions to encrypt and decrypt an 
+   8:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   *          input message using TDES in ECB/CBC modes .
+   9:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   *          It uses the stm32f4xx_cryp.c/.h drivers to access the STM32F4xx CRYP
+  10:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   *          peripheral.
+  11:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   *
+  12:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   *  @verbatim
+  13:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   *
+  14:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   *          ===================================================================
+  15:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   *                                   How to use this driver
+  16:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   *          ===================================================================
+  17:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   *          1. Enable The CRYP controller clock using 
+  18:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   *            RCC_AHB2PeriphClockCmd(RCC_AHB2Periph_CRYP, ENABLE); function.
+  19:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   *
+  20:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   *          2. Encrypt and decrypt using TDES in ECB Mode using CRYP_TDES_ECB()
+  21:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   *             function.
+  22:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   *
+  23:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   *          3. Encrypt and decrypt using TDES in CBC Mode using CRYP_TDES_CBC()
+  24:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   *             function.
+  25:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   *
+  26:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   *  @endverbatim
+  27:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   *
+  28:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   ******************************************************************************
+  29:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   * @attention
+  30:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   *
+  31:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   * <h2><center>&copy; COPYRIGHT 2012 STMicroelectronics</center></h2>
+  32:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   *
+  33:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   * Licensed under MCD-ST Liberty SW License Agreement V2, (the "License");
+  34:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   * You may not use this file except in compliance with the License.
+  35:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   * You may obtain a copy of the License at:
+  36:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   *
+  37:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   *        http://www.st.com/software_license_agreement_liberty_v2
+  38:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   *
+  39:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   * Unless required by applicable law or agreed to in writing, software 
+  40:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   * distributed under the License is distributed on an "AS IS" BASIS, 
+  41:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  42:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   * See the License for the specific language governing permissions and
+  43:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   * limitations under the License.
+  44:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   *
+  45:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   ******************************************************************************
+  46:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   */ 
+  47:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c **** 
+  48:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c **** /* Includes ------------------------------------------------------------------*/
+  49:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c **** #include "stm32f4xx_cryp.h"
+  50:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c **** 
+  51:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c **** 
+  52:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c **** /** @addtogroup STM32F4xx_StdPeriph_Driver
+  53:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   * @{
+  54:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   */
+  55:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c **** 
+  56:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c **** /** @defgroup CRYP 
+  57:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   * @brief CRYP driver modules
+  58:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   * @{
+  59:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   */
+  60:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c **** 
+  61:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c **** /* Private typedef -----------------------------------------------------------*/
+  62:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c **** /* Private define ------------------------------------------------------------*/
+  63:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c **** #define TDESBUSY_TIMEOUT    ((uint32_t) 0x00010000)
+  64:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c **** 
+  65:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c **** /* Private macro -------------------------------------------------------------*/
+  66:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c **** /* Private variables ---------------------------------------------------------*/
+  67:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c **** /* Private function prototypes -----------------------------------------------*/
+  68:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c **** /* Private functions ---------------------------------------------------------*/
+  69:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c **** 
+  70:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c **** 
+  71:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c **** /** @defgroup CRYP_Private_Functions
+  72:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   * @{
+  73:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   */ 
+  74:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c **** 
+  75:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c **** /** @defgroup CRYP_Group7 High Level TDES functions
+  76:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****  *  @brief   High Level TDES functions 
+  77:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****  *
+  78:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c **** @verbatim   
+  79:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****  ===============================================================================
+  80:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****                           High Level TDES functions
+  81:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****  ===============================================================================
+  82:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c **** 
+  83:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c **** 
+  84:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c **** @endverbatim
+  85:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   * @{
+  86:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   */
+  87:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c **** 
+  88:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c **** /**
+  89:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   * @brief  Encrypt and decrypt using TDES in ECB Mode
+  90:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   * @param  Mode: encryption or decryption Mode.
+  91:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   *           This parameter can be one of the following values:
+  92:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   *            @arg MODE_ENCRYPT: Encryption
+  93:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   *            @arg MODE_DECRYPT: Decryption
+  94:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   * @param  Key: Key used for TDES algorithm.
+  95:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   * @param  Ilength: length of the Input buffer, must be a multiple of 8.
+  96:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   * @param  Input: pointer to the Input buffer.
+  97:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   * @param  Output: pointer to the returned buffer.
+  98:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   * @retval An ErrorStatus enumeration value:
+  99:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   *          - SUCCESS: Operation done
+ 100:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   *          - ERROR: Operation failed
+ 101:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   */
+ 102:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c **** ErrorStatus CRYP_TDES_ECB(uint8_t Mode, uint8_t Key[24], uint8_t *Input, 
+ 103:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****                           uint32_t Ilength, uint8_t *Output)
+ 104:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c **** {
+  26              		.loc 1 104 0
+  27              		.cfi_startproc
+  28              		@ args = 4, pretend = 0, frame = 136
+  29              		@ frame_needed = 1, uses_anonymous_args = 0
+  30 0000 90B5     		push	{r4, r7, lr}
+  31              	.LCFI0:
+  32              		.cfi_def_cfa_offset 12
+  33              		.cfi_offset 4, -12
+  34              		.cfi_offset 7, -8
+  35              		.cfi_offset 14, -4
+  36 0002 A3B0     		sub	sp, sp, #140
+  37              	.LCFI1:
+  38              		.cfi_def_cfa_offset 152
+  39 0004 00AF     		add	r7, sp, #0
+  40              	.LCFI2:
+  41              		.cfi_def_cfa_register 7
+  42 0006 B960     		str	r1, [r7, #8]
+  43 0008 7A60     		str	r2, [r7, #4]
+  44 000a 3B60     		str	r3, [r7, #0]
+  45 000c 0346     		mov	r3, r0
+  46 000e FB73     		strb	r3, [r7, #15]
+ 105:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   CRYP_InitTypeDef TDES_CRYP_InitStructure;
+ 106:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   CRYP_KeyInitTypeDef TDES_CRYP_KeyInitStructure;
+ 107:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   __IO uint32_t counter = 0;
+  47              		.loc 1 107 0
+  48 0010 4FF00003 		mov	r3, #0
+  49 0014 7B61     		str	r3, [r7, #20]
+ 108:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   uint32_t busystatus = 0;
+  50              		.loc 1 108 0
+  51 0016 4FF00003 		mov	r3, #0
+  52 001a 7B67     		str	r3, [r7, #116]
+ 109:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   ErrorStatus status = SUCCESS;
+  53              		.loc 1 109 0
+  54 001c 4FF00103 		mov	r3, #1
+  55 0020 87F88730 		strb	r3, [r7, #135]
+ 110:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   uint32_t keyaddr    = (uint32_t)Key;
+  56              		.loc 1 110 0
+  57 0024 BB68     		ldr	r3, [r7, #8]
+  58 0026 3B67     		str	r3, [r7, #112]
+ 111:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   uint32_t inputaddr  = (uint32_t)Input;
+  59              		.loc 1 111 0
+  60 0028 7B68     		ldr	r3, [r7, #4]
+  61 002a C7F88030 		str	r3, [r7, #128]
+ 112:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   uint32_t outputaddr = (uint32_t)Output;
+  62              		.loc 1 112 0
+  63 002e D7F89830 		ldr	r3, [r7, #152]
+  64 0032 FB67     		str	r3, [r7, #124]
+ 113:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   uint32_t i = 0;
+  65              		.loc 1 113 0
+  66 0034 4FF00003 		mov	r3, #0
+  67 0038 BB67     		str	r3, [r7, #120]
+ 114:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c **** 
+ 115:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   /* Crypto structures initialisation*/
+ 116:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   CRYP_KeyStructInit(&TDES_CRYP_KeyInitStructure);
+  68              		.loc 1 116 0
+  69 003a 07F11803 		add	r3, r7, #24
+  70 003e 1846     		mov	r0, r3
+  71 0040 FFF7FEFF 		bl	CRYP_KeyStructInit
+ 117:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c **** 
+ 118:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   /* Crypto Init for Encryption process */
+ 119:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   if(Mode == MODE_ENCRYPT) /* TDES encryption */
+  72              		.loc 1 119 0
+  73 0044 FB7B     		ldrb	r3, [r7, #15]	@ zero_extendqisi2
+  74 0046 012B     		cmp	r3, #1
+  75 0048 03D1     		bne	.L2
+ 120:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   {
+ 121:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****      TDES_CRYP_InitStructure.CRYP_AlgoDir = CRYP_AlgoDir_Encrypt;
+  76              		.loc 1 121 0
+  77 004a 4FF00003 		mov	r3, #0
+  78 004e 3B87     		strh	r3, [r7, #56]	@ movhi
+  79 0050 02E0     		b	.L3
+  80              	.L2:
+ 122:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   }
+ 123:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   else /*if(Mode == MODE_DECRYPT)*/ /* TDES decryption */
+ 124:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   {
+ 125:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****      TDES_CRYP_InitStructure.CRYP_AlgoDir = CRYP_AlgoDir_Decrypt;
+  81              		.loc 1 125 0
+  82 0052 4FF00403 		mov	r3, #4
+  83 0056 3B87     		strh	r3, [r7, #56]	@ movhi
+  84              	.L3:
+ 126:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   }
+ 127:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c **** 
+ 128:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   TDES_CRYP_InitStructure.CRYP_AlgoMode = CRYP_AlgoMode_TDES_ECB;
+  85              		.loc 1 128 0
+  86 0058 4FF00003 		mov	r3, #0
+  87 005c 7B87     		strh	r3, [r7, #58]	@ movhi
+ 129:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   TDES_CRYP_InitStructure.CRYP_DataType = CRYP_DataType_8b;
+  88              		.loc 1 129 0
+  89 005e 4FF08003 		mov	r3, #128
+  90 0062 BB87     		strh	r3, [r7, #60]	@ movhi
+ 130:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   CRYP_Init(&TDES_CRYP_InitStructure);
+  91              		.loc 1 130 0
+  92 0064 07F13803 		add	r3, r7, #56
+  93 0068 1846     		mov	r0, r3
+  94 006a FFF7FEFF 		bl	CRYP_Init
+ 131:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c **** 
+ 132:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   /* Key Initialisation */
+ 133:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   TDES_CRYP_KeyInitStructure.CRYP_Key1Left = __REV(*(uint32_t*)(keyaddr));
+  95              		.loc 1 133 0
+  96 006e 3B6F     		ldr	r3, [r7, #112]
+  97 0070 1B68     		ldr	r3, [r3, #0]
+  98 0072 FB66     		str	r3, [r7, #108]
+  99              	.LBB30:
+ 100              	.LBB31:
+ 101              		.file 2 "/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_
+   1:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /**************************************************************************//**
+   2:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  * @file     core_cmInstr.h
+   3:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  * @brief    CMSIS Cortex-M Core Instruction Access Header File
+   4:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  * @version  V2.10
+   5:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  * @date     19. July 2011
+   6:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  *
+   7:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  * @note
+   8:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  * Copyright (C) 2009-2011 ARM Limited. All rights reserved.
+   9:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  *
+  10:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  * @par
+  11:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  * ARM Limited (ARM) is supplying this software for use with Cortex-M 
+  12:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  * processor based microcontrollers.  This file can be freely distributed 
+  13:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  * within development tools that are supporting such ARM based processors. 
+  14:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  *
+  15:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  * @par
+  16:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  * THIS SOFTWARE IS PROVIDED "AS IS".  NO WARRANTIES, WHETHER EXPRESS, IMPLIED
+  17:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  * OR STATUTORY, INCLUDING, BUT NOT LIMITED TO, IMPLIED WARRANTIES OF
+  18:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE APPLY TO THIS SOFTWARE.
+  19:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  * ARM SHALL NOT, IN ANY CIRCUMSTANCES, BE LIABLE FOR SPECIAL, INCIDENTAL, OR
+  20:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  * CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
+  21:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  *
+  22:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  ******************************************************************************/
+  23:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+  24:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** #ifndef __CORE_CMINSTR_H
+  25:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** #define __CORE_CMINSTR_H
+  26:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+  27:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+  28:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /* ##########################  Core Instruction Access  ######################### */
+  29:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /** \defgroup CMSIS_Core_InstructionInterface CMSIS Core Instruction Interface
+  30:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****   Access to dedicated instructions
+  31:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****   @{
+  32:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** */
+  33:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+  34:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** #if   defined ( __CC_ARM ) /*------------------RealView Compiler -----------------*/
+  35:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /* ARM armcc specific functions */
+  36:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+  37:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** #if (__ARMCC_VERSION < 400677)
+  38:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****   #error "Please use ARM Compiler Toolchain V4.0.677 or later!"
+  39:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** #endif
+  40:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+  41:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+  42:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /** \brief  No Operation
+  43:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+  44:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     No Operation does nothing. This instruction can be used for code alignment purposes.
+  45:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  */
+  46:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** #define __NOP                             __nop
+  47:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+  48:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+  49:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /** \brief  Wait For Interrupt
+  50:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+  51:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     Wait For Interrupt is a hint instruction that suspends execution
+  52:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     until one of a number of events occurs.
+  53:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  */
+  54:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** #define __WFI                             __wfi
+  55:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+  56:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+  57:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /** \brief  Wait For Event
+  58:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+  59:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     Wait For Event is a hint instruction that permits the processor to enter
+  60:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     a low-power state until one of a number of events occurs.
+  61:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  */
+  62:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** #define __WFE                             __wfe
+  63:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+  64:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+  65:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /** \brief  Send Event
+  66:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+  67:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     Send Event is a hint instruction. It causes an event to be signaled to the CPU.
+  68:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  */
+  69:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** #define __SEV                             __sev
+  70:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+  71:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+  72:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /** \brief  Instruction Synchronization Barrier
+  73:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+  74:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     Instruction Synchronization Barrier flushes the pipeline in the processor, 
+  75:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     so that all instructions following the ISB are fetched from cache or 
+  76:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     memory, after the instruction has been completed.
+  77:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  */
+  78:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** #define __ISB()                           __isb(0xF)
+  79:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+  80:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+  81:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /** \brief  Data Synchronization Barrier
+  82:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+  83:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     This function acts as a special kind of Data Memory Barrier. 
+  84:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     It completes when all explicit memory accesses before this instruction complete.
+  85:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  */
+  86:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** #define __DSB()                           __dsb(0xF)
+  87:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+  88:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+  89:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /** \brief  Data Memory Barrier
+  90:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+  91:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     This function ensures the apparent order of the explicit memory operations before 
+  92:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     and after the instruction, without ensuring their completion.
+  93:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  */
+  94:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** #define __DMB()                           __dmb(0xF)
+  95:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+  96:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+  97:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /** \brief  Reverse byte order (32 bit)
+  98:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+  99:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     This function reverses the byte order in integer value.
+ 100:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 101:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \param [in]    value  Value to reverse
+ 102:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \return               Reversed value
+ 103:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  */
+ 104:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** #define __REV                             __rev
+ 105:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 106:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 107:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /** \brief  Reverse byte order (16 bit)
+ 108:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 109:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     This function reverses the byte order in two unsigned short values.
+ 110:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 111:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \param [in]    value  Value to reverse
+ 112:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \return               Reversed value
+ 113:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  */
+ 114:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** static __INLINE __ASM uint32_t __REV16(uint32_t value)
+ 115:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** {
+ 116:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****   rev16 r0, r0
+ 117:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****   bx lr
+ 118:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** }
+ 119:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 120:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 121:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /** \brief  Reverse byte order in signed short value
+ 122:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 123:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     This function reverses the byte order in a signed short value with sign extension to integer.
+ 124:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 125:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \param [in]    value  Value to reverse
+ 126:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \return               Reversed value
+ 127:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  */
+ 128:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** static __INLINE __ASM int32_t __REVSH(int32_t value)
+ 129:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** {
+ 130:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****   revsh r0, r0
+ 131:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****   bx lr
+ 132:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** }
+ 133:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 134:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 135:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** #if       (__CORTEX_M >= 0x03)
+ 136:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 137:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /** \brief  Reverse bit order of value
+ 138:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 139:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     This function reverses the bit order of the given value.
+ 140:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 141:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \param [in]    value  Value to reverse
+ 142:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \return               Reversed value
+ 143:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  */
+ 144:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** #define __RBIT                            __rbit
+ 145:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 146:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 147:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /** \brief  LDR Exclusive (8 bit)
+ 148:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 149:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     This function performs a exclusive LDR command for 8 bit value.
+ 150:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 151:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \param [in]    ptr  Pointer to data
+ 152:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \return             value of type uint8_t at (*ptr)
+ 153:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  */
+ 154:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** #define __LDREXB(ptr)                     ((uint8_t ) __ldrex(ptr))
+ 155:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 156:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 157:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /** \brief  LDR Exclusive (16 bit)
+ 158:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 159:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     This function performs a exclusive LDR command for 16 bit values.
+ 160:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 161:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \param [in]    ptr  Pointer to data
+ 162:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \return        value of type uint16_t at (*ptr)
+ 163:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  */
+ 164:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** #define __LDREXH(ptr)                     ((uint16_t) __ldrex(ptr))
+ 165:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 166:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 167:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /** \brief  LDR Exclusive (32 bit)
+ 168:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 169:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     This function performs a exclusive LDR command for 32 bit values.
+ 170:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 171:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \param [in]    ptr  Pointer to data
+ 172:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \return        value of type uint32_t at (*ptr)
+ 173:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  */
+ 174:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** #define __LDREXW(ptr)                     ((uint32_t ) __ldrex(ptr))
+ 175:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 176:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 177:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /** \brief  STR Exclusive (8 bit)
+ 178:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 179:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     This function performs a exclusive STR command for 8 bit values.
+ 180:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 181:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \param [in]  value  Value to store
+ 182:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \param [in]    ptr  Pointer to location
+ 183:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \return          0  Function succeeded
+ 184:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \return          1  Function failed
+ 185:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  */
+ 186:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** #define __STREXB(value, ptr)              __strex(value, ptr)
+ 187:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 188:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 189:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /** \brief  STR Exclusive (16 bit)
+ 190:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 191:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     This function performs a exclusive STR command for 16 bit values.
+ 192:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 193:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \param [in]  value  Value to store
+ 194:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \param [in]    ptr  Pointer to location
+ 195:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \return          0  Function succeeded
+ 196:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \return          1  Function failed
+ 197:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  */
+ 198:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** #define __STREXH(value, ptr)              __strex(value, ptr)
+ 199:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 200:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 201:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /** \brief  STR Exclusive (32 bit)
+ 202:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 203:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     This function performs a exclusive STR command for 32 bit values.
+ 204:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 205:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \param [in]  value  Value to store
+ 206:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \param [in]    ptr  Pointer to location
+ 207:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \return          0  Function succeeded
+ 208:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \return          1  Function failed
+ 209:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  */
+ 210:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** #define __STREXW(value, ptr)              __strex(value, ptr)
+ 211:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 212:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 213:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /** \brief  Remove the exclusive lock
+ 214:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 215:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     This function removes the exclusive lock which is created by LDREX.
+ 216:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 217:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  */
+ 218:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** #define __CLREX                           __clrex
+ 219:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 220:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 221:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /** \brief  Signed Saturate
+ 222:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 223:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     This function saturates a signed value.
+ 224:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 225:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \param [in]  value  Value to be saturated
+ 226:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \param [in]    sat  Bit position to saturate to (1..32)
+ 227:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \return             Saturated value
+ 228:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  */
+ 229:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** #define __SSAT                            __ssat
+ 230:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 231:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 232:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /** \brief  Unsigned Saturate
+ 233:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 234:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     This function saturates an unsigned value.
+ 235:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 236:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \param [in]  value  Value to be saturated
+ 237:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \param [in]    sat  Bit position to saturate to (0..31)
+ 238:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \return             Saturated value
+ 239:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  */
+ 240:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** #define __USAT                            __usat
+ 241:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 242:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 243:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /** \brief  Count leading zeros
+ 244:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 245:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     This function counts the number of leading zeros of a data value.
+ 246:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 247:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \param [in]  value  Value to count the leading zeros
+ 248:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \return             number of leading zeros in value
+ 249:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  */
+ 250:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** #define __CLZ                             __clz 
+ 251:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 252:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** #endif /* (__CORTEX_M >= 0x03) */
+ 253:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 254:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 255:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 256:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** #elif defined ( __ICCARM__ ) /*------------------ ICC Compiler -------------------*/
+ 257:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /* IAR iccarm specific functions */
+ 258:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 259:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** #include <cmsis_iar.h>
+ 260:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 261:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 262:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** #elif defined ( __GNUC__ ) /*------------------ GNU Compiler ---------------------*/
+ 263:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /* GNU gcc specific functions */
+ 264:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 265:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /** \brief  No Operation
+ 266:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 267:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     No Operation does nothing. This instruction can be used for code alignment purposes.
+ 268:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  */
+ 269:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** __attribute__( ( always_inline ) ) static __INLINE void __NOP(void)
+ 270:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** {
+ 271:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****   __ASM volatile ("nop");
+ 272:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** }
+ 273:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 274:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 275:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /** \brief  Wait For Interrupt
+ 276:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 277:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     Wait For Interrupt is a hint instruction that suspends execution
+ 278:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     until one of a number of events occurs.
+ 279:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  */
+ 280:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** __attribute__( ( always_inline ) ) static __INLINE void __WFI(void)
+ 281:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** {
+ 282:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****   __ASM volatile ("wfi");
+ 283:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** }
+ 284:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 285:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 286:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /** \brief  Wait For Event
+ 287:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 288:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     Wait For Event is a hint instruction that permits the processor to enter
+ 289:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     a low-power state until one of a number of events occurs.
+ 290:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  */
+ 291:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** __attribute__( ( always_inline ) ) static __INLINE void __WFE(void)
+ 292:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** {
+ 293:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****   __ASM volatile ("wfe");
+ 294:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** }
+ 295:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 296:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 297:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /** \brief  Send Event
+ 298:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 299:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     Send Event is a hint instruction. It causes an event to be signaled to the CPU.
+ 300:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  */
+ 301:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** __attribute__( ( always_inline ) ) static __INLINE void __SEV(void)
+ 302:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** {
+ 303:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****   __ASM volatile ("sev");
+ 304:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** }
+ 305:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 306:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 307:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /** \brief  Instruction Synchronization Barrier
+ 308:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 309:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     Instruction Synchronization Barrier flushes the pipeline in the processor, 
+ 310:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     so that all instructions following the ISB are fetched from cache or 
+ 311:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     memory, after the instruction has been completed.
+ 312:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  */
+ 313:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** __attribute__( ( always_inline ) ) static __INLINE void __ISB(void)
+ 314:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** {
+ 315:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****   __ASM volatile ("isb");
+ 316:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** }
+ 317:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 318:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 319:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /** \brief  Data Synchronization Barrier
+ 320:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 321:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     This function acts as a special kind of Data Memory Barrier. 
+ 322:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     It completes when all explicit memory accesses before this instruction complete.
+ 323:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  */
+ 324:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** __attribute__( ( always_inline ) ) static __INLINE void __DSB(void)
+ 325:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** {
+ 326:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****   __ASM volatile ("dsb");
+ 327:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** }
+ 328:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 329:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 330:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /** \brief  Data Memory Barrier
+ 331:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 332:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     This function ensures the apparent order of the explicit memory operations before 
+ 333:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     and after the instruction, without ensuring their completion.
+ 334:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  */
+ 335:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** __attribute__( ( always_inline ) ) static __INLINE void __DMB(void)
+ 336:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** {
+ 337:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****   __ASM volatile ("dmb");
+ 338:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** }
+ 339:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 340:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 341:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /** \brief  Reverse byte order (32 bit)
+ 342:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 343:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     This function reverses the byte order in integer value.
+ 344:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 345:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \param [in]    value  Value to reverse
+ 346:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \return               Reversed value
+ 347:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  */
+ 348:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** __attribute__( ( always_inline ) ) static __INLINE uint32_t __REV(uint32_t value)
+ 349:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** {
+ 350:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****   uint32_t result;
+ 351:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****   
+ 352:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****   __ASM volatile ("rev %0, %1" : "=r" (result) : "r" (value) );
+ 102              		.loc 2 352 0
+ 103 0074 FB6E     		ldr	r3, [r7, #108]
+ 104              	@ 352 "/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmI
+ 105 0076 1CBA     		rev r4, r3
+ 106              	@ 0 "" 2
+ 107              		.thumb
+ 108 0078 BC66     		str	r4, [r7, #104]
+ 353:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****   return(result);
+ 109              		.loc 2 353 0
+ 110 007a BB6E     		ldr	r3, [r7, #104]
+ 111              	.LBE31:
+ 112              	.LBE30:
+ 113              		.loc 1 133 0
+ 114 007c 3B62     		str	r3, [r7, #32]
+ 134:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   keyaddr+=4;
+ 115              		.loc 1 134 0
+ 116 007e 3B6F     		ldr	r3, [r7, #112]
+ 117 0080 03F10403 		add	r3, r3, #4
+ 118 0084 3B67     		str	r3, [r7, #112]
+ 135:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   TDES_CRYP_KeyInitStructure.CRYP_Key1Right= __REV(*(uint32_t*)(keyaddr));
+ 119              		.loc 1 135 0
+ 120 0086 3B6F     		ldr	r3, [r7, #112]
+ 121 0088 1B68     		ldr	r3, [r3, #0]
+ 122 008a 7B66     		str	r3, [r7, #100]
+ 123              	.LBB32:
+ 124              	.LBB33:
+ 352:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****   __ASM volatile ("rev %0, %1" : "=r" (result) : "r" (value) );
+ 125              		.loc 2 352 0
+ 126 008c 7B6E     		ldr	r3, [r7, #100]
+ 127              	@ 352 "/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmI
+ 128 008e 1CBA     		rev r4, r3
+ 129              	@ 0 "" 2
+ 130              		.thumb
+ 131 0090 3C66     		str	r4, [r7, #96]
+ 132              		.loc 2 353 0
+ 133 0092 3B6E     		ldr	r3, [r7, #96]
+ 134              	.LBE33:
+ 135              	.LBE32:
+ 136              		.loc 1 135 0
+ 137 0094 7B62     		str	r3, [r7, #36]
+ 136:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   keyaddr+=4;
+ 138              		.loc 1 136 0
+ 139 0096 3B6F     		ldr	r3, [r7, #112]
+ 140 0098 03F10403 		add	r3, r3, #4
+ 141 009c 3B67     		str	r3, [r7, #112]
+ 137:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   TDES_CRYP_KeyInitStructure.CRYP_Key2Left = __REV(*(uint32_t*)(keyaddr));
+ 142              		.loc 1 137 0
+ 143 009e 3B6F     		ldr	r3, [r7, #112]
+ 144 00a0 1B68     		ldr	r3, [r3, #0]
+ 145 00a2 FB65     		str	r3, [r7, #92]
+ 146              	.LBB34:
+ 147              	.LBB35:
+ 352:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****   __ASM volatile ("rev %0, %1" : "=r" (result) : "r" (value) );
+ 148              		.loc 2 352 0
+ 149 00a4 FB6D     		ldr	r3, [r7, #92]
+ 150              	@ 352 "/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmI
+ 151 00a6 1CBA     		rev r4, r3
+ 152              	@ 0 "" 2
+ 153              		.thumb
+ 154 00a8 BC65     		str	r4, [r7, #88]
+ 155              		.loc 2 353 0
+ 156 00aa BB6D     		ldr	r3, [r7, #88]
+ 157              	.LBE35:
+ 158              	.LBE34:
+ 159              		.loc 1 137 0
+ 160 00ac BB62     		str	r3, [r7, #40]
+ 138:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   keyaddr+=4;
+ 161              		.loc 1 138 0
+ 162 00ae 3B6F     		ldr	r3, [r7, #112]
+ 163 00b0 03F10403 		add	r3, r3, #4
+ 164 00b4 3B67     		str	r3, [r7, #112]
+ 139:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   TDES_CRYP_KeyInitStructure.CRYP_Key2Right= __REV(*(uint32_t*)(keyaddr));
+ 165              		.loc 1 139 0
+ 166 00b6 3B6F     		ldr	r3, [r7, #112]
+ 167 00b8 1B68     		ldr	r3, [r3, #0]
+ 168 00ba 7B65     		str	r3, [r7, #84]
+ 169              	.LBB36:
+ 170              	.LBB37:
+ 352:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****   __ASM volatile ("rev %0, %1" : "=r" (result) : "r" (value) );
+ 171              		.loc 2 352 0
+ 172 00bc 7B6D     		ldr	r3, [r7, #84]
+ 173              	@ 352 "/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmI
+ 174 00be 1CBA     		rev r4, r3
+ 175              	@ 0 "" 2
+ 176              		.thumb
+ 177 00c0 3C65     		str	r4, [r7, #80]
+ 178              		.loc 2 353 0
+ 179 00c2 3B6D     		ldr	r3, [r7, #80]
+ 180              	.LBE37:
+ 181              	.LBE36:
+ 182              		.loc 1 139 0
+ 183 00c4 FB62     		str	r3, [r7, #44]
+ 140:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   keyaddr+=4;
+ 184              		.loc 1 140 0
+ 185 00c6 3B6F     		ldr	r3, [r7, #112]
+ 186 00c8 03F10403 		add	r3, r3, #4
+ 187 00cc 3B67     		str	r3, [r7, #112]
+ 141:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   TDES_CRYP_KeyInitStructure.CRYP_Key3Left = __REV(*(uint32_t*)(keyaddr));
+ 188              		.loc 1 141 0
+ 189 00ce 3B6F     		ldr	r3, [r7, #112]
+ 190 00d0 1B68     		ldr	r3, [r3, #0]
+ 191 00d2 FB64     		str	r3, [r7, #76]
+ 192              	.LBB38:
+ 193              	.LBB39:
+ 352:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****   __ASM volatile ("rev %0, %1" : "=r" (result) : "r" (value) );
+ 194              		.loc 2 352 0
+ 195 00d4 FB6C     		ldr	r3, [r7, #76]
+ 196              	@ 352 "/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmI
+ 197 00d6 1CBA     		rev r4, r3
+ 198              	@ 0 "" 2
+ 199              		.thumb
+ 200 00d8 BC64     		str	r4, [r7, #72]
+ 201              		.loc 2 353 0
+ 202 00da BB6C     		ldr	r3, [r7, #72]
+ 203              	.LBE39:
+ 204              	.LBE38:
+ 205              		.loc 1 141 0
+ 206 00dc 3B63     		str	r3, [r7, #48]
+ 142:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   keyaddr+=4;
+ 207              		.loc 1 142 0
+ 208 00de 3B6F     		ldr	r3, [r7, #112]
+ 209 00e0 03F10403 		add	r3, r3, #4
+ 210 00e4 3B67     		str	r3, [r7, #112]
+ 143:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   TDES_CRYP_KeyInitStructure.CRYP_Key3Right= __REV(*(uint32_t*)(keyaddr));
+ 211              		.loc 1 143 0
+ 212 00e6 3B6F     		ldr	r3, [r7, #112]
+ 213 00e8 1B68     		ldr	r3, [r3, #0]
+ 214 00ea 7B64     		str	r3, [r7, #68]
+ 215              	.LBB40:
+ 216              	.LBB41:
+ 352:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****   __ASM volatile ("rev %0, %1" : "=r" (result) : "r" (value) );
+ 217              		.loc 2 352 0
+ 218 00ec 7B6C     		ldr	r3, [r7, #68]
+ 219              	@ 352 "/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmI
+ 220 00ee 1CBA     		rev r4, r3
+ 221              	@ 0 "" 2
+ 222              		.thumb
+ 223 00f0 3C64     		str	r4, [r7, #64]
+ 224              		.loc 2 353 0
+ 225 00f2 3B6C     		ldr	r3, [r7, #64]
+ 226              	.LBE41:
+ 227              	.LBE40:
+ 228              		.loc 1 143 0
+ 229 00f4 7B63     		str	r3, [r7, #52]
+ 144:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   CRYP_KeyInit(& TDES_CRYP_KeyInitStructure);
+ 230              		.loc 1 144 0
+ 231 00f6 07F11803 		add	r3, r7, #24
+ 232 00fa 1846     		mov	r0, r3
+ 233 00fc FFF7FEFF 		bl	CRYP_KeyInit
+ 145:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c **** 
+ 146:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   /* Flush IN/OUT FIFO */
+ 147:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   CRYP_FIFOFlush();
+ 234              		.loc 1 147 0
+ 235 0100 FFF7FEFF 		bl	CRYP_FIFOFlush
+ 148:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c **** 
+ 149:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   /* Enable Crypto processor */
+ 150:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   CRYP_Cmd(ENABLE);
+ 236              		.loc 1 150 0
+ 237 0104 4FF00100 		mov	r0, #1
+ 238 0108 FFF7FEFF 		bl	CRYP_Cmd
+ 151:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c **** 
+ 152:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   for(i=0; ((i<Ilength) && (status != ERROR)); i+=8)
+ 239              		.loc 1 152 0
+ 240 010c 4FF00003 		mov	r3, #0
+ 241 0110 BB67     		str	r3, [r7, #120]
+ 242 0112 49E0     		b	.L10
+ 243              	.L16:
+ 153:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   {
+ 154:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****     /* Write the Input block in the Input FIFO */
+ 155:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****     CRYP_DataIn(*(uint32_t*)(inputaddr));
+ 244              		.loc 1 155 0
+ 245 0114 D7F88030 		ldr	r3, [r7, #128]
+ 246 0118 1B68     		ldr	r3, [r3, #0]
+ 247 011a 1846     		mov	r0, r3
+ 248 011c FFF7FEFF 		bl	CRYP_DataIn
+ 156:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****     inputaddr+=4;
+ 249              		.loc 1 156 0
+ 250 0120 D7F88030 		ldr	r3, [r7, #128]
+ 251 0124 03F10403 		add	r3, r3, #4
+ 252 0128 C7F88030 		str	r3, [r7, #128]
+ 157:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****     CRYP_DataIn(*(uint32_t*)(inputaddr));
+ 253              		.loc 1 157 0
+ 254 012c D7F88030 		ldr	r3, [r7, #128]
+ 255 0130 1B68     		ldr	r3, [r3, #0]
+ 256 0132 1846     		mov	r0, r3
+ 257 0134 FFF7FEFF 		bl	CRYP_DataIn
+ 158:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****     inputaddr+=4;
+ 258              		.loc 1 158 0
+ 259 0138 D7F88030 		ldr	r3, [r7, #128]
+ 260 013c 03F10403 		add	r3, r3, #4
+ 261 0140 C7F88030 		str	r3, [r7, #128]
+ 159:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c **** 
+ 160:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****     /* Wait until the complete message has been processed */
+ 161:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****     counter = 0;
+ 262              		.loc 1 161 0
+ 263 0144 4FF00003 		mov	r3, #0
+ 264 0148 7B61     		str	r3, [r7, #20]
+ 265              	.L12:
+ 162:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****     do
+ 163:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****     {
+ 164:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****       busystatus = CRYP_GetFlagStatus(CRYP_FLAG_BUSY);
+ 266              		.loc 1 164 0 discriminator 1
+ 267 014a 4FF01000 		mov	r0, #16
+ 268 014e FFF7FEFF 		bl	CRYP_GetFlagStatus
+ 269 0152 0346     		mov	r3, r0
+ 270 0154 7B67     		str	r3, [r7, #116]
+ 165:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****       counter++;
+ 271              		.loc 1 165 0 discriminator 1
+ 272 0156 7B69     		ldr	r3, [r7, #20]
+ 273 0158 03F10103 		add	r3, r3, #1
+ 274 015c 7B61     		str	r3, [r7, #20]
+ 166:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****     }while ((counter != TDESBUSY_TIMEOUT) && (busystatus != RESET));
+ 275              		.loc 1 166 0 discriminator 1
+ 276 015e 7B69     		ldr	r3, [r7, #20]
+ 277 0160 B3F5803F 		cmp	r3, #65536
+ 278 0164 02D0     		beq	.L11
+ 279 0166 7B6F     		ldr	r3, [r7, #116]
+ 280 0168 002B     		cmp	r3, #0
+ 281 016a EED1     		bne	.L12
+ 282              	.L11:
+ 167:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c **** 
+ 168:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****     if (busystatus != RESET)
+ 283              		.loc 1 168 0
+ 284 016c 7B6F     		ldr	r3, [r7, #116]
+ 285 016e 002B     		cmp	r3, #0
+ 286 0170 04D0     		beq	.L13
+ 169:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****     {
+ 170:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****        status = ERROR;
+ 287              		.loc 1 170 0
+ 288 0172 4FF00003 		mov	r3, #0
+ 289 0176 87F88730 		strb	r3, [r7, #135]
+ 290 017a 11E0     		b	.L14
+ 291              	.L13:
+ 171:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****     }
+ 172:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****     else
+ 173:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****     {
+ 174:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c **** 
+ 175:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****       /* Read the Output block from the Output FIFO */
+ 176:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****       *(uint32_t*)(outputaddr) = CRYP_DataOut();
+ 292              		.loc 1 176 0
+ 293 017c FC6F     		ldr	r4, [r7, #124]
+ 294 017e FFF7FEFF 		bl	CRYP_DataOut
+ 295 0182 0346     		mov	r3, r0
+ 296 0184 2360     		str	r3, [r4, #0]
+ 177:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****       outputaddr+=4;
+ 297              		.loc 1 177 0
+ 298 0186 FB6F     		ldr	r3, [r7, #124]
+ 299 0188 03F10403 		add	r3, r3, #4
+ 300 018c FB67     		str	r3, [r7, #124]
+ 178:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****       *(uint32_t*)(outputaddr) = CRYP_DataOut();
+ 301              		.loc 1 178 0
+ 302 018e FC6F     		ldr	r4, [r7, #124]
+ 303 0190 FFF7FEFF 		bl	CRYP_DataOut
+ 304 0194 0346     		mov	r3, r0
+ 305 0196 2360     		str	r3, [r4, #0]
+ 179:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****       outputaddr+=4;
+ 306              		.loc 1 179 0
+ 307 0198 FB6F     		ldr	r3, [r7, #124]
+ 308 019a 03F10403 		add	r3, r3, #4
+ 309 019e FB67     		str	r3, [r7, #124]
+ 310              	.L14:
+ 152:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   for(i=0; ((i<Ilength) && (status != ERROR)); i+=8)
+ 311              		.loc 1 152 0
+ 312 01a0 BB6F     		ldr	r3, [r7, #120]
+ 313 01a2 03F10803 		add	r3, r3, #8
+ 314 01a6 BB67     		str	r3, [r7, #120]
+ 315              	.L10:
+ 152:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   for(i=0; ((i<Ilength) && (status != ERROR)); i+=8)
+ 316              		.loc 1 152 0 is_stmt 0 discriminator 1
+ 317 01a8 BA6F     		ldr	r2, [r7, #120]
+ 318 01aa 3B68     		ldr	r3, [r7, #0]
+ 319 01ac 9A42     		cmp	r2, r3
+ 320 01ae 03D2     		bcs	.L15
+ 152:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   for(i=0; ((i<Ilength) && (status != ERROR)); i+=8)
+ 321              		.loc 1 152 0 discriminator 2
+ 322 01b0 97F88730 		ldrb	r3, [r7, #135]	@ zero_extendqisi2
+ 323 01b4 002B     		cmp	r3, #0
+ 324 01b6 ADD1     		bne	.L16
+ 325              	.L15:
+ 180:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****     }
+ 181:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   }
+ 182:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c **** 
+ 183:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   /* Disable Crypto */
+ 184:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   CRYP_Cmd(DISABLE);
+ 326              		.loc 1 184 0 is_stmt 1
+ 327 01b8 4FF00000 		mov	r0, #0
+ 328 01bc FFF7FEFF 		bl	CRYP_Cmd
+ 185:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c **** 
+ 186:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   return status; 
+ 329              		.loc 1 186 0
+ 330 01c0 97F88730 		ldrb	r3, [r7, #135]	@ zero_extendqisi2
+ 187:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c **** }
+ 331              		.loc 1 187 0
+ 332 01c4 1846     		mov	r0, r3
+ 333 01c6 07F18C07 		add	r7, r7, #140
+ 334 01ca BD46     		mov	sp, r7
+ 335 01cc 90BD     		pop	{r4, r7, pc}
+ 336              		.cfi_endproc
+ 337              	.LFE110:
+ 339 01ce 00BF     		.align	2
+ 340              		.global	CRYP_TDES_CBC
+ 341              		.thumb
+ 342              		.thumb_func
+ 344              	CRYP_TDES_CBC:
+ 345              	.LFB111:
+ 188:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c **** 
+ 189:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c **** /**
+ 190:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   * @brief  Encrypt and decrypt using TDES in CBC Mode
+ 191:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   * @param  Mode: encryption or decryption Mode.
+ 192:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   *           This parameter can be one of the following values:
+ 193:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   *            @arg MODE_ENCRYPT: Encryption
+ 194:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   *            @arg MODE_DECRYPT: Decryption
+ 195:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   * @param  Key: Key used for TDES algorithm.
+ 196:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   * @param  InitVectors: Initialisation Vectors used for TDES algorithm.
+ 197:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   * @param  Input: pointer to the Input buffer.
+ 198:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   * @param  Ilength: length of the Input buffer, must be a multiple of 8.
+ 199:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   * @param  Output: pointer to the returned buffer.
+ 200:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   * @retval An ErrorStatus enumeration value:
+ 201:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   *          - SUCCESS: Operation done
+ 202:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   *          - ERROR: Operation failed
+ 203:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   */
+ 204:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c **** ErrorStatus CRYP_TDES_CBC(uint8_t Mode, uint8_t Key[24], uint8_t InitVectors[8],
+ 205:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****                           uint8_t *Input, uint32_t Ilength, uint8_t *Output)
+ 206:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c **** {
+ 346              		.loc 1 206 0
+ 347              		.cfi_startproc
+ 348              		@ args = 8, pretend = 0, frame = 168
+ 349              		@ frame_needed = 1, uses_anonymous_args = 0
+ 350 01d0 90B5     		push	{r4, r7, lr}
+ 351              	.LCFI3:
+ 352              		.cfi_def_cfa_offset 12
+ 353              		.cfi_offset 4, -12
+ 354              		.cfi_offset 7, -8
+ 355              		.cfi_offset 14, -4
+ 356 01d2 ABB0     		sub	sp, sp, #172
+ 357              	.LCFI4:
+ 358              		.cfi_def_cfa_offset 184
+ 359 01d4 00AF     		add	r7, sp, #0
+ 360              	.LCFI5:
+ 361              		.cfi_def_cfa_register 7
+ 362 01d6 B960     		str	r1, [r7, #8]
+ 363 01d8 7A60     		str	r2, [r7, #4]
+ 364 01da 3B60     		str	r3, [r7, #0]
+ 365 01dc 0346     		mov	r3, r0
+ 366 01de FB73     		strb	r3, [r7, #15]
+ 207:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   CRYP_InitTypeDef TDES_CRYP_InitStructure;
+ 208:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   CRYP_KeyInitTypeDef TDES_CRYP_KeyInitStructure;
+ 209:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   CRYP_IVInitTypeDef TDES_CRYP_IVInitStructure;
+ 210:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   __IO uint32_t counter = 0;
+ 367              		.loc 1 210 0
+ 368 01e0 4FF00003 		mov	r3, #0
+ 369 01e4 3B61     		str	r3, [r7, #16]
+ 211:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   uint32_t busystatus = 0;
+ 370              		.loc 1 211 0
+ 371 01e6 4FF00003 		mov	r3, #0
+ 372 01ea C7F89430 		str	r3, [r7, #148]
+ 212:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   ErrorStatus status = SUCCESS;
+ 373              		.loc 1 212 0
+ 374 01ee 4FF00103 		mov	r3, #1
+ 375 01f2 87F8A730 		strb	r3, [r7, #167]
+ 213:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   uint32_t keyaddr    = (uint32_t)Key;
+ 376              		.loc 1 213 0
+ 377 01f6 BB68     		ldr	r3, [r7, #8]
+ 378 01f8 C7F89030 		str	r3, [r7, #144]
+ 214:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   uint32_t inputaddr  = (uint32_t)Input;
+ 379              		.loc 1 214 0
+ 380 01fc 3B68     		ldr	r3, [r7, #0]
+ 381 01fe C7F8A030 		str	r3, [r7, #160]
+ 215:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   uint32_t outputaddr = (uint32_t)Output;
+ 382              		.loc 1 215 0
+ 383 0202 D7F8BC30 		ldr	r3, [r7, #188]
+ 384 0206 C7F89C30 		str	r3, [r7, #156]
+ 216:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   uint32_t ivaddr     = (uint32_t)InitVectors;
+ 385              		.loc 1 216 0
+ 386 020a 7B68     		ldr	r3, [r7, #4]
+ 387 020c C7F88C30 		str	r3, [r7, #140]
+ 217:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   uint32_t i = 0;
+ 388              		.loc 1 217 0
+ 389 0210 4FF00003 		mov	r3, #0
+ 390 0214 C7F89830 		str	r3, [r7, #152]
+ 218:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c **** 
+ 219:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   /* Crypto structures initialisation*/
+ 220:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   CRYP_KeyStructInit(&TDES_CRYP_KeyInitStructure);
+ 391              		.loc 1 220 0
+ 392 0218 07F12403 		add	r3, r7, #36
+ 393 021c 1846     		mov	r0, r3
+ 394 021e FFF7FEFF 		bl	CRYP_KeyStructInit
+ 221:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c **** 
+ 222:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   /* Crypto Init for Encryption process */
+ 223:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   if(Mode == MODE_ENCRYPT) /* TDES encryption */
+ 395              		.loc 1 223 0
+ 396 0222 FB7B     		ldrb	r3, [r7, #15]	@ zero_extendqisi2
+ 397 0224 012B     		cmp	r3, #1
+ 398 0226 04D1     		bne	.L19
+ 224:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   {
+ 225:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****     TDES_CRYP_InitStructure.CRYP_AlgoDir = CRYP_AlgoDir_Encrypt;
+ 399              		.loc 1 225 0
+ 400 0228 4FF00003 		mov	r3, #0
+ 401 022c A7F84430 		strh	r3, [r7, #68]	@ movhi
+ 402 0230 03E0     		b	.L20
+ 403              	.L19:
+ 226:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   }
+ 227:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   else
+ 228:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   {
+ 229:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****     TDES_CRYP_InitStructure.CRYP_AlgoDir = CRYP_AlgoDir_Decrypt;
+ 404              		.loc 1 229 0
+ 405 0232 4FF00403 		mov	r3, #4
+ 406 0236 A7F84430 		strh	r3, [r7, #68]	@ movhi
+ 407              	.L20:
+ 230:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   }
+ 231:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   TDES_CRYP_InitStructure.CRYP_AlgoMode = CRYP_AlgoMode_TDES_CBC;
+ 408              		.loc 1 231 0
+ 409 023a 4FF00803 		mov	r3, #8
+ 410 023e A7F84630 		strh	r3, [r7, #70]	@ movhi
+ 232:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   TDES_CRYP_InitStructure.CRYP_DataType = CRYP_DataType_8b;
+ 411              		.loc 1 232 0
+ 412 0242 4FF08003 		mov	r3, #128
+ 413 0246 A7F84830 		strh	r3, [r7, #72]	@ movhi
+ 233:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c **** 
+ 234:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   CRYP_Init(&TDES_CRYP_InitStructure);
+ 414              		.loc 1 234 0
+ 415 024a 07F14403 		add	r3, r7, #68
+ 416 024e 1846     		mov	r0, r3
+ 417 0250 FFF7FEFF 		bl	CRYP_Init
+ 235:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c **** 
+ 236:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   /* Key Initialisation */
+ 237:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   TDES_CRYP_KeyInitStructure.CRYP_Key1Left = __REV(*(uint32_t*)(keyaddr));
+ 418              		.loc 1 237 0
+ 419 0254 D7F89030 		ldr	r3, [r7, #144]
+ 420 0258 1B68     		ldr	r3, [r3, #0]
+ 421 025a C7F88830 		str	r3, [r7, #136]
+ 422              	.LBB42:
+ 423              	.LBB43:
+ 352:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****   __ASM volatile ("rev %0, %1" : "=r" (result) : "r" (value) );
+ 424              		.loc 2 352 0
+ 425 025e D7F88830 		ldr	r3, [r7, #136]
+ 426              	@ 352 "/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmI
+ 427 0262 1CBA     		rev r4, r3
+ 428              	@ 0 "" 2
+ 429              		.thumb
+ 430 0264 C7F88440 		str	r4, [r7, #132]
+ 431              		.loc 2 353 0
+ 432 0268 D7F88430 		ldr	r3, [r7, #132]
+ 433              	.LBE43:
+ 434              	.LBE42:
+ 435              		.loc 1 237 0
+ 436 026c FB62     		str	r3, [r7, #44]
+ 238:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   keyaddr+=4;
+ 437              		.loc 1 238 0
+ 438 026e D7F89030 		ldr	r3, [r7, #144]
+ 439 0272 03F10403 		add	r3, r3, #4
+ 440 0276 C7F89030 		str	r3, [r7, #144]
+ 239:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   TDES_CRYP_KeyInitStructure.CRYP_Key1Right= __REV(*(uint32_t*)(keyaddr));
+ 441              		.loc 1 239 0
+ 442 027a D7F89030 		ldr	r3, [r7, #144]
+ 443 027e 1B68     		ldr	r3, [r3, #0]
+ 444 0280 C7F88030 		str	r3, [r7, #128]
+ 445              	.LBB44:
+ 446              	.LBB45:
+ 352:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****   __ASM volatile ("rev %0, %1" : "=r" (result) : "r" (value) );
+ 447              		.loc 2 352 0
+ 448 0284 D7F88030 		ldr	r3, [r7, #128]
+ 449              	@ 352 "/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmI
+ 450 0288 1CBA     		rev r4, r3
+ 451              	@ 0 "" 2
+ 452              		.thumb
+ 453 028a FC67     		str	r4, [r7, #124]
+ 454              		.loc 2 353 0
+ 455 028c FB6F     		ldr	r3, [r7, #124]
+ 456              	.LBE45:
+ 457              	.LBE44:
+ 458              		.loc 1 239 0
+ 459 028e 3B63     		str	r3, [r7, #48]
+ 240:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   keyaddr+=4;
+ 460              		.loc 1 240 0
+ 461 0290 D7F89030 		ldr	r3, [r7, #144]
+ 462 0294 03F10403 		add	r3, r3, #4
+ 463 0298 C7F89030 		str	r3, [r7, #144]
+ 241:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   TDES_CRYP_KeyInitStructure.CRYP_Key2Left = __REV(*(uint32_t*)(keyaddr));
+ 464              		.loc 1 241 0
+ 465 029c D7F89030 		ldr	r3, [r7, #144]
+ 466 02a0 1B68     		ldr	r3, [r3, #0]
+ 467 02a2 BB67     		str	r3, [r7, #120]
+ 468              	.LBB46:
+ 469              	.LBB47:
+ 352:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****   __ASM volatile ("rev %0, %1" : "=r" (result) : "r" (value) );
+ 470              		.loc 2 352 0
+ 471 02a4 BB6F     		ldr	r3, [r7, #120]
+ 472              	@ 352 "/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmI
+ 473 02a6 1CBA     		rev r4, r3
+ 474              	@ 0 "" 2
+ 475              		.thumb
+ 476 02a8 7C67     		str	r4, [r7, #116]
+ 477              		.loc 2 353 0
+ 478 02aa 7B6F     		ldr	r3, [r7, #116]
+ 479              	.LBE47:
+ 480              	.LBE46:
+ 481              		.loc 1 241 0
+ 482 02ac 7B63     		str	r3, [r7, #52]
+ 242:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   keyaddr+=4;
+ 483              		.loc 1 242 0
+ 484 02ae D7F89030 		ldr	r3, [r7, #144]
+ 485 02b2 03F10403 		add	r3, r3, #4
+ 486 02b6 C7F89030 		str	r3, [r7, #144]
+ 243:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   TDES_CRYP_KeyInitStructure.CRYP_Key2Right= __REV(*(uint32_t*)(keyaddr));
+ 487              		.loc 1 243 0
+ 488 02ba D7F89030 		ldr	r3, [r7, #144]
+ 489 02be 1B68     		ldr	r3, [r3, #0]
+ 490 02c0 3B67     		str	r3, [r7, #112]
+ 491              	.LBB48:
+ 492              	.LBB49:
+ 352:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****   __ASM volatile ("rev %0, %1" : "=r" (result) : "r" (value) );
+ 493              		.loc 2 352 0
+ 494 02c2 3B6F     		ldr	r3, [r7, #112]
+ 495              	@ 352 "/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmI
+ 496 02c4 1CBA     		rev r4, r3
+ 497              	@ 0 "" 2
+ 498              		.thumb
+ 499 02c6 FC66     		str	r4, [r7, #108]
+ 500              		.loc 2 353 0
+ 501 02c8 FB6E     		ldr	r3, [r7, #108]
+ 502              	.LBE49:
+ 503              	.LBE48:
+ 504              		.loc 1 243 0
+ 505 02ca BB63     		str	r3, [r7, #56]
+ 244:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   keyaddr+=4;
+ 506              		.loc 1 244 0
+ 507 02cc D7F89030 		ldr	r3, [r7, #144]
+ 508 02d0 03F10403 		add	r3, r3, #4
+ 509 02d4 C7F89030 		str	r3, [r7, #144]
+ 245:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   TDES_CRYP_KeyInitStructure.CRYP_Key3Left = __REV(*(uint32_t*)(keyaddr));
+ 510              		.loc 1 245 0
+ 511 02d8 D7F89030 		ldr	r3, [r7, #144]
+ 512 02dc 1B68     		ldr	r3, [r3, #0]
+ 513 02de BB66     		str	r3, [r7, #104]
+ 514              	.LBB50:
+ 515              	.LBB51:
+ 352:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****   __ASM volatile ("rev %0, %1" : "=r" (result) : "r" (value) );
+ 516              		.loc 2 352 0
+ 517 02e0 BB6E     		ldr	r3, [r7, #104]
+ 518              	@ 352 "/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmI
+ 519 02e2 1CBA     		rev r4, r3
+ 520              	@ 0 "" 2
+ 521              		.thumb
+ 522 02e4 7C66     		str	r4, [r7, #100]
+ 523              		.loc 2 353 0
+ 524 02e6 7B6E     		ldr	r3, [r7, #100]
+ 525              	.LBE51:
+ 526              	.LBE50:
+ 527              		.loc 1 245 0
+ 528 02e8 FB63     		str	r3, [r7, #60]
+ 246:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   keyaddr+=4;
+ 529              		.loc 1 246 0
+ 530 02ea D7F89030 		ldr	r3, [r7, #144]
+ 531 02ee 03F10403 		add	r3, r3, #4
+ 532 02f2 C7F89030 		str	r3, [r7, #144]
+ 247:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   TDES_CRYP_KeyInitStructure.CRYP_Key3Right= __REV(*(uint32_t*)(keyaddr));
+ 533              		.loc 1 247 0
+ 534 02f6 D7F89030 		ldr	r3, [r7, #144]
+ 535 02fa 1B68     		ldr	r3, [r3, #0]
+ 536 02fc 3B66     		str	r3, [r7, #96]
+ 537              	.LBB52:
+ 538              	.LBB53:
+ 352:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****   __ASM volatile ("rev %0, %1" : "=r" (result) : "r" (value) );
+ 539              		.loc 2 352 0
+ 540 02fe 3B6E     		ldr	r3, [r7, #96]
+ 541              	@ 352 "/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmI
+ 542 0300 1CBA     		rev r4, r3
+ 543              	@ 0 "" 2
+ 544              		.thumb
+ 545 0302 FC65     		str	r4, [r7, #92]
+ 546              		.loc 2 353 0
+ 547 0304 FB6D     		ldr	r3, [r7, #92]
+ 548              	.LBE53:
+ 549              	.LBE52:
+ 550              		.loc 1 247 0
+ 551 0306 3B64     		str	r3, [r7, #64]
+ 248:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   CRYP_KeyInit(& TDES_CRYP_KeyInitStructure);
+ 552              		.loc 1 248 0
+ 553 0308 07F12403 		add	r3, r7, #36
+ 554 030c 1846     		mov	r0, r3
+ 555 030e FFF7FEFF 		bl	CRYP_KeyInit
+ 249:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c **** 
+ 250:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   /* Initialization Vectors */
+ 251:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   TDES_CRYP_IVInitStructure.CRYP_IV0Left = __REV(*(uint32_t*)(ivaddr));
+ 556              		.loc 1 251 0
+ 557 0312 D7F88C30 		ldr	r3, [r7, #140]
+ 558 0316 1B68     		ldr	r3, [r3, #0]
+ 559 0318 BB65     		str	r3, [r7, #88]
+ 560              	.LBB54:
+ 561              	.LBB55:
+ 352:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****   __ASM volatile ("rev %0, %1" : "=r" (result) : "r" (value) );
+ 562              		.loc 2 352 0
+ 563 031a BB6D     		ldr	r3, [r7, #88]
+ 564              	@ 352 "/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmI
+ 565 031c 1CBA     		rev r4, r3
+ 566              	@ 0 "" 2
+ 567              		.thumb
+ 568 031e 7C65     		str	r4, [r7, #84]
+ 569              		.loc 2 353 0
+ 570 0320 7B6D     		ldr	r3, [r7, #84]
+ 571              	.LBE55:
+ 572              	.LBE54:
+ 573              		.loc 1 251 0
+ 574 0322 7B61     		str	r3, [r7, #20]
+ 252:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   ivaddr+=4;
+ 575              		.loc 1 252 0
+ 576 0324 D7F88C30 		ldr	r3, [r7, #140]
+ 577 0328 03F10403 		add	r3, r3, #4
+ 578 032c C7F88C30 		str	r3, [r7, #140]
+ 253:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   TDES_CRYP_IVInitStructure.CRYP_IV0Right= __REV(*(uint32_t*)(ivaddr));
+ 579              		.loc 1 253 0
+ 580 0330 D7F88C30 		ldr	r3, [r7, #140]
+ 581 0334 1B68     		ldr	r3, [r3, #0]
+ 582 0336 3B65     		str	r3, [r7, #80]
+ 583              	.LBB56:
+ 584              	.LBB57:
+ 352:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****   __ASM volatile ("rev %0, %1" : "=r" (result) : "r" (value) );
+ 585              		.loc 2 352 0
+ 586 0338 3B6D     		ldr	r3, [r7, #80]
+ 587              	@ 352 "/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmI
+ 588 033a 1CBA     		rev r4, r3
+ 589              	@ 0 "" 2
+ 590              		.thumb
+ 591 033c FC64     		str	r4, [r7, #76]
+ 592              		.loc 2 353 0
+ 593 033e FB6C     		ldr	r3, [r7, #76]
+ 594              	.LBE57:
+ 595              	.LBE56:
+ 596              		.loc 1 253 0
+ 597 0340 BB61     		str	r3, [r7, #24]
+ 254:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   CRYP_IVInit(&TDES_CRYP_IVInitStructure);
+ 598              		.loc 1 254 0
+ 599 0342 07F11403 		add	r3, r7, #20
+ 600 0346 1846     		mov	r0, r3
+ 601 0348 FFF7FEFF 		bl	CRYP_IVInit
+ 255:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c **** 
+ 256:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   /* Flush IN/OUT FIFO */
+ 257:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   CRYP_FIFOFlush();
+ 602              		.loc 1 257 0
+ 603 034c FFF7FEFF 		bl	CRYP_FIFOFlush
+ 258:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c **** 
+ 259:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   /* Enable Crypto processor */
+ 260:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   CRYP_Cmd(ENABLE);
+ 604              		.loc 1 260 0
+ 605 0350 4FF00100 		mov	r0, #1
+ 606 0354 FFF7FEFF 		bl	CRYP_Cmd
+ 261:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c **** 
+ 262:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   for(i=0; ((i<Ilength) && (status != ERROR)); i+=8)
+ 607              		.loc 1 262 0
+ 608 0358 4FF00003 		mov	r3, #0
+ 609 035c C7F89830 		str	r3, [r7, #152]
+ 610 0360 54E0     		b	.L29
+ 611              	.L35:
+ 263:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   {
+ 264:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****     /* Write the Input block in the Input FIFO */
+ 265:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****     CRYP_DataIn(*(uint32_t*)(inputaddr));
+ 612              		.loc 1 265 0
+ 613 0362 D7F8A030 		ldr	r3, [r7, #160]
+ 614 0366 1B68     		ldr	r3, [r3, #0]
+ 615 0368 1846     		mov	r0, r3
+ 616 036a FFF7FEFF 		bl	CRYP_DataIn
+ 266:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****     inputaddr+=4;
+ 617              		.loc 1 266 0
+ 618 036e D7F8A030 		ldr	r3, [r7, #160]
+ 619 0372 03F10403 		add	r3, r3, #4
+ 620 0376 C7F8A030 		str	r3, [r7, #160]
+ 267:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****     CRYP_DataIn(*(uint32_t*)(inputaddr));
+ 621              		.loc 1 267 0
+ 622 037a D7F8A030 		ldr	r3, [r7, #160]
+ 623 037e 1B68     		ldr	r3, [r3, #0]
+ 624 0380 1846     		mov	r0, r3
+ 625 0382 FFF7FEFF 		bl	CRYP_DataIn
+ 268:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****     inputaddr+=4;
+ 626              		.loc 1 268 0
+ 627 0386 D7F8A030 		ldr	r3, [r7, #160]
+ 628 038a 03F10403 		add	r3, r3, #4
+ 629 038e C7F8A030 		str	r3, [r7, #160]
+ 269:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c **** 
+ 270:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****     /* Wait until the complete message has been processed */
+ 271:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****     counter = 0;
+ 630              		.loc 1 271 0
+ 631 0392 4FF00003 		mov	r3, #0
+ 632 0396 3B61     		str	r3, [r7, #16]
+ 633              	.L31:
+ 272:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****     do
+ 273:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****     {
+ 274:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****       busystatus = CRYP_GetFlagStatus(CRYP_FLAG_BUSY);
+ 634              		.loc 1 274 0 discriminator 1
+ 635 0398 4FF01000 		mov	r0, #16
+ 636 039c FFF7FEFF 		bl	CRYP_GetFlagStatus
+ 637 03a0 0346     		mov	r3, r0
+ 638 03a2 C7F89430 		str	r3, [r7, #148]
+ 275:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****       counter++;
+ 639              		.loc 1 275 0 discriminator 1
+ 640 03a6 3B69     		ldr	r3, [r7, #16]
+ 641 03a8 03F10103 		add	r3, r3, #1
+ 642 03ac 3B61     		str	r3, [r7, #16]
+ 276:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****     }while ((counter != TDESBUSY_TIMEOUT) && (busystatus != RESET));
+ 643              		.loc 1 276 0 discriminator 1
+ 644 03ae 3B69     		ldr	r3, [r7, #16]
+ 645 03b0 B3F5803F 		cmp	r3, #65536
+ 646 03b4 03D0     		beq	.L30
+ 647 03b6 D7F89430 		ldr	r3, [r7, #148]
+ 648 03ba 002B     		cmp	r3, #0
+ 649 03bc ECD1     		bne	.L31
+ 650              	.L30:
+ 277:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c **** 
+ 278:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****     if (busystatus != RESET)
+ 651              		.loc 1 278 0
+ 652 03be D7F89430 		ldr	r3, [r7, #148]
+ 653 03c2 002B     		cmp	r3, #0
+ 654 03c4 04D0     		beq	.L32
+ 279:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****    {
+ 280:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****        status = ERROR;
+ 655              		.loc 1 280 0
+ 656 03c6 4FF00003 		mov	r3, #0
+ 657 03ca 87F8A730 		strb	r3, [r7, #167]
+ 658 03ce 17E0     		b	.L33
+ 659              	.L32:
+ 281:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****     }
+ 282:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****     else
+ 283:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****     {
+ 284:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c **** 
+ 285:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****       /* Read the Output block from the Output FIFO */
+ 286:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****       *(uint32_t*)(outputaddr) = CRYP_DataOut();
+ 660              		.loc 1 286 0
+ 661 03d0 D7F89C40 		ldr	r4, [r7, #156]
+ 662 03d4 FFF7FEFF 		bl	CRYP_DataOut
+ 663 03d8 0346     		mov	r3, r0
+ 664 03da 2360     		str	r3, [r4, #0]
+ 287:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****       outputaddr+=4;
+ 665              		.loc 1 287 0
+ 666 03dc D7F89C30 		ldr	r3, [r7, #156]
+ 667 03e0 03F10403 		add	r3, r3, #4
+ 668 03e4 C7F89C30 		str	r3, [r7, #156]
+ 288:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****       *(uint32_t*)(outputaddr) = CRYP_DataOut();
+ 669              		.loc 1 288 0
+ 670 03e8 D7F89C40 		ldr	r4, [r7, #156]
+ 671 03ec FFF7FEFF 		bl	CRYP_DataOut
+ 672 03f0 0346     		mov	r3, r0
+ 673 03f2 2360     		str	r3, [r4, #0]
+ 289:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****       outputaddr+=4;
+ 674              		.loc 1 289 0
+ 675 03f4 D7F89C30 		ldr	r3, [r7, #156]
+ 676 03f8 03F10403 		add	r3, r3, #4
+ 677 03fc C7F89C30 		str	r3, [r7, #156]
+ 678              	.L33:
+ 262:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   for(i=0; ((i<Ilength) && (status != ERROR)); i+=8)
+ 679              		.loc 1 262 0
+ 680 0400 D7F89830 		ldr	r3, [r7, #152]
+ 681 0404 03F10803 		add	r3, r3, #8
+ 682 0408 C7F89830 		str	r3, [r7, #152]
+ 683              	.L29:
+ 262:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   for(i=0; ((i<Ilength) && (status != ERROR)); i+=8)
+ 684              		.loc 1 262 0 is_stmt 0 discriminator 1
+ 685 040c D7F89820 		ldr	r2, [r7, #152]
+ 686 0410 D7F8B830 		ldr	r3, [r7, #184]
+ 687 0414 9A42     		cmp	r2, r3
+ 688 0416 03D2     		bcs	.L34
+ 262:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   for(i=0; ((i<Ilength) && (status != ERROR)); i+=8)
+ 689              		.loc 1 262 0 discriminator 2
+ 690 0418 97F8A730 		ldrb	r3, [r7, #167]	@ zero_extendqisi2
+ 691 041c 002B     		cmp	r3, #0
+ 692 041e A0D1     		bne	.L35
+ 693              	.L34:
+ 290:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****     }
+ 291:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   }
+ 292:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c **** 
+ 293:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   /* Disable Crypto */
+ 294:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   CRYP_Cmd(DISABLE);
+ 694              		.loc 1 294 0 is_stmt 1
+ 695 0420 4FF00000 		mov	r0, #0
+ 696 0424 FFF7FEFF 		bl	CRYP_Cmd
+ 295:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c **** 
+ 296:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c ****   return status; 
+ 697              		.loc 1 296 0
+ 698 0428 97F8A730 		ldrb	r3, [r7, #167]	@ zero_extendqisi2
+ 297:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.c **** }
+ 699              		.loc 1 297 0
+ 700 042c 1846     		mov	r0, r3
+ 701 042e 07F1AC07 		add	r7, r7, #172
+ 702 0432 BD46     		mov	sp, r7
+ 703 0434 90BD     		pop	{r4, r7, pc}
+ 704              		.cfi_endproc
+ 705              	.LFE111:
+ 707              	.Letext0:
+ 708              		.file 3 "/opt/CodeSourcery/bin/../lib/gcc/arm-none-eabi/4.7.2/../../../../arm-none-eabi/include/st
+ 709              		.file 4 "/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Device/ST/STM
+ 710              		.file 5 "/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/STM32F4xx_StdPeriph
+ 711              		.file 6 "/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_
+DEFINED SYMBOLS
+                            *ABS*:00000000 stm32f4xx_cryp_tdes.c
+     /tmp/ccGkcCFD.s:18     .text:00000000 $t
+     /tmp/ccGkcCFD.s:23     .text:00000000 CRYP_TDES_ECB
+     /tmp/ccGkcCFD.s:344    .text:000001d0 CRYP_TDES_CBC
+                     .debug_frame:00000010 $d
+                           .group:00000000 wm4.1.ee386580922180e5cad1057f989de60d
+                           .group:00000000 wm4.stm32f4xx.h.54.6e1f0ee5c76cc1e53c8ea6d18297b5fd
+                           .group:00000000 wm4.core_cm4.h.32.f824aba4d431a5bb4a51726bd5b62834
+                           .group:00000000 wm4.stdint.h.10.90b695f550ca6cc3fb08fa83baf01e05
+                           .group:00000000 wm4.core_cmInstr.h.25.f50f886f2edf670cf199b35fd96f5c91
+                           .group:00000000 wm4.core_cm4_simd.h.29.b4a3fdfb606cb3b26119424324d4b963
+                           .group:00000000 wm4.core_cm4.h.153.5393ef7e6cebf34dd51ca528f9218ab3
+                           .group:00000000 wm4.stm32f4xx.h.289.fa68dcae75666a037ce29b5a1b57e3b3
+                           .group:00000000 wm4.stm32f4xx_adc.h.108.1710484bf41297b93f825b3b15cbdff8
+                           .group:00000000 wm4.stm32f4xx_can.h.31.3bb56c6436c7a6e6af1611046e81f48c
+                           .group:00000000 wm4.stm32f4xx_dac.h.31.b8d45e7eaf71ee4bf01c1317dbc06f77
+                           .group:00000000 wm4.stm32f4xx_dbgmcu.h.30.70a81ec54c2707baa9fca77391eeeaaa
+                           .group:00000000 wm4.stm32f4xx_dcmi.h.30.9d0942d58c357d2eed15e044bf9b4a77
+                           .group:00000000 wm4.stm32f4xx_dma.h.31.815bb924b30b1c776b3cd51113fdfe60
+                           .group:00000000 wm4.stm32f4xx_exti.h.31.86bd18e979f97217bb1d3b80fde0231e
+                           .group:00000000 wm4.stm32f4xx_flash.h.31.74f2ed42d890f144ca7eb5ae8172f0d0
+                           .group:00000000 wm4.stm32f4xx_fsmc.h.31.ff58629e0c603fb2f9b3f00c0657fdfa
+                           .group:00000000 wm4.stm32f4xx_hash.h.31.5c109425d30f0b9cc0a26ad38182d91f
+                           .group:00000000 wm4.stm32f4xx_gpio.h.31.d9aeae10cfa353d85d475c0d4900c452
+                           .group:00000000 wm4.stm32f4xx_i2c.h.31.edf5baa611075c49ae13f56be9040be3
+                           .group:00000000 wm4.stm32f4xx_iwdg.h.31.30e376e6d8d424aab7fddd66cf691c7b
+                           .group:00000000 wm4.stm32f4xx_pwr.h.31.bb774fc1b632cb8d2ecaec8c6524d2c0
+                           .group:00000000 wm4.stm32f4xx_rcc.h.30.820e94551583d2b835c8cf3ad722e16c
+                           .group:00000000 wm4.stm32f4xx_rng.h.31.1ec493d56b7a8e5a71238519cae6dea7
+                           .group:00000000 wm4.stm32f4xx_rtc.h.31.bddeb98c63c8fa06fac80b5dd8296471
+                           .group:00000000 wm4.stm32f4xx_sdio.h.31.8c6dff42ffa718b444c3420717601ff2
+                           .group:00000000 wm4.stm32f4xx_spi.h.31.fb1b2c8214b87a47d4457633b7c31c3c
+                           .group:00000000 wm4.stm32f4xx_syscfg.h.31.5a680f88d55b7816ae613c20f199cbd9
+                           .group:00000000 wm4.stm32f4xx_tim.h.31.b1d608fbde729347e4ccf70799e654d2
+                           .group:00000000 wm4.stm32f4xx_usart.h.31.f8d29b14aa4d39de5495adcc92749d3c
+                           .group:00000000 wm4.stm32f4xx_wwdg.h.31.b45a80fa1ec64984adf786f7e489f31b
+                           .group:00000000 wm4.misc.h.31.041217492a6cb86f2fb26099f373a465
+                           .group:00000000 wm4.stm32f4xx.h.6975.cdbdae9d5de06f1ba6b770f59cbe4d6c
+                           .group:00000000 wm4.stm32f4xx_cryp.h.125.59051ea0c9977c45a9bf7528170ecab2
+
+UNDEFINED SYMBOLS
+CRYP_KeyStructInit
+CRYP_Init
+CRYP_KeyInit
+CRYP_FIFOFlush
+CRYP_Cmd
+CRYP_DataIn
+CRYP_GetFlagStatus
+CRYP_DataOut
+CRYP_IVInit

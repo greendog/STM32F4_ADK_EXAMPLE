@@ -1,0 +1,1406 @@
+   1              		.syntax unified
+   2              		.cpu cortex-m4
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 6
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.file	"stm32f4xx_hash_sha1.c"
+  15              		.text
+  16              	.Ltext0:
+  17              		.cfi_sections	.debug_frame
+  18              		.align	2
+  19              		.global	HASH_SHA1
+  20              		.thumb
+  21              		.thumb_func
+  23              	HASH_SHA1:
+  24              	.LFB110:
+  25              		.file 1 "../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c"
+   1:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c **** /**
+   2:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   ******************************************************************************
+   3:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   * @file    stm32f4xx_hash_sha1.c
+   4:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   * @author  MCD Application Team
+   5:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   * @version V1.0.2
+   6:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   * @date    05-March-2012
+   7:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   * @brief   This file provides high level functions to compute the HASH SHA1 and
+   8:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   *          HMAC SHA1 Digest of an input message.
+   9:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   *          It uses the stm32f4xx_hash.c/.h drivers to access the STM32F4xx HASH
+  10:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   *          peripheral.
+  11:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   *
+  12:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   *  @verbatim
+  13:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   * 
+  14:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   *          ===================================================================
+  15:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   *                                   How to use this driver
+  16:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   *          ===================================================================
+  17:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   *          1. Enable The HASH controller clock using 
+  18:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   *            RCC_AHB2PeriphClockCmd(RCC_AHB2Periph_HASH, ENABLE); function.
+  19:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   *
+  20:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   *          2. Calculate the HASH SHA1 Digest using HASH_SHA1() function.
+  21:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   *
+  22:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   *          3. Calculate the HMAC SHA1 Digest using HMAC_SHA1() function.
+  23:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   *
+  24:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   *  @endverbatim
+  25:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   *
+  26:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   ******************************************************************************
+  27:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   * @attention
+  28:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   *
+  29:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   * <h2><center>&copy; COPYRIGHT 2012 STMicroelectronics</center></h2>
+  30:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   *
+  31:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   * Licensed under MCD-ST Liberty SW License Agreement V2, (the "License");
+  32:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   * You may not use this file except in compliance with the License.
+  33:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   * You may obtain a copy of the License at:
+  34:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   *
+  35:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   *        http://www.st.com/software_license_agreement_liberty_v2
+  36:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   *
+  37:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   * Unless required by applicable law or agreed to in writing, software 
+  38:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   * distributed under the License is distributed on an "AS IS" BASIS, 
+  39:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  40:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   * See the License for the specific language governing permissions and
+  41:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   * limitations under the License.
+  42:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   *
+  43:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   ******************************************************************************
+  44:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   */
+  45:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c **** 
+  46:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c **** /* Includes ------------------------------------------------------------------*/
+  47:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c **** #include "stm32f4xx_hash.h"
+  48:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c **** 
+  49:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c **** /** @addtogroup STM32F4xx_StdPeriph_Driver
+  50:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   * @{
+  51:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   */
+  52:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c **** 
+  53:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c **** /** @defgroup HASH 
+  54:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   * @brief HASH driver modules
+  55:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   * @{
+  56:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   */
+  57:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c **** 
+  58:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c **** /* Private typedef -----------------------------------------------------------*/
+  59:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c **** /* Private define ------------------------------------------------------------*/
+  60:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c **** #define SHA1BUSY_TIMEOUT    ((uint32_t) 0x00010000)
+  61:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c **** 
+  62:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c **** /* Private macro -------------------------------------------------------------*/
+  63:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c **** /* Private variables ---------------------------------------------------------*/
+  64:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c **** /* Private function prototypes -----------------------------------------------*/
+  65:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c **** /* Private functions ---------------------------------------------------------*/
+  66:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c **** 
+  67:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c **** /** @defgroup HASH_Private_Functions
+  68:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   * @{
+  69:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   */ 
+  70:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c **** 
+  71:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c **** /** @defgroup HASH_Group6 High Level SHA1 functions
+  72:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****  *  @brief   High Level SHA1 Hash and HMAC functions 
+  73:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****  *
+  74:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c **** @verbatim   
+  75:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****  ===============================================================================
+  76:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****                           High Level SHA1 Hash and HMAC functions
+  77:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****  ===============================================================================
+  78:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c **** 
+  79:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c **** 
+  80:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c **** @endverbatim
+  81:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   * @{
+  82:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   */
+  83:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c **** 
+  84:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c **** /**
+  85:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   * @brief  Compute the HASH SHA1 digest.
+  86:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   * @param  Input: pointer to the Input buffer to be treated.
+  87:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   * @param  Ilen: length of the Input buffer.
+  88:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   * @param  Output: the returned digest
+  89:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   * @retval An ErrorStatus enumeration value:
+  90:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   *          - SUCCESS: digest computation done
+  91:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   *          - ERROR: digest computation failed
+  92:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   */
+  93:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c **** ErrorStatus HASH_SHA1(uint8_t *Input, uint32_t Ilen, uint8_t Output[20])
+  94:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c **** {
+  26              		.loc 1 94 0
+  27              		.cfi_startproc
+  28              		@ args = 0, pretend = 0, frame = 120
+  29              		@ frame_needed = 1, uses_anonymous_args = 0
+  30 0000 90B5     		push	{r4, r7, lr}
+  31              	.LCFI0:
+  32              		.cfi_def_cfa_offset 12
+  33              		.cfi_offset 4, -12
+  34              		.cfi_offset 7, -8
+  35              		.cfi_offset 14, -4
+  36 0002 9FB0     		sub	sp, sp, #124
+  37              	.LCFI1:
+  38              		.cfi_def_cfa_offset 136
+  39 0004 00AF     		add	r7, sp, #0
+  40              	.LCFI2:
+  41              		.cfi_def_cfa_register 7
+  42 0006 F860     		str	r0, [r7, #12]
+  43 0008 B960     		str	r1, [r7, #8]
+  44 000a 7A60     		str	r2, [r7, #4]
+  95:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   HASH_InitTypeDef SHA1_HASH_InitStructure;
+  96:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   HASH_MsgDigest SHA1_MessageDigest;
+  97:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   __IO uint16_t nbvalidbitsdata = 0;
+  45              		.loc 1 97 0
+  46 000c 4FF00003 		mov	r3, #0
+  47 0010 FB82     		strh	r3, [r7, #22]	@ movhi
+  98:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   uint32_t i = 0;
+  48              		.loc 1 98 0
+  49 0012 4FF00003 		mov	r3, #0
+  50 0016 7B67     		str	r3, [r7, #116]
+  99:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   __IO uint32_t counter = 0;
+  51              		.loc 1 99 0
+  52 0018 4FF00003 		mov	r3, #0
+  53 001c 3B61     		str	r3, [r7, #16]
+ 100:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   uint32_t busystatus = 0;
+  54              		.loc 1 100 0
+  55 001e 4FF00003 		mov	r3, #0
+  56 0022 BB66     		str	r3, [r7, #104]
+ 101:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   ErrorStatus status = SUCCESS;
+  57              		.loc 1 101 0
+  58 0024 4FF00103 		mov	r3, #1
+  59 0028 87F87330 		strb	r3, [r7, #115]
+ 102:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   uint32_t inputaddr  = (uint32_t)Input;
+  60              		.loc 1 102 0
+  61 002c FB68     		ldr	r3, [r7, #12]
+  62 002e FB66     		str	r3, [r7, #108]
+ 103:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   uint32_t outputaddr = (uint32_t)Output;
+  63              		.loc 1 103 0
+  64 0030 7B68     		ldr	r3, [r7, #4]
+  65 0032 7B66     		str	r3, [r7, #100]
+ 104:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c **** 
+ 105:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   /* Number of valid bits in last word of the Input data */
+ 106:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   nbvalidbitsdata = 8 * (Ilen % 4);
+  66              		.loc 1 106 0
+  67 0034 BB68     		ldr	r3, [r7, #8]
+  68 0036 9BB2     		uxth	r3, r3
+  69 0038 03F00303 		and	r3, r3, #3
+  70 003c 9BB2     		uxth	r3, r3
+  71 003e 4FEAC303 		lsl	r3, r3, #3
+  72 0042 9BB2     		uxth	r3, r3
+  73 0044 FB82     		strh	r3, [r7, #22]	@ movhi
+ 107:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c **** 
+ 108:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   /* HASH peripheral initialization */
+ 109:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   HASH_DeInit();
+  74              		.loc 1 109 0
+  75 0046 FFF7FEFF 		bl	HASH_DeInit
+ 110:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c **** 
+ 111:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   /* HASH Configuration */
+ 112:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   SHA1_HASH_InitStructure.HASH_AlgoSelection = HASH_AlgoSelection_SHA1;
+  76              		.loc 1 112 0
+  77 004a 4FF00003 		mov	r3, #0
+  78 004e FB62     		str	r3, [r7, #44]
+ 113:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   SHA1_HASH_InitStructure.HASH_AlgoMode = HASH_AlgoMode_HASH;
+  79              		.loc 1 113 0
+  80 0050 4FF00003 		mov	r3, #0
+  81 0054 3B63     		str	r3, [r7, #48]
+ 114:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   SHA1_HASH_InitStructure.HASH_DataType = HASH_DataType_8b;
+  82              		.loc 1 114 0
+  83 0056 4FF02003 		mov	r3, #32
+  84 005a 7B63     		str	r3, [r7, #52]
+ 115:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   HASH_Init(&SHA1_HASH_InitStructure);
+  85              		.loc 1 115 0
+  86 005c 07F12C03 		add	r3, r7, #44
+  87 0060 1846     		mov	r0, r3
+  88 0062 FFF7FEFF 		bl	HASH_Init
+ 116:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c **** 
+ 117:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   /* Configure the number of valid bits in last word of the data */
+ 118:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   HASH_SetLastWordValidBitsNbr(nbvalidbitsdata);
+  89              		.loc 1 118 0
+  90 0066 FB8A     		ldrh	r3, [r7, #22]	@ movhi
+  91 0068 9BB2     		uxth	r3, r3
+  92 006a 1846     		mov	r0, r3
+  93 006c FFF7FEFF 		bl	HASH_SetLastWordValidBitsNbr
+ 119:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c **** 
+ 120:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   /* Write the Input block in the IN FIFO */
+ 121:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   for(i=0; i<Ilen; i+=4)
+  94              		.loc 1 121 0
+  95 0070 4FF00003 		mov	r3, #0
+  96 0074 7B67     		str	r3, [r7, #116]
+  97 0076 0CE0     		b	.L2
+  98              	.L3:
+ 122:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   {
+ 123:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****     HASH_DataIn(*(uint32_t*)inputaddr);
+  99              		.loc 1 123 0 discriminator 2
+ 100 0078 FB6E     		ldr	r3, [r7, #108]
+ 101 007a 1B68     		ldr	r3, [r3, #0]
+ 102 007c 1846     		mov	r0, r3
+ 103 007e FFF7FEFF 		bl	HASH_DataIn
+ 124:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****     inputaddr+=4;
+ 104              		.loc 1 124 0 discriminator 2
+ 105 0082 FB6E     		ldr	r3, [r7, #108]
+ 106 0084 03F10403 		add	r3, r3, #4
+ 107 0088 FB66     		str	r3, [r7, #108]
+ 121:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   for(i=0; i<Ilen; i+=4)
+ 108              		.loc 1 121 0 discriminator 2
+ 109 008a 7B6F     		ldr	r3, [r7, #116]
+ 110 008c 03F10403 		add	r3, r3, #4
+ 111 0090 7B67     		str	r3, [r7, #116]
+ 112              	.L2:
+ 121:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   for(i=0; i<Ilen; i+=4)
+ 113              		.loc 1 121 0 is_stmt 0 discriminator 1
+ 114 0092 7A6F     		ldr	r2, [r7, #116]
+ 115 0094 BB68     		ldr	r3, [r7, #8]
+ 116 0096 9A42     		cmp	r2, r3
+ 117 0098 EED3     		bcc	.L3
+ 125:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   }
+ 126:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c **** 
+ 127:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   /* Start the HASH processor */
+ 128:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   HASH_StartDigest();
+ 118              		.loc 1 128 0 is_stmt 1
+ 119 009a FFF7FEFF 		bl	HASH_StartDigest
+ 120              	.L5:
+ 129:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c **** 
+ 130:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   /* wait until the Busy flag is RESET */
+ 131:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   do
+ 132:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   {
+ 133:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****     busystatus = HASH_GetFlagStatus(HASH_FLAG_BUSY);
+ 121              		.loc 1 133 0 discriminator 1
+ 122 009e 4FF00800 		mov	r0, #8
+ 123 00a2 FFF7FEFF 		bl	HASH_GetFlagStatus
+ 124 00a6 0346     		mov	r3, r0
+ 125 00a8 BB66     		str	r3, [r7, #104]
+ 134:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****     counter++;
+ 126              		.loc 1 134 0 discriminator 1
+ 127 00aa 3B69     		ldr	r3, [r7, #16]
+ 128 00ac 03F10103 		add	r3, r3, #1
+ 129 00b0 3B61     		str	r3, [r7, #16]
+ 135:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   }while ((counter != SHA1BUSY_TIMEOUT) && (busystatus != RESET));
+ 130              		.loc 1 135 0 discriminator 1
+ 131 00b2 3B69     		ldr	r3, [r7, #16]
+ 132 00b4 B3F5803F 		cmp	r3, #65536
+ 133 00b8 02D0     		beq	.L4
+ 134 00ba BB6E     		ldr	r3, [r7, #104]
+ 135 00bc 002B     		cmp	r3, #0
+ 136 00be EED1     		bne	.L5
+ 137              	.L4:
+ 136:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c **** 
+ 137:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   if (busystatus != RESET)
+ 138              		.loc 1 137 0
+ 139 00c0 BB6E     		ldr	r3, [r7, #104]
+ 140 00c2 002B     		cmp	r3, #0
+ 141 00c4 04D0     		beq	.L6
+ 138:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   {
+ 139:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****      status = ERROR;
+ 142              		.loc 1 139 0
+ 143 00c6 4FF00003 		mov	r3, #0
+ 144 00ca 87F87330 		strb	r3, [r7, #115]
+ 145 00ce 3CE0     		b	.L7
+ 146              	.L6:
+ 140:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   }
+ 141:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   else
+ 142:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   {
+ 143:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****     /* Read the message digest */
+ 144:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****     HASH_GetDigest(&SHA1_MessageDigest);
+ 147              		.loc 1 144 0
+ 148 00d0 07F11803 		add	r3, r7, #24
+ 149 00d4 1846     		mov	r0, r3
+ 150 00d6 FFF7FEFF 		bl	HASH_GetDigest
+ 145:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****     *(uint32_t*)(outputaddr)  = __REV(SHA1_MessageDigest.Data[0]);
+ 151              		.loc 1 145 0
+ 152 00da 7B6E     		ldr	r3, [r7, #100]
+ 153 00dc BA69     		ldr	r2, [r7, #24]
+ 154 00de 3A66     		str	r2, [r7, #96]
+ 155              	.LBB22:
+ 156              	.LBB23:
+ 157              		.file 2 "/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_
+   1:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /**************************************************************************//**
+   2:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  * @file     core_cmInstr.h
+   3:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  * @brief    CMSIS Cortex-M Core Instruction Access Header File
+   4:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  * @version  V2.10
+   5:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  * @date     19. July 2011
+   6:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  *
+   7:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  * @note
+   8:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  * Copyright (C) 2009-2011 ARM Limited. All rights reserved.
+   9:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  *
+  10:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  * @par
+  11:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  * ARM Limited (ARM) is supplying this software for use with Cortex-M 
+  12:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  * processor based microcontrollers.  This file can be freely distributed 
+  13:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  * within development tools that are supporting such ARM based processors. 
+  14:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  *
+  15:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  * @par
+  16:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  * THIS SOFTWARE IS PROVIDED "AS IS".  NO WARRANTIES, WHETHER EXPRESS, IMPLIED
+  17:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  * OR STATUTORY, INCLUDING, BUT NOT LIMITED TO, IMPLIED WARRANTIES OF
+  18:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE APPLY TO THIS SOFTWARE.
+  19:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  * ARM SHALL NOT, IN ANY CIRCUMSTANCES, BE LIABLE FOR SPECIAL, INCIDENTAL, OR
+  20:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  * CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
+  21:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  *
+  22:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  ******************************************************************************/
+  23:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+  24:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** #ifndef __CORE_CMINSTR_H
+  25:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** #define __CORE_CMINSTR_H
+  26:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+  27:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+  28:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /* ##########################  Core Instruction Access  ######################### */
+  29:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /** \defgroup CMSIS_Core_InstructionInterface CMSIS Core Instruction Interface
+  30:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****   Access to dedicated instructions
+  31:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****   @{
+  32:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** */
+  33:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+  34:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** #if   defined ( __CC_ARM ) /*------------------RealView Compiler -----------------*/
+  35:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /* ARM armcc specific functions */
+  36:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+  37:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** #if (__ARMCC_VERSION < 400677)
+  38:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****   #error "Please use ARM Compiler Toolchain V4.0.677 or later!"
+  39:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** #endif
+  40:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+  41:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+  42:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /** \brief  No Operation
+  43:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+  44:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     No Operation does nothing. This instruction can be used for code alignment purposes.
+  45:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  */
+  46:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** #define __NOP                             __nop
+  47:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+  48:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+  49:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /** \brief  Wait For Interrupt
+  50:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+  51:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     Wait For Interrupt is a hint instruction that suspends execution
+  52:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     until one of a number of events occurs.
+  53:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  */
+  54:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** #define __WFI                             __wfi
+  55:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+  56:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+  57:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /** \brief  Wait For Event
+  58:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+  59:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     Wait For Event is a hint instruction that permits the processor to enter
+  60:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     a low-power state until one of a number of events occurs.
+  61:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  */
+  62:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** #define __WFE                             __wfe
+  63:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+  64:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+  65:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /** \brief  Send Event
+  66:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+  67:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     Send Event is a hint instruction. It causes an event to be signaled to the CPU.
+  68:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  */
+  69:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** #define __SEV                             __sev
+  70:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+  71:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+  72:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /** \brief  Instruction Synchronization Barrier
+  73:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+  74:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     Instruction Synchronization Barrier flushes the pipeline in the processor, 
+  75:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     so that all instructions following the ISB are fetched from cache or 
+  76:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     memory, after the instruction has been completed.
+  77:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  */
+  78:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** #define __ISB()                           __isb(0xF)
+  79:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+  80:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+  81:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /** \brief  Data Synchronization Barrier
+  82:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+  83:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     This function acts as a special kind of Data Memory Barrier. 
+  84:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     It completes when all explicit memory accesses before this instruction complete.
+  85:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  */
+  86:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** #define __DSB()                           __dsb(0xF)
+  87:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+  88:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+  89:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /** \brief  Data Memory Barrier
+  90:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+  91:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     This function ensures the apparent order of the explicit memory operations before 
+  92:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     and after the instruction, without ensuring their completion.
+  93:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  */
+  94:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** #define __DMB()                           __dmb(0xF)
+  95:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+  96:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+  97:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /** \brief  Reverse byte order (32 bit)
+  98:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+  99:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     This function reverses the byte order in integer value.
+ 100:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 101:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \param [in]    value  Value to reverse
+ 102:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \return               Reversed value
+ 103:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  */
+ 104:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** #define __REV                             __rev
+ 105:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 106:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 107:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /** \brief  Reverse byte order (16 bit)
+ 108:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 109:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     This function reverses the byte order in two unsigned short values.
+ 110:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 111:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \param [in]    value  Value to reverse
+ 112:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \return               Reversed value
+ 113:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  */
+ 114:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** static __INLINE __ASM uint32_t __REV16(uint32_t value)
+ 115:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** {
+ 116:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****   rev16 r0, r0
+ 117:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****   bx lr
+ 118:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** }
+ 119:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 120:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 121:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /** \brief  Reverse byte order in signed short value
+ 122:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 123:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     This function reverses the byte order in a signed short value with sign extension to integer.
+ 124:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 125:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \param [in]    value  Value to reverse
+ 126:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \return               Reversed value
+ 127:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  */
+ 128:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** static __INLINE __ASM int32_t __REVSH(int32_t value)
+ 129:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** {
+ 130:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****   revsh r0, r0
+ 131:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****   bx lr
+ 132:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** }
+ 133:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 134:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 135:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** #if       (__CORTEX_M >= 0x03)
+ 136:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 137:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /** \brief  Reverse bit order of value
+ 138:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 139:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     This function reverses the bit order of the given value.
+ 140:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 141:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \param [in]    value  Value to reverse
+ 142:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \return               Reversed value
+ 143:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  */
+ 144:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** #define __RBIT                            __rbit
+ 145:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 146:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 147:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /** \brief  LDR Exclusive (8 bit)
+ 148:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 149:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     This function performs a exclusive LDR command for 8 bit value.
+ 150:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 151:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \param [in]    ptr  Pointer to data
+ 152:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \return             value of type uint8_t at (*ptr)
+ 153:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  */
+ 154:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** #define __LDREXB(ptr)                     ((uint8_t ) __ldrex(ptr))
+ 155:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 156:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 157:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /** \brief  LDR Exclusive (16 bit)
+ 158:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 159:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     This function performs a exclusive LDR command for 16 bit values.
+ 160:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 161:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \param [in]    ptr  Pointer to data
+ 162:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \return        value of type uint16_t at (*ptr)
+ 163:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  */
+ 164:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** #define __LDREXH(ptr)                     ((uint16_t) __ldrex(ptr))
+ 165:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 166:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 167:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /** \brief  LDR Exclusive (32 bit)
+ 168:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 169:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     This function performs a exclusive LDR command for 32 bit values.
+ 170:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 171:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \param [in]    ptr  Pointer to data
+ 172:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \return        value of type uint32_t at (*ptr)
+ 173:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  */
+ 174:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** #define __LDREXW(ptr)                     ((uint32_t ) __ldrex(ptr))
+ 175:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 176:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 177:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /** \brief  STR Exclusive (8 bit)
+ 178:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 179:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     This function performs a exclusive STR command for 8 bit values.
+ 180:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 181:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \param [in]  value  Value to store
+ 182:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \param [in]    ptr  Pointer to location
+ 183:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \return          0  Function succeeded
+ 184:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \return          1  Function failed
+ 185:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  */
+ 186:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** #define __STREXB(value, ptr)              __strex(value, ptr)
+ 187:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 188:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 189:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /** \brief  STR Exclusive (16 bit)
+ 190:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 191:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     This function performs a exclusive STR command for 16 bit values.
+ 192:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 193:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \param [in]  value  Value to store
+ 194:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \param [in]    ptr  Pointer to location
+ 195:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \return          0  Function succeeded
+ 196:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \return          1  Function failed
+ 197:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  */
+ 198:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** #define __STREXH(value, ptr)              __strex(value, ptr)
+ 199:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 200:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 201:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /** \brief  STR Exclusive (32 bit)
+ 202:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 203:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     This function performs a exclusive STR command for 32 bit values.
+ 204:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 205:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \param [in]  value  Value to store
+ 206:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \param [in]    ptr  Pointer to location
+ 207:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \return          0  Function succeeded
+ 208:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \return          1  Function failed
+ 209:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  */
+ 210:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** #define __STREXW(value, ptr)              __strex(value, ptr)
+ 211:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 212:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 213:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /** \brief  Remove the exclusive lock
+ 214:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 215:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     This function removes the exclusive lock which is created by LDREX.
+ 216:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 217:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  */
+ 218:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** #define __CLREX                           __clrex
+ 219:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 220:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 221:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /** \brief  Signed Saturate
+ 222:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 223:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     This function saturates a signed value.
+ 224:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 225:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \param [in]  value  Value to be saturated
+ 226:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \param [in]    sat  Bit position to saturate to (1..32)
+ 227:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \return             Saturated value
+ 228:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  */
+ 229:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** #define __SSAT                            __ssat
+ 230:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 231:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 232:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /** \brief  Unsigned Saturate
+ 233:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 234:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     This function saturates an unsigned value.
+ 235:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 236:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \param [in]  value  Value to be saturated
+ 237:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \param [in]    sat  Bit position to saturate to (0..31)
+ 238:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \return             Saturated value
+ 239:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  */
+ 240:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** #define __USAT                            __usat
+ 241:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 242:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 243:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /** \brief  Count leading zeros
+ 244:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 245:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     This function counts the number of leading zeros of a data value.
+ 246:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 247:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \param [in]  value  Value to count the leading zeros
+ 248:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \return             number of leading zeros in value
+ 249:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  */
+ 250:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** #define __CLZ                             __clz 
+ 251:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 252:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** #endif /* (__CORTEX_M >= 0x03) */
+ 253:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 254:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 255:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 256:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** #elif defined ( __ICCARM__ ) /*------------------ ICC Compiler -------------------*/
+ 257:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /* IAR iccarm specific functions */
+ 258:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 259:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** #include <cmsis_iar.h>
+ 260:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 261:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 262:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** #elif defined ( __GNUC__ ) /*------------------ GNU Compiler ---------------------*/
+ 263:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /* GNU gcc specific functions */
+ 264:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 265:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /** \brief  No Operation
+ 266:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 267:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     No Operation does nothing. This instruction can be used for code alignment purposes.
+ 268:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  */
+ 269:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** __attribute__( ( always_inline ) ) static __INLINE void __NOP(void)
+ 270:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** {
+ 271:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****   __ASM volatile ("nop");
+ 272:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** }
+ 273:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 274:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 275:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /** \brief  Wait For Interrupt
+ 276:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 277:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     Wait For Interrupt is a hint instruction that suspends execution
+ 278:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     until one of a number of events occurs.
+ 279:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  */
+ 280:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** __attribute__( ( always_inline ) ) static __INLINE void __WFI(void)
+ 281:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** {
+ 282:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****   __ASM volatile ("wfi");
+ 283:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** }
+ 284:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 285:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 286:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /** \brief  Wait For Event
+ 287:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 288:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     Wait For Event is a hint instruction that permits the processor to enter
+ 289:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     a low-power state until one of a number of events occurs.
+ 290:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  */
+ 291:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** __attribute__( ( always_inline ) ) static __INLINE void __WFE(void)
+ 292:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** {
+ 293:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****   __ASM volatile ("wfe");
+ 294:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** }
+ 295:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 296:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 297:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /** \brief  Send Event
+ 298:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 299:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     Send Event is a hint instruction. It causes an event to be signaled to the CPU.
+ 300:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  */
+ 301:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** __attribute__( ( always_inline ) ) static __INLINE void __SEV(void)
+ 302:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** {
+ 303:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****   __ASM volatile ("sev");
+ 304:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** }
+ 305:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 306:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 307:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /** \brief  Instruction Synchronization Barrier
+ 308:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 309:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     Instruction Synchronization Barrier flushes the pipeline in the processor, 
+ 310:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     so that all instructions following the ISB are fetched from cache or 
+ 311:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     memory, after the instruction has been completed.
+ 312:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  */
+ 313:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** __attribute__( ( always_inline ) ) static __INLINE void __ISB(void)
+ 314:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** {
+ 315:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****   __ASM volatile ("isb");
+ 316:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** }
+ 317:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 318:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 319:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /** \brief  Data Synchronization Barrier
+ 320:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 321:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     This function acts as a special kind of Data Memory Barrier. 
+ 322:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     It completes when all explicit memory accesses before this instruction complete.
+ 323:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  */
+ 324:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** __attribute__( ( always_inline ) ) static __INLINE void __DSB(void)
+ 325:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** {
+ 326:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****   __ASM volatile ("dsb");
+ 327:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** }
+ 328:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 329:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 330:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /** \brief  Data Memory Barrier
+ 331:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 332:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     This function ensures the apparent order of the explicit memory operations before 
+ 333:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     and after the instruction, without ensuring their completion.
+ 334:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  */
+ 335:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** __attribute__( ( always_inline ) ) static __INLINE void __DMB(void)
+ 336:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** {
+ 337:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****   __ASM volatile ("dmb");
+ 338:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** }
+ 339:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 340:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 341:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /** \brief  Reverse byte order (32 bit)
+ 342:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 343:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     This function reverses the byte order in integer value.
+ 344:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 345:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \param [in]    value  Value to reverse
+ 346:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \return               Reversed value
+ 347:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  */
+ 348:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** __attribute__( ( always_inline ) ) static __INLINE uint32_t __REV(uint32_t value)
+ 349:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** {
+ 350:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****   uint32_t result;
+ 351:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****   
+ 352:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****   __ASM volatile ("rev %0, %1" : "=r" (result) : "r" (value) );
+ 158              		.loc 2 352 0
+ 159 00e0 3A6E     		ldr	r2, [r7, #96]
+ 160              	@ 352 "/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmI
+ 161 00e2 14BA     		rev r4, r2
+ 162              	@ 0 "" 2
+ 163              		.thumb
+ 164 00e4 FC65     		str	r4, [r7, #92]
+ 353:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****   return(result);
+ 165              		.loc 2 353 0
+ 166 00e6 FA6D     		ldr	r2, [r7, #92]
+ 167              	.LBE23:
+ 168              	.LBE22:
+ 169              		.loc 1 145 0
+ 170 00e8 1A60     		str	r2, [r3, #0]
+ 146:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****     outputaddr+=4;
+ 171              		.loc 1 146 0
+ 172 00ea 7B6E     		ldr	r3, [r7, #100]
+ 173 00ec 03F10403 		add	r3, r3, #4
+ 174 00f0 7B66     		str	r3, [r7, #100]
+ 147:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****     *(uint32_t*)(outputaddr)  = __REV(SHA1_MessageDigest.Data[1]);
+ 175              		.loc 1 147 0
+ 176 00f2 7B6E     		ldr	r3, [r7, #100]
+ 177 00f4 FA69     		ldr	r2, [r7, #28]
+ 178 00f6 BA65     		str	r2, [r7, #88]
+ 179              	.LBB24:
+ 180              	.LBB25:
+ 352:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****   __ASM volatile ("rev %0, %1" : "=r" (result) : "r" (value) );
+ 181              		.loc 2 352 0
+ 182 00f8 BA6D     		ldr	r2, [r7, #88]
+ 183              	@ 352 "/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmI
+ 184 00fa 14BA     		rev r4, r2
+ 185              	@ 0 "" 2
+ 186              		.thumb
+ 187 00fc 7C65     		str	r4, [r7, #84]
+ 188              		.loc 2 353 0
+ 189 00fe 7A6D     		ldr	r2, [r7, #84]
+ 190              	.LBE25:
+ 191              	.LBE24:
+ 192              		.loc 1 147 0
+ 193 0100 1A60     		str	r2, [r3, #0]
+ 148:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****     outputaddr+=4;
+ 194              		.loc 1 148 0
+ 195 0102 7B6E     		ldr	r3, [r7, #100]
+ 196 0104 03F10403 		add	r3, r3, #4
+ 197 0108 7B66     		str	r3, [r7, #100]
+ 149:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****     *(uint32_t*)(outputaddr)  = __REV(SHA1_MessageDigest.Data[2]);
+ 198              		.loc 1 149 0
+ 199 010a 7B6E     		ldr	r3, [r7, #100]
+ 200 010c 3A6A     		ldr	r2, [r7, #32]
+ 201 010e 3A65     		str	r2, [r7, #80]
+ 202              	.LBB26:
+ 203              	.LBB27:
+ 352:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****   __ASM volatile ("rev %0, %1" : "=r" (result) : "r" (value) );
+ 204              		.loc 2 352 0
+ 205 0110 3A6D     		ldr	r2, [r7, #80]
+ 206              	@ 352 "/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmI
+ 207 0112 14BA     		rev r4, r2
+ 208              	@ 0 "" 2
+ 209              		.thumb
+ 210 0114 FC64     		str	r4, [r7, #76]
+ 211              		.loc 2 353 0
+ 212 0116 FA6C     		ldr	r2, [r7, #76]
+ 213              	.LBE27:
+ 214              	.LBE26:
+ 215              		.loc 1 149 0
+ 216 0118 1A60     		str	r2, [r3, #0]
+ 150:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****     outputaddr+=4;
+ 217              		.loc 1 150 0
+ 218 011a 7B6E     		ldr	r3, [r7, #100]
+ 219 011c 03F10403 		add	r3, r3, #4
+ 220 0120 7B66     		str	r3, [r7, #100]
+ 151:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****     *(uint32_t*)(outputaddr)  = __REV(SHA1_MessageDigest.Data[3]);
+ 221              		.loc 1 151 0
+ 222 0122 7B6E     		ldr	r3, [r7, #100]
+ 223 0124 7A6A     		ldr	r2, [r7, #36]
+ 224 0126 BA64     		str	r2, [r7, #72]
+ 225              	.LBB28:
+ 226              	.LBB29:
+ 352:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****   __ASM volatile ("rev %0, %1" : "=r" (result) : "r" (value) );
+ 227              		.loc 2 352 0
+ 228 0128 BA6C     		ldr	r2, [r7, #72]
+ 229              	@ 352 "/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmI
+ 230 012a 14BA     		rev r4, r2
+ 231              	@ 0 "" 2
+ 232              		.thumb
+ 233 012c 7C64     		str	r4, [r7, #68]
+ 234              		.loc 2 353 0
+ 235 012e 7A6C     		ldr	r2, [r7, #68]
+ 236              	.LBE29:
+ 237              	.LBE28:
+ 238              		.loc 1 151 0
+ 239 0130 1A60     		str	r2, [r3, #0]
+ 152:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****     outputaddr+=4;
+ 240              		.loc 1 152 0
+ 241 0132 7B6E     		ldr	r3, [r7, #100]
+ 242 0134 03F10403 		add	r3, r3, #4
+ 243 0138 7B66     		str	r3, [r7, #100]
+ 153:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****     *(uint32_t*)(outputaddr)  = __REV(SHA1_MessageDigest.Data[4]);
+ 244              		.loc 1 153 0
+ 245 013a 7B6E     		ldr	r3, [r7, #100]
+ 246 013c BA6A     		ldr	r2, [r7, #40]
+ 247 013e 3A64     		str	r2, [r7, #64]
+ 248              	.LBB30:
+ 249              	.LBB31:
+ 352:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****   __ASM volatile ("rev %0, %1" : "=r" (result) : "r" (value) );
+ 250              		.loc 2 352 0
+ 251 0140 3A6C     		ldr	r2, [r7, #64]
+ 252              	@ 352 "/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmI
+ 253 0142 14BA     		rev r4, r2
+ 254              	@ 0 "" 2
+ 255              		.thumb
+ 256 0144 FC63     		str	r4, [r7, #60]
+ 257              		.loc 2 353 0
+ 258 0146 FA6B     		ldr	r2, [r7, #60]
+ 259              	.LBE31:
+ 260              	.LBE30:
+ 261              		.loc 1 153 0
+ 262 0148 1A60     		str	r2, [r3, #0]
+ 263              	.L7:
+ 154:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   }
+ 155:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   return status;
+ 264              		.loc 1 155 0
+ 265 014a 97F87330 		ldrb	r3, [r7, #115]	@ zero_extendqisi2
+ 156:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c **** }
+ 266              		.loc 1 156 0
+ 267 014e 1846     		mov	r0, r3
+ 268 0150 07F17C07 		add	r7, r7, #124
+ 269 0154 BD46     		mov	sp, r7
+ 270 0156 90BD     		pop	{r4, r7, pc}
+ 271              		.cfi_endproc
+ 272              	.LFE110:
+ 274              		.align	2
+ 275              		.global	HMAC_SHA1
+ 276              		.thumb
+ 277              		.thumb_func
+ 279              	HMAC_SHA1:
+ 280              	.LFB111:
+ 157:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c **** 
+ 158:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c **** /**
+ 159:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   * @brief  Compute the HMAC SHA1 digest.
+ 160:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   * @param  Key: pointer to the Key used for HMAC.
+ 161:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   * @param  Keylen: length of the Key used for HMAC.  
+ 162:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   * @param  Input: pointer to the Input buffer to be treated.
+ 163:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   * @param  Ilen: length of the Input buffer.
+ 164:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   * @param  Output: the returned digest
+ 165:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   * @retval An ErrorStatus enumeration value:
+ 166:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   *          - SUCCESS: digest computation done
+ 167:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   *          - ERROR: digest computation failed
+ 168:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   */
+ 169:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c **** ErrorStatus HMAC_SHA1(uint8_t *Key, uint32_t Keylen, uint8_t *Input,
+ 170:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****                       uint32_t Ilen, uint8_t Output[20])
+ 171:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c **** {
+ 281              		.loc 1 171 0
+ 282              		.cfi_startproc
+ 283              		@ args = 4, pretend = 0, frame = 128
+ 284              		@ frame_needed = 1, uses_anonymous_args = 0
+ 285 0158 90B5     		push	{r4, r7, lr}
+ 286              	.LCFI3:
+ 287              		.cfi_def_cfa_offset 12
+ 288              		.cfi_offset 4, -12
+ 289              		.cfi_offset 7, -8
+ 290              		.cfi_offset 14, -4
+ 291 015a A1B0     		sub	sp, sp, #132
+ 292              	.LCFI4:
+ 293              		.cfi_def_cfa_offset 144
+ 294 015c 00AF     		add	r7, sp, #0
+ 295              	.LCFI5:
+ 296              		.cfi_def_cfa_register 7
+ 297 015e F860     		str	r0, [r7, #12]
+ 298 0160 B960     		str	r1, [r7, #8]
+ 299 0162 7A60     		str	r2, [r7, #4]
+ 300 0164 3B60     		str	r3, [r7, #0]
+ 172:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   HASH_InitTypeDef SHA1_HASH_InitStructure;
+ 173:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   HASH_MsgDigest SHA1_MessageDigest;
+ 174:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   __IO uint16_t nbvalidbitsdata = 0;
+ 301              		.loc 1 174 0
+ 302 0166 4FF00003 		mov	r3, #0
+ 303 016a 7B83     		strh	r3, [r7, #26]	@ movhi
+ 175:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   __IO uint16_t nbvalidbitskey = 0;
+ 304              		.loc 1 175 0
+ 305 016c 4FF00003 		mov	r3, #0
+ 306 0170 3B83     		strh	r3, [r7, #24]	@ movhi
+ 176:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   uint32_t i = 0;
+ 307              		.loc 1 176 0
+ 308 0172 4FF00003 		mov	r3, #0
+ 309 0176 FB67     		str	r3, [r7, #124]
+ 177:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   __IO uint32_t counter = 0;
+ 310              		.loc 1 177 0
+ 311 0178 4FF00003 		mov	r3, #0
+ 312 017c 7B61     		str	r3, [r7, #20]
+ 178:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   uint32_t busystatus = 0;
+ 313              		.loc 1 178 0
+ 314 017e 4FF00003 		mov	r3, #0
+ 315 0182 FB66     		str	r3, [r7, #108]
+ 179:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   ErrorStatus status = SUCCESS;
+ 316              		.loc 1 179 0
+ 317 0184 4FF00103 		mov	r3, #1
+ 318 0188 87F87B30 		strb	r3, [r7, #123]
+ 180:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   uint32_t keyaddr    = (uint32_t)Key;
+ 319              		.loc 1 180 0
+ 320 018c FB68     		ldr	r3, [r7, #12]
+ 321 018e 7B67     		str	r3, [r7, #116]
+ 181:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   uint32_t inputaddr  = (uint32_t)Input;
+ 322              		.loc 1 181 0
+ 323 0190 7B68     		ldr	r3, [r7, #4]
+ 324 0192 3B67     		str	r3, [r7, #112]
+ 182:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   uint32_t outputaddr = (uint32_t)Output;
+ 325              		.loc 1 182 0
+ 326 0194 D7F89030 		ldr	r3, [r7, #144]
+ 327 0198 BB66     		str	r3, [r7, #104]
+ 183:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c **** 
+ 184:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   /* Number of valid bits in last word of the Input data */
+ 185:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   nbvalidbitsdata = 8 * (Ilen % 4);
+ 328              		.loc 1 185 0
+ 329 019a 3B68     		ldr	r3, [r7, #0]
+ 330 019c 9BB2     		uxth	r3, r3
+ 331 019e 03F00303 		and	r3, r3, #3
+ 332 01a2 9BB2     		uxth	r3, r3
+ 333 01a4 4FEAC303 		lsl	r3, r3, #3
+ 334 01a8 9BB2     		uxth	r3, r3
+ 335 01aa 7B83     		strh	r3, [r7, #26]	@ movhi
+ 186:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c **** 
+ 187:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   /* Number of valid bits in last word of the Key */
+ 188:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   nbvalidbitskey = 8 * (Keylen % 4);
+ 336              		.loc 1 188 0
+ 337 01ac BB68     		ldr	r3, [r7, #8]
+ 338 01ae 9BB2     		uxth	r3, r3
+ 339 01b0 03F00303 		and	r3, r3, #3
+ 340 01b4 9BB2     		uxth	r3, r3
+ 341 01b6 4FEAC303 		lsl	r3, r3, #3
+ 342 01ba 9BB2     		uxth	r3, r3
+ 343 01bc 3B83     		strh	r3, [r7, #24]	@ movhi
+ 189:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c **** 
+ 190:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   /* HASH peripheral initialization */
+ 191:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   HASH_DeInit();
+ 344              		.loc 1 191 0
+ 345 01be FFF7FEFF 		bl	HASH_DeInit
+ 192:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c **** 
+ 193:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   /* HASH Configuration */
+ 194:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   SHA1_HASH_InitStructure.HASH_AlgoSelection = HASH_AlgoSelection_SHA1;
+ 346              		.loc 1 194 0
+ 347 01c2 4FF00003 		mov	r3, #0
+ 348 01c6 3B63     		str	r3, [r7, #48]
+ 195:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   SHA1_HASH_InitStructure.HASH_AlgoMode = HASH_AlgoMode_HMAC;
+ 349              		.loc 1 195 0
+ 350 01c8 4FF04003 		mov	r3, #64
+ 351 01cc 7B63     		str	r3, [r7, #52]
+ 196:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   SHA1_HASH_InitStructure.HASH_DataType = HASH_DataType_8b;
+ 352              		.loc 1 196 0
+ 353 01ce 4FF02003 		mov	r3, #32
+ 354 01d2 BB63     		str	r3, [r7, #56]
+ 197:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   if(Keylen > 64)
+ 355              		.loc 1 197 0
+ 356 01d4 BB68     		ldr	r3, [r7, #8]
+ 357 01d6 402B     		cmp	r3, #64
+ 358 01d8 03D9     		bls	.L15
+ 198:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   {
+ 199:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****     /* HMAC long Key */
+ 200:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****     SHA1_HASH_InitStructure.HASH_HMACKeyType = HASH_HMACKeyType_LongKey;
+ 359              		.loc 1 200 0
+ 360 01da 4FF48033 		mov	r3, #65536
+ 361 01de FB63     		str	r3, [r7, #60]
+ 362 01e0 02E0     		b	.L16
+ 363              	.L15:
+ 201:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   }
+ 202:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   else
+ 203:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   {
+ 204:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****     /* HMAC short Key */
+ 205:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****     SHA1_HASH_InitStructure.HASH_HMACKeyType = HASH_HMACKeyType_ShortKey;
+ 364              		.loc 1 205 0
+ 365 01e2 4FF00003 		mov	r3, #0
+ 366 01e6 FB63     		str	r3, [r7, #60]
+ 367              	.L16:
+ 206:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   }
+ 207:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   HASH_Init(&SHA1_HASH_InitStructure);
+ 368              		.loc 1 207 0
+ 369 01e8 07F13003 		add	r3, r7, #48
+ 370 01ec 1846     		mov	r0, r3
+ 371 01ee FFF7FEFF 		bl	HASH_Init
+ 208:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c **** 
+ 209:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   /* Configure the number of valid bits in last word of the Key */
+ 210:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   HASH_SetLastWordValidBitsNbr(nbvalidbitskey);
+ 372              		.loc 1 210 0
+ 373 01f2 3B8B     		ldrh	r3, [r7, #24]	@ movhi
+ 374 01f4 9BB2     		uxth	r3, r3
+ 375 01f6 1846     		mov	r0, r3
+ 376 01f8 FFF7FEFF 		bl	HASH_SetLastWordValidBitsNbr
+ 211:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c **** 
+ 212:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   /* Write the Key */
+ 213:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   for(i=0; i<Keylen; i+=4)
+ 377              		.loc 1 213 0
+ 378 01fc 4FF00003 		mov	r3, #0
+ 379 0200 FB67     		str	r3, [r7, #124]
+ 380 0202 0CE0     		b	.L17
+ 381              	.L18:
+ 214:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   {
+ 215:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****     HASH_DataIn(*(uint32_t*)keyaddr);
+ 382              		.loc 1 215 0 discriminator 2
+ 383 0204 7B6F     		ldr	r3, [r7, #116]
+ 384 0206 1B68     		ldr	r3, [r3, #0]
+ 385 0208 1846     		mov	r0, r3
+ 386 020a FFF7FEFF 		bl	HASH_DataIn
+ 216:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****     keyaddr+=4;
+ 387              		.loc 1 216 0 discriminator 2
+ 388 020e 7B6F     		ldr	r3, [r7, #116]
+ 389 0210 03F10403 		add	r3, r3, #4
+ 390 0214 7B67     		str	r3, [r7, #116]
+ 213:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   for(i=0; i<Keylen; i+=4)
+ 391              		.loc 1 213 0 discriminator 2
+ 392 0216 FB6F     		ldr	r3, [r7, #124]
+ 393 0218 03F10403 		add	r3, r3, #4
+ 394 021c FB67     		str	r3, [r7, #124]
+ 395              	.L17:
+ 213:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   for(i=0; i<Keylen; i+=4)
+ 396              		.loc 1 213 0 is_stmt 0 discriminator 1
+ 397 021e FA6F     		ldr	r2, [r7, #124]
+ 398 0220 BB68     		ldr	r3, [r7, #8]
+ 399 0222 9A42     		cmp	r2, r3
+ 400 0224 EED3     		bcc	.L18
+ 217:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   }
+ 218:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c **** 
+ 219:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   /* Start the HASH processor */
+ 220:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   HASH_StartDigest();
+ 401              		.loc 1 220 0 is_stmt 1
+ 402 0226 FFF7FEFF 		bl	HASH_StartDigest
+ 403              	.L20:
+ 221:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c **** 
+ 222:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   /* wait until the Busy flag is RESET */
+ 223:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   do
+ 224:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   {
+ 225:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****     busystatus = HASH_GetFlagStatus(HASH_FLAG_BUSY);
+ 404              		.loc 1 225 0 discriminator 1
+ 405 022a 4FF00800 		mov	r0, #8
+ 406 022e FFF7FEFF 		bl	HASH_GetFlagStatus
+ 407 0232 0346     		mov	r3, r0
+ 408 0234 FB66     		str	r3, [r7, #108]
+ 226:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****     counter++;
+ 409              		.loc 1 226 0 discriminator 1
+ 410 0236 7B69     		ldr	r3, [r7, #20]
+ 411 0238 03F10103 		add	r3, r3, #1
+ 412 023c 7B61     		str	r3, [r7, #20]
+ 227:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   }while ((counter != SHA1BUSY_TIMEOUT) && (busystatus != RESET));
+ 413              		.loc 1 227 0 discriminator 1
+ 414 023e 7B69     		ldr	r3, [r7, #20]
+ 415 0240 B3F5803F 		cmp	r3, #65536
+ 416 0244 02D0     		beq	.L19
+ 417 0246 FB6E     		ldr	r3, [r7, #108]
+ 418 0248 002B     		cmp	r3, #0
+ 419 024a EED1     		bne	.L20
+ 420              	.L19:
+ 228:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c **** 
+ 229:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   if (busystatus != RESET)
+ 421              		.loc 1 229 0
+ 422 024c FB6E     		ldr	r3, [r7, #108]
+ 423 024e 002B     		cmp	r3, #0
+ 424 0250 04D0     		beq	.L21
+ 230:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   {
+ 231:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****      status = ERROR;
+ 425              		.loc 1 231 0
+ 426 0252 4FF00003 		mov	r3, #0
+ 427 0256 87F87B30 		strb	r3, [r7, #123]
+ 428 025a AEE0     		b	.L22
+ 429              	.L21:
+ 232:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   }
+ 233:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   else
+ 234:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   {
+ 235:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****     /* Configure the number of valid bits in last word of the Input data */
+ 236:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****     HASH_SetLastWordValidBitsNbr(nbvalidbitsdata);
+ 430              		.loc 1 236 0
+ 431 025c 7B8B     		ldrh	r3, [r7, #26]	@ movhi
+ 432 025e 9BB2     		uxth	r3, r3
+ 433 0260 1846     		mov	r0, r3
+ 434 0262 FFF7FEFF 		bl	HASH_SetLastWordValidBitsNbr
+ 237:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c **** 
+ 238:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****     /* Write the Input block in the IN FIFO */
+ 239:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****     for(i=0; i<Ilen; i+=4)
+ 435              		.loc 1 239 0
+ 436 0266 4FF00003 		mov	r3, #0
+ 437 026a FB67     		str	r3, [r7, #124]
+ 438 026c 0CE0     		b	.L23
+ 439              	.L24:
+ 240:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****     {
+ 241:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****       HASH_DataIn(*(uint32_t*)inputaddr);
+ 440              		.loc 1 241 0 discriminator 2
+ 441 026e 3B6F     		ldr	r3, [r7, #112]
+ 442 0270 1B68     		ldr	r3, [r3, #0]
+ 443 0272 1846     		mov	r0, r3
+ 444 0274 FFF7FEFF 		bl	HASH_DataIn
+ 242:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****       inputaddr+=4;
+ 445              		.loc 1 242 0 discriminator 2
+ 446 0278 3B6F     		ldr	r3, [r7, #112]
+ 447 027a 03F10403 		add	r3, r3, #4
+ 448 027e 3B67     		str	r3, [r7, #112]
+ 239:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****     for(i=0; i<Ilen; i+=4)
+ 449              		.loc 1 239 0 discriminator 2
+ 450 0280 FB6F     		ldr	r3, [r7, #124]
+ 451 0282 03F10403 		add	r3, r3, #4
+ 452 0286 FB67     		str	r3, [r7, #124]
+ 453              	.L23:
+ 239:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****     for(i=0; i<Ilen; i+=4)
+ 454              		.loc 1 239 0 is_stmt 0 discriminator 1
+ 455 0288 FA6F     		ldr	r2, [r7, #124]
+ 456 028a 3B68     		ldr	r3, [r7, #0]
+ 457 028c 9A42     		cmp	r2, r3
+ 458 028e EED3     		bcc	.L24
+ 243:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****     }
+ 244:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c **** 
+ 245:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****     /* Start the HASH processor */
+ 246:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****     HASH_StartDigest();
+ 459              		.loc 1 246 0 is_stmt 1
+ 460 0290 FFF7FEFF 		bl	HASH_StartDigest
+ 247:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c **** 
+ 248:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c **** 
+ 249:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****     /* wait until the Busy flag is RESET */
+ 250:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****     counter =0;
+ 461              		.loc 1 250 0
+ 462 0294 4FF00003 		mov	r3, #0
+ 463 0298 7B61     		str	r3, [r7, #20]
+ 464              	.L26:
+ 251:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****     do
+ 252:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****     {
+ 253:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****       busystatus = HASH_GetFlagStatus(HASH_FLAG_BUSY);
+ 465              		.loc 1 253 0 discriminator 1
+ 466 029a 4FF00800 		mov	r0, #8
+ 467 029e FFF7FEFF 		bl	HASH_GetFlagStatus
+ 468 02a2 0346     		mov	r3, r0
+ 469 02a4 FB66     		str	r3, [r7, #108]
+ 254:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****       counter++;
+ 470              		.loc 1 254 0 discriminator 1
+ 471 02a6 7B69     		ldr	r3, [r7, #20]
+ 472 02a8 03F10103 		add	r3, r3, #1
+ 473 02ac 7B61     		str	r3, [r7, #20]
+ 255:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****     }while ((counter != SHA1BUSY_TIMEOUT) && (busystatus != RESET));
+ 474              		.loc 1 255 0 discriminator 1
+ 475 02ae 7B69     		ldr	r3, [r7, #20]
+ 476 02b0 B3F5803F 		cmp	r3, #65536
+ 477 02b4 02D0     		beq	.L25
+ 478 02b6 FB6E     		ldr	r3, [r7, #108]
+ 479 02b8 002B     		cmp	r3, #0
+ 480 02ba EED1     		bne	.L26
+ 481              	.L25:
+ 256:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c **** 
+ 257:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****     if (busystatus != RESET)
+ 482              		.loc 1 257 0
+ 483 02bc FB6E     		ldr	r3, [r7, #108]
+ 484 02be 002B     		cmp	r3, #0
+ 485 02c0 04D0     		beq	.L27
+ 258:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****     {
+ 259:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****       status = ERROR;
+ 486              		.loc 1 259 0
+ 487 02c2 4FF00003 		mov	r3, #0
+ 488 02c6 87F87B30 		strb	r3, [r7, #123]
+ 489 02ca 76E0     		b	.L22
+ 490              	.L27:
+ 260:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****     }
+ 261:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****     else
+ 262:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****     {  
+ 263:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****       /* Configure the number of valid bits in last word of the Key */
+ 264:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****       HASH_SetLastWordValidBitsNbr(nbvalidbitskey);
+ 491              		.loc 1 264 0
+ 492 02cc 3B8B     		ldrh	r3, [r7, #24]	@ movhi
+ 493 02ce 9BB2     		uxth	r3, r3
+ 494 02d0 1846     		mov	r0, r3
+ 495 02d2 FFF7FEFF 		bl	HASH_SetLastWordValidBitsNbr
+ 265:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c **** 
+ 266:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****       /* Write the Key */
+ 267:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****       keyaddr = (uint32_t)Key;
+ 496              		.loc 1 267 0
+ 497 02d6 FB68     		ldr	r3, [r7, #12]
+ 498 02d8 7B67     		str	r3, [r7, #116]
+ 268:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****       for(i=0; i<Keylen; i+=4)
+ 499              		.loc 1 268 0
+ 500 02da 4FF00003 		mov	r3, #0
+ 501 02de FB67     		str	r3, [r7, #124]
+ 502 02e0 0CE0     		b	.L28
+ 503              	.L29:
+ 269:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****       {
+ 270:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****         HASH_DataIn(*(uint32_t*)keyaddr);
+ 504              		.loc 1 270 0 discriminator 2
+ 505 02e2 7B6F     		ldr	r3, [r7, #116]
+ 506 02e4 1B68     		ldr	r3, [r3, #0]
+ 507 02e6 1846     		mov	r0, r3
+ 508 02e8 FFF7FEFF 		bl	HASH_DataIn
+ 271:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****         keyaddr+=4;
+ 509              		.loc 1 271 0 discriminator 2
+ 510 02ec 7B6F     		ldr	r3, [r7, #116]
+ 511 02ee 03F10403 		add	r3, r3, #4
+ 512 02f2 7B67     		str	r3, [r7, #116]
+ 268:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****       for(i=0; i<Keylen; i+=4)
+ 513              		.loc 1 268 0 discriminator 2
+ 514 02f4 FB6F     		ldr	r3, [r7, #124]
+ 515 02f6 03F10403 		add	r3, r3, #4
+ 516 02fa FB67     		str	r3, [r7, #124]
+ 517              	.L28:
+ 268:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****       for(i=0; i<Keylen; i+=4)
+ 518              		.loc 1 268 0 is_stmt 0 discriminator 1
+ 519 02fc FA6F     		ldr	r2, [r7, #124]
+ 520 02fe BB68     		ldr	r3, [r7, #8]
+ 521 0300 9A42     		cmp	r2, r3
+ 522 0302 EED3     		bcc	.L29
+ 272:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****       }
+ 273:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c **** 
+ 274:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****       /* Start the HASH processor */
+ 275:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****       HASH_StartDigest();
+ 523              		.loc 1 275 0 is_stmt 1
+ 524 0304 FFF7FEFF 		bl	HASH_StartDigest
+ 276:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c **** 
+ 277:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****       /* wait until the Busy flag is RESET */
+ 278:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****       counter =0;
+ 525              		.loc 1 278 0
+ 526 0308 4FF00003 		mov	r3, #0
+ 527 030c 7B61     		str	r3, [r7, #20]
+ 528              	.L31:
+ 279:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****       do
+ 280:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****       {
+ 281:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****         busystatus = HASH_GetFlagStatus(HASH_FLAG_BUSY);
+ 529              		.loc 1 281 0 discriminator 1
+ 530 030e 4FF00800 		mov	r0, #8
+ 531 0312 FFF7FEFF 		bl	HASH_GetFlagStatus
+ 532 0316 0346     		mov	r3, r0
+ 533 0318 FB66     		str	r3, [r7, #108]
+ 282:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****         counter++;
+ 534              		.loc 1 282 0 discriminator 1
+ 535 031a 7B69     		ldr	r3, [r7, #20]
+ 536 031c 03F10103 		add	r3, r3, #1
+ 537 0320 7B61     		str	r3, [r7, #20]
+ 283:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****       }while ((counter != SHA1BUSY_TIMEOUT) && (busystatus != RESET));
+ 538              		.loc 1 283 0 discriminator 1
+ 539 0322 7B69     		ldr	r3, [r7, #20]
+ 540 0324 B3F5803F 		cmp	r3, #65536
+ 541 0328 02D0     		beq	.L30
+ 542 032a FB6E     		ldr	r3, [r7, #108]
+ 543 032c 002B     		cmp	r3, #0
+ 544 032e EED1     		bne	.L31
+ 545              	.L30:
+ 284:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c **** 
+ 285:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****       if (busystatus != RESET)
+ 546              		.loc 1 285 0
+ 547 0330 FB6E     		ldr	r3, [r7, #108]
+ 548 0332 002B     		cmp	r3, #0
+ 549 0334 04D0     		beq	.L32
+ 286:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****       {
+ 287:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****         status = ERROR;
+ 550              		.loc 1 287 0
+ 551 0336 4FF00003 		mov	r3, #0
+ 552 033a 87F87B30 		strb	r3, [r7, #123]
+ 553 033e 3CE0     		b	.L22
+ 554              	.L32:
+ 288:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****       }
+ 289:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****       else
+ 290:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****       {
+ 291:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****         /* Read the message digest */
+ 292:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****         HASH_GetDigest(&SHA1_MessageDigest);
+ 555              		.loc 1 292 0
+ 556 0340 07F11C03 		add	r3, r7, #28
+ 557 0344 1846     		mov	r0, r3
+ 558 0346 FFF7FEFF 		bl	HASH_GetDigest
+ 293:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****         *(uint32_t*)(outputaddr)  = __REV(SHA1_MessageDigest.Data[0]);
+ 559              		.loc 1 293 0
+ 560 034a BB6E     		ldr	r3, [r7, #104]
+ 561 034c FA69     		ldr	r2, [r7, #28]
+ 562 034e 7A66     		str	r2, [r7, #100]
+ 563              	.LBB32:
+ 564              	.LBB33:
+ 352:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****   __ASM volatile ("rev %0, %1" : "=r" (result) : "r" (value) );
+ 565              		.loc 2 352 0
+ 566 0350 7A6E     		ldr	r2, [r7, #100]
+ 567              	@ 352 "/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmI
+ 568 0352 14BA     		rev r4, r2
+ 569              	@ 0 "" 2
+ 570              		.thumb
+ 571 0354 3C66     		str	r4, [r7, #96]
+ 572              		.loc 2 353 0
+ 573 0356 3A6E     		ldr	r2, [r7, #96]
+ 574              	.LBE33:
+ 575              	.LBE32:
+ 576              		.loc 1 293 0
+ 577 0358 1A60     		str	r2, [r3, #0]
+ 294:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****         outputaddr+=4;
+ 578              		.loc 1 294 0
+ 579 035a BB6E     		ldr	r3, [r7, #104]
+ 580 035c 03F10403 		add	r3, r3, #4
+ 581 0360 BB66     		str	r3, [r7, #104]
+ 295:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****         *(uint32_t*)(outputaddr)  = __REV(SHA1_MessageDigest.Data[1]);
+ 582              		.loc 1 295 0
+ 583 0362 BB6E     		ldr	r3, [r7, #104]
+ 584 0364 3A6A     		ldr	r2, [r7, #32]
+ 585 0366 FA65     		str	r2, [r7, #92]
+ 586              	.LBB34:
+ 587              	.LBB35:
+ 352:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****   __ASM volatile ("rev %0, %1" : "=r" (result) : "r" (value) );
+ 588              		.loc 2 352 0
+ 589 0368 FA6D     		ldr	r2, [r7, #92]
+ 590              	@ 352 "/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmI
+ 591 036a 14BA     		rev r4, r2
+ 592              	@ 0 "" 2
+ 593              		.thumb
+ 594 036c BC65     		str	r4, [r7, #88]
+ 595              		.loc 2 353 0
+ 596 036e BA6D     		ldr	r2, [r7, #88]
+ 597              	.LBE35:
+ 598              	.LBE34:
+ 599              		.loc 1 295 0
+ 600 0370 1A60     		str	r2, [r3, #0]
+ 296:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****         outputaddr+=4;
+ 601              		.loc 1 296 0
+ 602 0372 BB6E     		ldr	r3, [r7, #104]
+ 603 0374 03F10403 		add	r3, r3, #4
+ 604 0378 BB66     		str	r3, [r7, #104]
+ 297:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****         *(uint32_t*)(outputaddr)  = __REV(SHA1_MessageDigest.Data[2]);
+ 605              		.loc 1 297 0
+ 606 037a BB6E     		ldr	r3, [r7, #104]
+ 607 037c 7A6A     		ldr	r2, [r7, #36]
+ 608 037e 7A65     		str	r2, [r7, #84]
+ 609              	.LBB36:
+ 610              	.LBB37:
+ 352:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****   __ASM volatile ("rev %0, %1" : "=r" (result) : "r" (value) );
+ 611              		.loc 2 352 0
+ 612 0380 7A6D     		ldr	r2, [r7, #84]
+ 613              	@ 352 "/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmI
+ 614 0382 14BA     		rev r4, r2
+ 615              	@ 0 "" 2
+ 616              		.thumb
+ 617 0384 3C65     		str	r4, [r7, #80]
+ 618              		.loc 2 353 0
+ 619 0386 3A6D     		ldr	r2, [r7, #80]
+ 620              	.LBE37:
+ 621              	.LBE36:
+ 622              		.loc 1 297 0
+ 623 0388 1A60     		str	r2, [r3, #0]
+ 298:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****         outputaddr+=4;
+ 624              		.loc 1 298 0
+ 625 038a BB6E     		ldr	r3, [r7, #104]
+ 626 038c 03F10403 		add	r3, r3, #4
+ 627 0390 BB66     		str	r3, [r7, #104]
+ 299:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****         *(uint32_t*)(outputaddr)  = __REV(SHA1_MessageDigest.Data[3]);
+ 628              		.loc 1 299 0
+ 629 0392 BB6E     		ldr	r3, [r7, #104]
+ 630 0394 BA6A     		ldr	r2, [r7, #40]
+ 631 0396 FA64     		str	r2, [r7, #76]
+ 632              	.LBB38:
+ 633              	.LBB39:
+ 352:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****   __ASM volatile ("rev %0, %1" : "=r" (result) : "r" (value) );
+ 634              		.loc 2 352 0
+ 635 0398 FA6C     		ldr	r2, [r7, #76]
+ 636              	@ 352 "/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmI
+ 637 039a 14BA     		rev r4, r2
+ 638              	@ 0 "" 2
+ 639              		.thumb
+ 640 039c BC64     		str	r4, [r7, #72]
+ 641              		.loc 2 353 0
+ 642 039e BA6C     		ldr	r2, [r7, #72]
+ 643              	.LBE39:
+ 644              	.LBE38:
+ 645              		.loc 1 299 0
+ 646 03a0 1A60     		str	r2, [r3, #0]
+ 300:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****         outputaddr+=4;
+ 647              		.loc 1 300 0
+ 648 03a2 BB6E     		ldr	r3, [r7, #104]
+ 649 03a4 03F10403 		add	r3, r3, #4
+ 650 03a8 BB66     		str	r3, [r7, #104]
+ 301:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****         *(uint32_t*)(outputaddr)  = __REV(SHA1_MessageDigest.Data[4]);
+ 651              		.loc 1 301 0
+ 652 03aa BB6E     		ldr	r3, [r7, #104]
+ 653 03ac FA6A     		ldr	r2, [r7, #44]
+ 654 03ae 7A64     		str	r2, [r7, #68]
+ 655              	.LBB40:
+ 656              	.LBB41:
+ 352:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****   __ASM volatile ("rev %0, %1" : "=r" (result) : "r" (value) );
+ 657              		.loc 2 352 0
+ 658 03b0 7A6C     		ldr	r2, [r7, #68]
+ 659              	@ 352 "/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmI
+ 660 03b2 14BA     		rev r4, r2
+ 661              	@ 0 "" 2
+ 662              		.thumb
+ 663 03b4 3C64     		str	r4, [r7, #64]
+ 664              		.loc 2 353 0
+ 665 03b6 3A6C     		ldr	r2, [r7, #64]
+ 666              	.LBE41:
+ 667              	.LBE40:
+ 668              		.loc 1 301 0
+ 669 03b8 1A60     		str	r2, [r3, #0]
+ 670              	.L22:
+ 302:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****       }
+ 303:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****     }  
+ 304:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   }
+ 305:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c ****   return status;  
+ 671              		.loc 1 305 0
+ 672 03ba 97F87B30 		ldrb	r3, [r7, #123]	@ zero_extendqisi2
+ 306:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.c **** }
+ 673              		.loc 1 306 0
+ 674 03be 1846     		mov	r0, r3
+ 675 03c0 07F18407 		add	r7, r7, #132
+ 676 03c4 BD46     		mov	sp, r7
+ 677 03c6 90BD     		pop	{r4, r7, pc}
+ 678              		.cfi_endproc
+ 679              	.LFE111:
+ 681              	.Letext0:
+ 682              		.file 3 "/opt/CodeSourcery/bin/../lib/gcc/arm-none-eabi/4.7.2/../../../../arm-none-eabi/include/st
+ 683              		.file 4 "/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Device/ST/STM
+ 684              		.file 5 "/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/STM32F4xx_StdPeriph
+ 685              		.file 6 "/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_
+DEFINED SYMBOLS
+                            *ABS*:00000000 stm32f4xx_hash_sha1.c
+     /tmp/ccMkBx2p.s:18     .text:00000000 $t
+     /tmp/ccMkBx2p.s:23     .text:00000000 HASH_SHA1
+     /tmp/ccMkBx2p.s:279    .text:00000158 HMAC_SHA1
+                     .debug_frame:00000010 $d
+                           .group:00000000 wm4.1.ee386580922180e5cad1057f989de60d
+                           .group:00000000 wm4.stm32f4xx.h.54.6e1f0ee5c76cc1e53c8ea6d18297b5fd
+                           .group:00000000 wm4.core_cm4.h.32.f824aba4d431a5bb4a51726bd5b62834
+                           .group:00000000 wm4.stdint.h.10.90b695f550ca6cc3fb08fa83baf01e05
+                           .group:00000000 wm4.core_cmInstr.h.25.f50f886f2edf670cf199b35fd96f5c91
+                           .group:00000000 wm4.core_cm4_simd.h.29.b4a3fdfb606cb3b26119424324d4b963
+                           .group:00000000 wm4.core_cm4.h.153.5393ef7e6cebf34dd51ca528f9218ab3
+                           .group:00000000 wm4.stm32f4xx.h.289.fa68dcae75666a037ce29b5a1b57e3b3
+                           .group:00000000 wm4.stm32f4xx_adc.h.108.1710484bf41297b93f825b3b15cbdff8
+                           .group:00000000 wm4.stm32f4xx_can.h.31.3bb56c6436c7a6e6af1611046e81f48c
+                           .group:00000000 wm4.stm32f4xx_cryp.h.31.94bbbb19b99df10306f31e78c333a77b
+                           .group:00000000 wm4.stm32f4xx_dac.h.31.b8d45e7eaf71ee4bf01c1317dbc06f77
+                           .group:00000000 wm4.stm32f4xx_dbgmcu.h.30.70a81ec54c2707baa9fca77391eeeaaa
+                           .group:00000000 wm4.stm32f4xx_dcmi.h.30.9d0942d58c357d2eed15e044bf9b4a77
+                           .group:00000000 wm4.stm32f4xx_dma.h.31.815bb924b30b1c776b3cd51113fdfe60
+                           .group:00000000 wm4.stm32f4xx_exti.h.31.86bd18e979f97217bb1d3b80fde0231e
+                           .group:00000000 wm4.stm32f4xx_flash.h.31.74f2ed42d890f144ca7eb5ae8172f0d0
+                           .group:00000000 wm4.stm32f4xx_fsmc.h.31.ff58629e0c603fb2f9b3f00c0657fdfa
+                           .group:00000000 wm4.stm32f4xx_gpio.h.31.d9aeae10cfa353d85d475c0d4900c452
+                           .group:00000000 wm4.stm32f4xx_i2c.h.31.edf5baa611075c49ae13f56be9040be3
+                           .group:00000000 wm4.stm32f4xx_iwdg.h.31.30e376e6d8d424aab7fddd66cf691c7b
+                           .group:00000000 wm4.stm32f4xx_pwr.h.31.bb774fc1b632cb8d2ecaec8c6524d2c0
+                           .group:00000000 wm4.stm32f4xx_rcc.h.30.820e94551583d2b835c8cf3ad722e16c
+                           .group:00000000 wm4.stm32f4xx_rng.h.31.1ec493d56b7a8e5a71238519cae6dea7
+                           .group:00000000 wm4.stm32f4xx_rtc.h.31.bddeb98c63c8fa06fac80b5dd8296471
+                           .group:00000000 wm4.stm32f4xx_sdio.h.31.8c6dff42ffa718b444c3420717601ff2
+                           .group:00000000 wm4.stm32f4xx_spi.h.31.fb1b2c8214b87a47d4457633b7c31c3c
+                           .group:00000000 wm4.stm32f4xx_syscfg.h.31.5a680f88d55b7816ae613c20f199cbd9
+                           .group:00000000 wm4.stm32f4xx_tim.h.31.b1d608fbde729347e4ccf70799e654d2
+                           .group:00000000 wm4.stm32f4xx_usart.h.31.f8d29b14aa4d39de5495adcc92749d3c
+                           .group:00000000 wm4.stm32f4xx_wwdg.h.31.b45a80fa1ec64984adf786f7e489f31b
+                           .group:00000000 wm4.misc.h.31.041217492a6cb86f2fb26099f373a465
+                           .group:00000000 wm4.stm32f4xx.h.6975.cdbdae9d5de06f1ba6b770f59cbe4d6c
+                           .group:00000000 wm4.stm32f4xx_hash.h.95.0ca7e03a3cda6499000de1ba9e3da660
+
+UNDEFINED SYMBOLS
+HASH_DeInit
+HASH_Init
+HASH_SetLastWordValidBitsNbr
+HASH_DataIn
+HASH_StartDigest
+HASH_GetFlagStatus
+HASH_GetDigest

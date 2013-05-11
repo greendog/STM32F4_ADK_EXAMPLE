@@ -1,0 +1,778 @@
+   1              		.syntax unified
+   2              		.cpu cortex-m4
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 6
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.file	"usb_hcd.c"
+  15              		.text
+  16              	.Ltext0:
+  17              		.cfi_sections	.debug_frame
+  18              		.align	2
+  19              		.global	HCD_Init
+  20              		.thumb
+  21              		.thumb_func
+  23              	HCD_Init:
+  24              	.LFB110:
+  25              		.file 1 "../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c"
+   1:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c **** /**
+   2:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   ******************************************************************************
+   3:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   * @file    usb_hcd.c
+   4:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   * @author  MCD Application Team
+   5:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   * @version V2.1.0
+   6:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   * @date    19-March-2012
+   7:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   * @brief   Host Interface Layer
+   8:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   ******************************************************************************
+   9:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   * @attention
+  10:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   *
+  11:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   * <h2><center>&copy; COPYRIGHT 2012 STMicroelectronics</center></h2>
+  12:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   *
+  13:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   * Licensed under MCD-ST Liberty SW License Agreement V2, (the "License");
+  14:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   * You may not use this file except in compliance with the License.
+  15:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   * You may obtain a copy of the License at:
+  16:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   *
+  17:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   *        http://www.st.com/software_license_agreement_liberty_v2
+  18:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   *
+  19:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   * Unless required by applicable law or agreed to in writing, software 
+  20:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   * distributed under the License is distributed on an "AS IS" BASIS, 
+  21:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  22:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   * See the License for the specific language governing permissions and
+  23:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   * limitations under the License.
+  24:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   *
+  25:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   ******************************************************************************
+  26:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   */
+  27:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c **** 
+  28:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c **** /* Includes ------------------------------------------------------------------*/
+  29:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c **** #include "usb_core.h"
+  30:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c **** #include "usb_hcd.h"
+  31:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c **** #include "usb_conf.h"
+  32:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c **** #include "usb_bsp.h"
+  33:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c **** 
+  34:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c **** 
+  35:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c **** /** @addtogroup USB_OTG_DRIVER
+  36:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   * @{
+  37:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   */
+  38:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   
+  39:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c **** /** @defgroup USB_HCD 
+  40:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   * @brief This file is the interface between EFSL ans Host mass-storage class
+  41:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   * @{
+  42:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   */
+  43:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c **** 
+  44:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c **** 
+  45:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c **** /** @defgroup USB_HCD_Private_Defines
+  46:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   * @{
+  47:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   */ 
+  48:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c **** /**
+  49:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   * @}
+  50:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   */ 
+  51:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****  
+  52:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c **** 
+  53:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c **** /** @defgroup USB_HCD_Private_TypesDefinitions
+  54:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   * @{
+  55:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   */ 
+  56:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c **** /**
+  57:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   * @}
+  58:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   */ 
+  59:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c **** 
+  60:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c **** 
+  61:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c **** 
+  62:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c **** /** @defgroup USB_HCD_Private_Macros
+  63:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   * @{
+  64:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   */ 
+  65:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c **** /**
+  66:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   * @}
+  67:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   */ 
+  68:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c **** 
+  69:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c **** 
+  70:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c **** /** @defgroup USB_HCD_Private_Variables
+  71:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   * @{
+  72:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   */ 
+  73:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c **** /**
+  74:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   * @}
+  75:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   */ 
+  76:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c **** 
+  77:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c **** 
+  78:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c **** /** @defgroup USB_HCD_Private_FunctionPrototypes
+  79:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   * @{
+  80:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   */ 
+  81:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c **** /**
+  82:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   * @}
+  83:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   */ 
+  84:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c **** 
+  85:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c **** 
+  86:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c **** /** @defgroup USB_HCD_Private_Functions
+  87:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   * @{
+  88:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   */ 
+  89:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c **** 
+  90:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c **** /**
+  91:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   * @brief  HCD_Init 
+  92:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   *         Initialize the HOST portion of the driver.
+  93:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   * @param  pdev: Selected device
+  94:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   * @param  base_address: OTG base address
+  95:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   * @retval Status
+  96:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   */
+  97:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c **** uint32_t HCD_Init(USB_OTG_CORE_HANDLE *pdev , 
+  98:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****                   USB_OTG_CORE_ID_TypeDef coreID)
+  99:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c **** {
+  26              		.loc 1 99 0
+  27              		.cfi_startproc
+  28              		@ args = 0, pretend = 0, frame = 16
+  29              		@ frame_needed = 1, uses_anonymous_args = 0
+  30 0000 80B5     		push	{r7, lr}
+  31              	.LCFI0:
+  32              		.cfi_def_cfa_offset 8
+  33              		.cfi_offset 7, -8
+  34              		.cfi_offset 14, -4
+  35 0002 84B0     		sub	sp, sp, #16
+  36              	.LCFI1:
+  37              		.cfi_def_cfa_offset 24
+  38 0004 00AF     		add	r7, sp, #0
+  39              	.LCFI2:
+  40              		.cfi_def_cfa_register 7
+  41 0006 7860     		str	r0, [r7, #4]
+  42 0008 0B46     		mov	r3, r1
+  43 000a FB70     		strb	r3, [r7, #3]
+ 100:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   uint8_t i = 0;
+  44              		.loc 1 100 0
+  45 000c 4FF00003 		mov	r3, #0
+  46 0010 FB73     		strb	r3, [r7, #15]
+ 101:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   pdev->host.ConnSts = 0;
+  47              		.loc 1 101 0
+  48 0012 7B68     		ldr	r3, [r7, #4]
+  49 0014 4FF00002 		mov	r2, #0
+  50 0018 C3F81023 		str	r2, [r3, #784]
+ 102:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   
+ 103:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   for (i= 0; i< USB_OTG_MAX_TX_FIFOS; i++)
+  51              		.loc 1 103 0
+  52 001c 4FF00003 		mov	r3, #0
+  53 0020 FB73     		strb	r3, [r7, #15]
+  54 0022 1CE0     		b	.L2
+  55              	.L3:
+ 104:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   {
+ 105:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   pdev->host.ErrCnt[i]  = 0;
+  56              		.loc 1 105 0 discriminator 2
+  57 0024 FB7B     		ldrb	r3, [r7, #15]	@ zero_extendqisi2
+  58 0026 7A68     		ldr	r2, [r7, #4]
+  59 0028 03F1C403 		add	r3, r3, #196
+  60 002c 4FEA8303 		lsl	r3, r3, #2
+  61 0030 D318     		adds	r3, r2, r3
+  62 0032 4FF00002 		mov	r2, #0
+  63 0036 5A60     		str	r2, [r3, #4]
+ 106:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   pdev->host.XferCnt[i]   = 0;
+  64              		.loc 1 106 0 discriminator 2
+  65 0038 FA7B     		ldrb	r2, [r7, #15]	@ zero_extendqisi2
+  66 003a 7B68     		ldr	r3, [r7, #4]
+  67 003c 02F1D402 		add	r2, r2, #212
+  68 0040 4FF00001 		mov	r1, #0
+  69 0044 43F82210 		str	r1, [r3, r2, lsl #2]
+ 107:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   pdev->host.HC_Status[i]   = HC_IDLE;
+  70              		.loc 1 107 0 discriminator 2
+  71 0048 FB7B     		ldrb	r3, [r7, #15]	@ zero_extendqisi2
+  72 004a 7A68     		ldr	r2, [r7, #4]
+  73 004c D318     		adds	r3, r2, r3
+  74 004e 4FF00002 		mov	r2, #0
+  75 0052 83F88C23 		strb	r2, [r3, #908]
+ 103:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   for (i= 0; i< USB_OTG_MAX_TX_FIFOS; i++)
+  76              		.loc 1 103 0 discriminator 2
+  77 0056 FB7B     		ldrb	r3, [r7, #15]
+  78 0058 03F10103 		add	r3, r3, #1
+  79 005c FB73     		strb	r3, [r7, #15]
+  80              	.L2:
+ 103:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   for (i= 0; i< USB_OTG_MAX_TX_FIFOS; i++)
+  81              		.loc 1 103 0 is_stmt 0 discriminator 1
+  82 005e FB7B     		ldrb	r3, [r7, #15]	@ zero_extendqisi2
+  83 0060 0E2B     		cmp	r3, #14
+  84 0062 DFD9     		bls	.L3
+ 108:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   }
+ 109:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   pdev->host.hc[0].max_packet  = 8; 
+  85              		.loc 1 109 0 is_stmt 1
+  86 0064 7B68     		ldr	r3, [r7, #4]
+  87 0066 4FF00802 		mov	r2, #8
+  88 006a A3F8B223 		strh	r2, [r3, #946]	@ movhi
+ 110:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c **** 
+ 111:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   USB_OTG_SelectCore(pdev, coreID);
+  89              		.loc 1 111 0
+  90 006e FB78     		ldrb	r3, [r7, #3]	@ zero_extendqisi2
+  91 0070 7868     		ldr	r0, [r7, #4]
+  92 0072 1946     		mov	r1, r3
+  93 0074 FFF7FEFF 		bl	USB_OTG_SelectCore
+ 112:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c **** #ifndef DUAL_ROLE_MODE_ENABLED
+ 113:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   USB_OTG_DisableGlobalInt(pdev);
+  94              		.loc 1 113 0
+  95 0078 7868     		ldr	r0, [r7, #4]
+  96 007a FFF7FEFF 		bl	USB_OTG_DisableGlobalInt
+ 114:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   USB_OTG_CoreInit(pdev);
+  97              		.loc 1 114 0
+  98 007e 7868     		ldr	r0, [r7, #4]
+  99 0080 FFF7FEFF 		bl	USB_OTG_CoreInit
+ 115:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c **** 
+ 116:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   /* Force Host Mode*/
+ 117:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   USB_OTG_SetCurrentMode(pdev , HOST_MODE);
+ 100              		.loc 1 117 0
+ 101 0084 7868     		ldr	r0, [r7, #4]
+ 102 0086 4FF00101 		mov	r1, #1
+ 103 008a FFF7FEFF 		bl	USB_OTG_SetCurrentMode
+ 118:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   USB_OTG_CoreInitHost(pdev);
+ 104              		.loc 1 118 0
+ 105 008e 7868     		ldr	r0, [r7, #4]
+ 106 0090 FFF7FEFF 		bl	USB_OTG_CoreInitHost
+ 119:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   USB_OTG_EnableGlobalInt(pdev);
+ 107              		.loc 1 119 0
+ 108 0094 7868     		ldr	r0, [r7, #4]
+ 109 0096 FFF7FEFF 		bl	USB_OTG_EnableGlobalInt
+ 120:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c **** #endif
+ 121:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****    
+ 122:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   return 0;
+ 110              		.loc 1 122 0
+ 111 009a 4FF00003 		mov	r3, #0
+ 123:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c **** }
+ 112              		.loc 1 123 0
+ 113 009e 1846     		mov	r0, r3
+ 114 00a0 07F11007 		add	r7, r7, #16
+ 115 00a4 BD46     		mov	sp, r7
+ 116 00a6 80BD     		pop	{r7, pc}
+ 117              		.cfi_endproc
+ 118              	.LFE110:
+ 120              		.align	2
+ 121              		.global	HCD_GetCurrentSpeed
+ 122              		.thumb
+ 123              		.thumb_func
+ 125              	HCD_GetCurrentSpeed:
+ 126              	.LFB111:
+ 124:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c **** 
+ 125:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c **** 
+ 126:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c **** /**
+ 127:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   * @brief  HCD_GetCurrentSpeed
+ 128:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   *         Get Current device Speed.
+ 129:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   * @param  pdev : Selected device
+ 130:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   * @retval Status
+ 131:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   */
+ 132:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c **** 
+ 133:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c **** uint32_t HCD_GetCurrentSpeed (USB_OTG_CORE_HANDLE *pdev)
+ 134:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c **** {    
+ 127              		.loc 1 134 0
+ 128              		.cfi_startproc
+ 129              		@ args = 0, pretend = 0, frame = 16
+ 130              		@ frame_needed = 1, uses_anonymous_args = 0
+ 131              		@ link register save eliminated.
+ 132 00a8 80B4     		push	{r7}
+ 133              	.LCFI3:
+ 134              		.cfi_def_cfa_offset 4
+ 135              		.cfi_offset 7, -4
+ 136 00aa 85B0     		sub	sp, sp, #20
+ 137              	.LCFI4:
+ 138              		.cfi_def_cfa_offset 24
+ 139 00ac 00AF     		add	r7, sp, #0
+ 140              	.LCFI5:
+ 141              		.cfi_def_cfa_register 7
+ 142 00ae 7860     		str	r0, [r7, #4]
+ 135:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****     USB_OTG_HPRT0_TypeDef  HPRT0;
+ 136:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****     HPRT0.d32 = USB_OTG_READ_REG32(pdev->regs.HPRT0);
+ 143              		.loc 1 136 0
+ 144 00b0 7B68     		ldr	r3, [r7, #4]
+ 145 00b2 D3F8CC30 		ldr	r3, [r3, #204]
+ 146 00b6 1B68     		ldr	r3, [r3, #0]
+ 147 00b8 FB60     		str	r3, [r7, #12]
+ 137:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****     
+ 138:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****     return HPRT0.b.prtspd;
+ 148              		.loc 1 138 0
+ 149 00ba FB68     		ldr	r3, [r7, #12]
+ 150 00bc C3F34143 		ubfx	r3, r3, #17, #2
+ 151 00c0 DBB2     		uxtb	r3, r3
+ 139:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c **** }
+ 152              		.loc 1 139 0
+ 153 00c2 1846     		mov	r0, r3
+ 154 00c4 07F11407 		add	r7, r7, #20
+ 155 00c8 BD46     		mov	sp, r7
+ 156 00ca 80BC     		pop	{r7}
+ 157 00cc 7047     		bx	lr
+ 158              		.cfi_endproc
+ 159              	.LFE111:
+ 161 00ce 00BF     		.align	2
+ 162              		.global	HCD_ResetPort
+ 163              		.thumb
+ 164              		.thumb_func
+ 166              	HCD_ResetPort:
+ 167              	.LFB112:
+ 140:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c **** 
+ 141:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c **** /**
+ 142:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   * @brief  HCD_ResetPort
+ 143:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   *         Issues the reset command to device
+ 144:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   * @param  pdev : Selected device
+ 145:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   * @retval Status
+ 146:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   */
+ 147:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c **** uint32_t HCD_ResetPort(USB_OTG_CORE_HANDLE *pdev)
+ 148:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c **** {
+ 168              		.loc 1 148 0
+ 169              		.cfi_startproc
+ 170              		@ args = 0, pretend = 0, frame = 8
+ 171              		@ frame_needed = 1, uses_anonymous_args = 0
+ 172 00d0 80B5     		push	{r7, lr}
+ 173              	.LCFI6:
+ 174              		.cfi_def_cfa_offset 8
+ 175              		.cfi_offset 7, -8
+ 176              		.cfi_offset 14, -4
+ 177 00d2 82B0     		sub	sp, sp, #8
+ 178              	.LCFI7:
+ 179              		.cfi_def_cfa_offset 16
+ 180 00d4 00AF     		add	r7, sp, #0
+ 181              	.LCFI8:
+ 182              		.cfi_def_cfa_register 7
+ 183 00d6 7860     		str	r0, [r7, #4]
+ 149:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   /*
+ 150:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   Before starting to drive a USB reset, the application waits for the OTG 
+ 151:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   interrupt triggered by the debounce done bit (DBCDNE bit in OTG_FS_GOTGINT), 
+ 152:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   which indicates that the bus is stable again after the electrical debounce 
+ 153:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   caused by the attachment of a pull-up resistor on DP (FS) or DM (LS).
+ 154:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   */
+ 155:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   
+ 156:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   USB_OTG_ResetPort(pdev); 
+ 184              		.loc 1 156 0
+ 185 00d8 7868     		ldr	r0, [r7, #4]
+ 186 00da FFF7FEFF 		bl	USB_OTG_ResetPort
+ 157:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   return 0;
+ 187              		.loc 1 157 0
+ 188 00de 4FF00003 		mov	r3, #0
+ 158:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c **** }
+ 189              		.loc 1 158 0
+ 190 00e2 1846     		mov	r0, r3
+ 191 00e4 07F10807 		add	r7, r7, #8
+ 192 00e8 BD46     		mov	sp, r7
+ 193 00ea 80BD     		pop	{r7, pc}
+ 194              		.cfi_endproc
+ 195              	.LFE112:
+ 197              		.align	2
+ 198              		.global	HCD_IsDeviceConnected
+ 199              		.thumb
+ 200              		.thumb_func
+ 202              	HCD_IsDeviceConnected:
+ 203              	.LFB113:
+ 159:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c **** 
+ 160:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c **** /**
+ 161:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   * @brief  HCD_IsDeviceConnected
+ 162:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   *         Check if the device is connected.
+ 163:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   * @param  pdev : Selected device
+ 164:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   * @retval Device connection status. 1 -> connected and 0 -> disconnected
+ 165:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   * 
+ 166:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   */
+ 167:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c **** uint32_t HCD_IsDeviceConnected(USB_OTG_CORE_HANDLE *pdev)
+ 168:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c **** {
+ 204              		.loc 1 168 0
+ 205              		.cfi_startproc
+ 206              		@ args = 0, pretend = 0, frame = 8
+ 207              		@ frame_needed = 1, uses_anonymous_args = 0
+ 208              		@ link register save eliminated.
+ 209 00ec 80B4     		push	{r7}
+ 210              	.LCFI9:
+ 211              		.cfi_def_cfa_offset 4
+ 212              		.cfi_offset 7, -4
+ 213 00ee 83B0     		sub	sp, sp, #12
+ 214              	.LCFI10:
+ 215              		.cfi_def_cfa_offset 16
+ 216 00f0 00AF     		add	r7, sp, #0
+ 217              	.LCFI11:
+ 218              		.cfi_def_cfa_register 7
+ 219 00f2 7860     		str	r0, [r7, #4]
+ 169:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   return (pdev->host.ConnSts);
+ 220              		.loc 1 169 0
+ 221 00f4 7B68     		ldr	r3, [r7, #4]
+ 222 00f6 D3F81033 		ldr	r3, [r3, #784]
+ 170:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c **** }
+ 223              		.loc 1 170 0
+ 224 00fa 1846     		mov	r0, r3
+ 225 00fc 07F10C07 		add	r7, r7, #12
+ 226 0100 BD46     		mov	sp, r7
+ 227 0102 80BC     		pop	{r7}
+ 228 0104 7047     		bx	lr
+ 229              		.cfi_endproc
+ 230              	.LFE113:
+ 232 0106 00BF     		.align	2
+ 233              		.global	HCD_GetCurrentFrame
+ 234              		.thumb
+ 235              		.thumb_func
+ 237              	HCD_GetCurrentFrame:
+ 238              	.LFB114:
+ 171:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c **** 
+ 172:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c **** /**
+ 173:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   * @brief  HCD_GetCurrentFrame 
+ 174:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   *         This function returns the frame number for sof packet
+ 175:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   * @param  pdev : Selected device
+ 176:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   * @retval Frame number
+ 177:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   * 
+ 178:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   */
+ 179:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c **** uint32_t HCD_GetCurrentFrame (USB_OTG_CORE_HANDLE *pdev) 
+ 180:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c **** {
+ 239              		.loc 1 180 0
+ 240              		.cfi_startproc
+ 241              		@ args = 0, pretend = 0, frame = 8
+ 242              		@ frame_needed = 1, uses_anonymous_args = 0
+ 243              		@ link register save eliminated.
+ 244 0108 80B4     		push	{r7}
+ 245              	.LCFI12:
+ 246              		.cfi_def_cfa_offset 4
+ 247              		.cfi_offset 7, -4
+ 248 010a 83B0     		sub	sp, sp, #12
+ 249              	.LCFI13:
+ 250              		.cfi_def_cfa_offset 16
+ 251 010c 00AF     		add	r7, sp, #0
+ 252              	.LCFI14:
+ 253              		.cfi_def_cfa_register 7
+ 254 010e 7860     		str	r0, [r7, #4]
+ 181:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****  return (USB_OTG_READ_REG32(&pdev->regs.HREGS->HFNUM) & 0xFFFF) ;
+ 255              		.loc 1 181 0
+ 256 0110 7B68     		ldr	r3, [r7, #4]
+ 257 0112 5B69     		ldr	r3, [r3, #20]
+ 258 0114 9B68     		ldr	r3, [r3, #8]
+ 259 0116 4FEA0343 		lsl	r3, r3, #16
+ 260 011a 4FEA1343 		lsr	r3, r3, #16
+ 182:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c **** }
+ 261              		.loc 1 182 0
+ 262 011e 1846     		mov	r0, r3
+ 263 0120 07F10C07 		add	r7, r7, #12
+ 264 0124 BD46     		mov	sp, r7
+ 265 0126 80BC     		pop	{r7}
+ 266 0128 7047     		bx	lr
+ 267              		.cfi_endproc
+ 268              	.LFE114:
+ 270 012a 00BF     		.align	2
+ 271              		.global	HCD_GetURB_State
+ 272              		.thumb
+ 273              		.thumb_func
+ 275              	HCD_GetURB_State:
+ 276              	.LFB115:
+ 183:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c **** 
+ 184:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c **** /**
+ 185:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   * @brief  HCD_GetURB_State 
+ 186:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   *         This function returns the last URBstate
+ 187:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   * @param  pdev: Selected device
+ 188:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   * @retval URB_STATE
+ 189:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   * 
+ 190:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   */
+ 191:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c **** URB_STATE HCD_GetURB_State (USB_OTG_CORE_HANDLE *pdev , uint8_t ch_num) 
+ 192:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c **** {
+ 277              		.loc 1 192 0
+ 278              		.cfi_startproc
+ 279              		@ args = 0, pretend = 0, frame = 8
+ 280              		@ frame_needed = 1, uses_anonymous_args = 0
+ 281              		@ link register save eliminated.
+ 282 012c 80B4     		push	{r7}
+ 283              	.LCFI15:
+ 284              		.cfi_def_cfa_offset 4
+ 285              		.cfi_offset 7, -4
+ 286 012e 83B0     		sub	sp, sp, #12
+ 287              	.LCFI16:
+ 288              		.cfi_def_cfa_offset 16
+ 289 0130 00AF     		add	r7, sp, #0
+ 290              	.LCFI17:
+ 291              		.cfi_def_cfa_register 7
+ 292 0132 7860     		str	r0, [r7, #4]
+ 293 0134 0B46     		mov	r3, r1
+ 294 0136 FB70     		strb	r3, [r7, #3]
+ 193:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   return pdev->host.URB_State[ch_num] ;
+ 295              		.loc 1 193 0
+ 296 0138 FB78     		ldrb	r3, [r7, #3]	@ zero_extendqisi2
+ 297 013a 7A68     		ldr	r2, [r7, #4]
+ 298 013c D318     		adds	r3, r2, r3
+ 299 013e 93F89B33 		ldrb	r3, [r3, #923]
+ 300 0142 DBB2     		uxtb	r3, r3
+ 194:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c **** }
+ 301              		.loc 1 194 0
+ 302 0144 1846     		mov	r0, r3
+ 303 0146 07F10C07 		add	r7, r7, #12
+ 304 014a BD46     		mov	sp, r7
+ 305 014c 80BC     		pop	{r7}
+ 306 014e 7047     		bx	lr
+ 307              		.cfi_endproc
+ 308              	.LFE115:
+ 310              		.align	2
+ 311              		.global	HCD_GetXferCnt
+ 312              		.thumb
+ 313              		.thumb_func
+ 315              	HCD_GetXferCnt:
+ 316              	.LFB116:
+ 195:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c **** 
+ 196:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c **** /**
+ 197:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   * @brief  HCD_GetXferCnt 
+ 198:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   *         This function returns the last URBstate
+ 199:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   * @param  pdev: Selected device
+ 200:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   * @retval No. of data bytes transferred
+ 201:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   * 
+ 202:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   */
+ 203:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c **** uint32_t HCD_GetXferCnt (USB_OTG_CORE_HANDLE *pdev, uint8_t ch_num) 
+ 204:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c **** {
+ 317              		.loc 1 204 0
+ 318              		.cfi_startproc
+ 319              		@ args = 0, pretend = 0, frame = 8
+ 320              		@ frame_needed = 1, uses_anonymous_args = 0
+ 321              		@ link register save eliminated.
+ 322 0150 80B4     		push	{r7}
+ 323              	.LCFI18:
+ 324              		.cfi_def_cfa_offset 4
+ 325              		.cfi_offset 7, -4
+ 326 0152 83B0     		sub	sp, sp, #12
+ 327              	.LCFI19:
+ 328              		.cfi_def_cfa_offset 16
+ 329 0154 00AF     		add	r7, sp, #0
+ 330              	.LCFI20:
+ 331              		.cfi_def_cfa_register 7
+ 332 0156 7860     		str	r0, [r7, #4]
+ 333 0158 0B46     		mov	r3, r1
+ 334 015a FB70     		strb	r3, [r7, #3]
+ 205:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   return pdev->host.XferCnt[ch_num] ;
+ 335              		.loc 1 205 0
+ 336 015c FA78     		ldrb	r2, [r7, #3]	@ zero_extendqisi2
+ 337 015e 7B68     		ldr	r3, [r7, #4]
+ 338 0160 02F1D402 		add	r2, r2, #212
+ 339 0164 53F82230 		ldr	r3, [r3, r2, lsl #2]
+ 206:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c **** }
+ 340              		.loc 1 206 0
+ 341 0168 1846     		mov	r0, r3
+ 342 016a 07F10C07 		add	r7, r7, #12
+ 343 016e BD46     		mov	sp, r7
+ 344 0170 80BC     		pop	{r7}
+ 345 0172 7047     		bx	lr
+ 346              		.cfi_endproc
+ 347              	.LFE116:
+ 349              		.align	2
+ 350              		.global	HCD_GetHCState
+ 351              		.thumb
+ 352              		.thumb_func
+ 354              	HCD_GetHCState:
+ 355              	.LFB117:
+ 207:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c **** 
+ 208:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c **** 
+ 209:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c **** 
+ 210:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c **** /**
+ 211:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   * @brief  HCD_GetHCState 
+ 212:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   *         This function returns the HC Status 
+ 213:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   * @param  pdev: Selected device
+ 214:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   * @retval HC_STATUS
+ 215:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   * 
+ 216:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   */
+ 217:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c **** HC_STATUS HCD_GetHCState (USB_OTG_CORE_HANDLE *pdev ,  uint8_t ch_num) 
+ 218:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c **** {
+ 356              		.loc 1 218 0
+ 357              		.cfi_startproc
+ 358              		@ args = 0, pretend = 0, frame = 8
+ 359              		@ frame_needed = 1, uses_anonymous_args = 0
+ 360              		@ link register save eliminated.
+ 361 0174 80B4     		push	{r7}
+ 362              	.LCFI21:
+ 363              		.cfi_def_cfa_offset 4
+ 364              		.cfi_offset 7, -4
+ 365 0176 83B0     		sub	sp, sp, #12
+ 366              	.LCFI22:
+ 367              		.cfi_def_cfa_offset 16
+ 368 0178 00AF     		add	r7, sp, #0
+ 369              	.LCFI23:
+ 370              		.cfi_def_cfa_register 7
+ 371 017a 7860     		str	r0, [r7, #4]
+ 372 017c 0B46     		mov	r3, r1
+ 373 017e FB70     		strb	r3, [r7, #3]
+ 219:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   return pdev->host.HC_Status[ch_num] ;
+ 374              		.loc 1 219 0
+ 375 0180 FB78     		ldrb	r3, [r7, #3]	@ zero_extendqisi2
+ 376 0182 7A68     		ldr	r2, [r7, #4]
+ 377 0184 D318     		adds	r3, r2, r3
+ 378 0186 93F88C33 		ldrb	r3, [r3, #908]
+ 379 018a DBB2     		uxtb	r3, r3
+ 220:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c **** }
+ 380              		.loc 1 220 0
+ 381 018c 1846     		mov	r0, r3
+ 382 018e 07F10C07 		add	r7, r7, #12
+ 383 0192 BD46     		mov	sp, r7
+ 384 0194 80BC     		pop	{r7}
+ 385 0196 7047     		bx	lr
+ 386              		.cfi_endproc
+ 387              	.LFE117:
+ 389              		.align	2
+ 390              		.global	HCD_HC_Init
+ 391              		.thumb
+ 392              		.thumb_func
+ 394              	HCD_HC_Init:
+ 395              	.LFB118:
+ 221:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c **** 
+ 222:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c **** /**
+ 223:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   * @brief  HCD_HC_Init 
+ 224:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   *         This function prepare a HC and start a transfer
+ 225:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   * @param  pdev: Selected device
+ 226:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   * @param  hc_num: Channel number 
+ 227:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   * @retval status 
+ 228:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   */
+ 229:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c **** uint32_t HCD_HC_Init (USB_OTG_CORE_HANDLE *pdev , uint8_t hc_num) 
+ 230:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c **** {
+ 396              		.loc 1 230 0
+ 397              		.cfi_startproc
+ 398              		@ args = 0, pretend = 0, frame = 8
+ 399              		@ frame_needed = 1, uses_anonymous_args = 0
+ 400 0198 80B5     		push	{r7, lr}
+ 401              	.LCFI24:
+ 402              		.cfi_def_cfa_offset 8
+ 403              		.cfi_offset 7, -8
+ 404              		.cfi_offset 14, -4
+ 405 019a 82B0     		sub	sp, sp, #8
+ 406              	.LCFI25:
+ 407              		.cfi_def_cfa_offset 16
+ 408 019c 00AF     		add	r7, sp, #0
+ 409              	.LCFI26:
+ 410              		.cfi_def_cfa_register 7
+ 411 019e 7860     		str	r0, [r7, #4]
+ 412 01a0 0B46     		mov	r3, r1
+ 413 01a2 FB70     		strb	r3, [r7, #3]
+ 231:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   return USB_OTG_HC_Init(pdev, hc_num);  
+ 414              		.loc 1 231 0
+ 415 01a4 FB78     		ldrb	r3, [r7, #3]	@ zero_extendqisi2
+ 416 01a6 7868     		ldr	r0, [r7, #4]
+ 417 01a8 1946     		mov	r1, r3
+ 418 01aa FFF7FEFF 		bl	USB_OTG_HC_Init
+ 419 01ae 0346     		mov	r3, r0
+ 232:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c **** }
+ 420              		.loc 1 232 0
+ 421 01b0 1846     		mov	r0, r3
+ 422 01b2 07F10807 		add	r7, r7, #8
+ 423 01b6 BD46     		mov	sp, r7
+ 424 01b8 80BD     		pop	{r7, pc}
+ 425              		.cfi_endproc
+ 426              	.LFE118:
+ 428 01ba 00BF     		.align	2
+ 429              		.global	HCD_SubmitRequest
+ 430              		.thumb
+ 431              		.thumb_func
+ 433              	HCD_SubmitRequest:
+ 434              	.LFB119:
+ 233:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c **** 
+ 234:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c **** /**
+ 235:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   * @brief  HCD_SubmitRequest 
+ 236:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   *         This function prepare a HC and start a transfer
+ 237:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   * @param  pdev: Selected device
+ 238:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   * @param  hc_num: Channel number 
+ 239:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   * @retval status
+ 240:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   */
+ 241:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c **** uint32_t HCD_SubmitRequest (USB_OTG_CORE_HANDLE *pdev , uint8_t hc_num) 
+ 242:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c **** {
+ 435              		.loc 1 242 0
+ 436              		.cfi_startproc
+ 437              		@ args = 0, pretend = 0, frame = 8
+ 438              		@ frame_needed = 1, uses_anonymous_args = 0
+ 439 01bc 80B5     		push	{r7, lr}
+ 440              	.LCFI27:
+ 441              		.cfi_def_cfa_offset 8
+ 442              		.cfi_offset 7, -8
+ 443              		.cfi_offset 14, -4
+ 444 01be 82B0     		sub	sp, sp, #8
+ 445              	.LCFI28:
+ 446              		.cfi_def_cfa_offset 16
+ 447 01c0 00AF     		add	r7, sp, #0
+ 448              	.LCFI29:
+ 449              		.cfi_def_cfa_register 7
+ 450 01c2 7860     		str	r0, [r7, #4]
+ 451 01c4 0B46     		mov	r3, r1
+ 452 01c6 FB70     		strb	r3, [r7, #3]
+ 243:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   
+ 244:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   pdev->host.URB_State[hc_num] =   URB_IDLE;  
+ 453              		.loc 1 244 0
+ 454 01c8 FB78     		ldrb	r3, [r7, #3]	@ zero_extendqisi2
+ 455 01ca 7A68     		ldr	r2, [r7, #4]
+ 456 01cc D318     		adds	r3, r2, r3
+ 457 01ce 4FF00002 		mov	r2, #0
+ 458 01d2 83F89B23 		strb	r2, [r3, #923]
+ 245:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   pdev->host.hc[hc_num].xfer_count = 0 ;
+ 459              		.loc 1 245 0
+ 460 01d6 FB78     		ldrb	r3, [r7, #3]	@ zero_extendqisi2
+ 461 01d8 7A68     		ldr	r2, [r7, #4]
+ 462 01da 4FEA4313 		lsl	r3, r3, #5
+ 463 01de D318     		adds	r3, r2, r3
+ 464 01e0 03F57073 		add	r3, r3, #960
+ 465 01e4 4FF00002 		mov	r2, #0
+ 466 01e8 1A60     		str	r2, [r3, #0]
+ 246:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c ****   return USB_OTG_HC_StartXfer(pdev, hc_num);
+ 467              		.loc 1 246 0
+ 468 01ea FB78     		ldrb	r3, [r7, #3]	@ zero_extendqisi2
+ 469 01ec 7868     		ldr	r0, [r7, #4]
+ 470 01ee 1946     		mov	r1, r3
+ 471 01f0 FFF7FEFF 		bl	USB_OTG_HC_StartXfer
+ 472 01f4 0346     		mov	r3, r0
+ 247:../Libraries/STM32_USB_OTG_Driver/src/usb_hcd.c **** }
+ 473              		.loc 1 247 0
+ 474 01f6 1846     		mov	r0, r3
+ 475 01f8 07F10807 		add	r7, r7, #8
+ 476 01fc BD46     		mov	sp, r7
+ 477 01fe 80BD     		pop	{r7, pc}
+ 478              		.cfi_endproc
+ 479              	.LFE119:
+ 481              	.Letext0:
+ 482              		.file 2 "/opt/CodeSourcery/bin/../lib/gcc/arm-none-eabi/4.7.2/../../../../arm-none-eabi/include/st
+ 483              		.file 3 "/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/STM32_USB_OTG_Drive
+ 484              		.file 4 "/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/STM32_USB_OTG_Drive
+ 485              		.file 5 "/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/STM32_USB_OTG_Drive
+ 486              		.file 6 "/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_
+DEFINED SYMBOLS
+                            *ABS*:00000000 usb_hcd.c
+     /tmp/ccMVvDjx.s:18     .text:00000000 $t
+     /tmp/ccMVvDjx.s:23     .text:00000000 HCD_Init
+     /tmp/ccMVvDjx.s:125    .text:000000a8 HCD_GetCurrentSpeed
+     /tmp/ccMVvDjx.s:166    .text:000000d0 HCD_ResetPort
+     /tmp/ccMVvDjx.s:202    .text:000000ec HCD_IsDeviceConnected
+     /tmp/ccMVvDjx.s:237    .text:00000108 HCD_GetCurrentFrame
+     /tmp/ccMVvDjx.s:275    .text:0000012c HCD_GetURB_State
+     /tmp/ccMVvDjx.s:315    .text:00000150 HCD_GetXferCnt
+     /tmp/ccMVvDjx.s:354    .text:00000174 HCD_GetHCState
+     /tmp/ccMVvDjx.s:394    .text:00000198 HCD_HC_Init
+     /tmp/ccMVvDjx.s:433    .text:000001bc HCD_SubmitRequest
+                     .debug_frame:00000010 $d
+                           .group:00000000 wm4.1.ee386580922180e5cad1057f989de60d
+                           .group:00000000 wm4.stm32f4xx.h.54.6e1f0ee5c76cc1e53c8ea6d18297b5fd
+                           .group:00000000 wm4.core_cm4.h.32.f824aba4d431a5bb4a51726bd5b62834
+                           .group:00000000 wm4.stdint.h.10.90b695f550ca6cc3fb08fa83baf01e05
+                           .group:00000000 wm4.core_cmInstr.h.25.f50f886f2edf670cf199b35fd96f5c91
+                           .group:00000000 wm4.core_cm4_simd.h.29.b4a3fdfb606cb3b26119424324d4b963
+                           .group:00000000 wm4.core_cm4.h.153.5393ef7e6cebf34dd51ca528f9218ab3
+                           .group:00000000 wm4.stm32f4xx.h.289.fa68dcae75666a037ce29b5a1b57e3b3
+                           .group:00000000 wm4.stm32f4xx_adc.h.108.1710484bf41297b93f825b3b15cbdff8
+                           .group:00000000 wm4.stm32f4xx_can.h.31.3bb56c6436c7a6e6af1611046e81f48c
+                           .group:00000000 wm4.stm32f4xx_cryp.h.31.94bbbb19b99df10306f31e78c333a77b
+                           .group:00000000 wm4.stm32f4xx_dac.h.31.b8d45e7eaf71ee4bf01c1317dbc06f77
+                           .group:00000000 wm4.stm32f4xx_dbgmcu.h.30.70a81ec54c2707baa9fca77391eeeaaa
+                           .group:00000000 wm4.stm32f4xx_dcmi.h.30.9d0942d58c357d2eed15e044bf9b4a77
+                           .group:00000000 wm4.stm32f4xx_dma.h.31.815bb924b30b1c776b3cd51113fdfe60
+                           .group:00000000 wm4.stm32f4xx_exti.h.31.86bd18e979f97217bb1d3b80fde0231e
+                           .group:00000000 wm4.stm32f4xx_flash.h.31.74f2ed42d890f144ca7eb5ae8172f0d0
+                           .group:00000000 wm4.stm32f4xx_fsmc.h.31.ff58629e0c603fb2f9b3f00c0657fdfa
+                           .group:00000000 wm4.stm32f4xx_hash.h.31.5c109425d30f0b9cc0a26ad38182d91f
+                           .group:00000000 wm4.stm32f4xx_gpio.h.31.d9aeae10cfa353d85d475c0d4900c452
+                           .group:00000000 wm4.stm32f4xx_i2c.h.31.edf5baa611075c49ae13f56be9040be3
+                           .group:00000000 wm4.stm32f4xx_iwdg.h.31.30e376e6d8d424aab7fddd66cf691c7b
+                           .group:00000000 wm4.stm32f4xx_pwr.h.31.bb774fc1b632cb8d2ecaec8c6524d2c0
+                           .group:00000000 wm4.stm32f4xx_rcc.h.30.820e94551583d2b835c8cf3ad722e16c
+                           .group:00000000 wm4.stm32f4xx_rng.h.31.1ec493d56b7a8e5a71238519cae6dea7
+                           .group:00000000 wm4.stm32f4xx_rtc.h.31.bddeb98c63c8fa06fac80b5dd8296471
+                           .group:00000000 wm4.stm32f4xx_sdio.h.31.8c6dff42ffa718b444c3420717601ff2
+                           .group:00000000 wm4.stm32f4xx_spi.h.31.fb1b2c8214b87a47d4457633b7c31c3c
+                           .group:00000000 wm4.stm32f4xx_syscfg.h.31.5a680f88d55b7816ae613c20f199cbd9
+                           .group:00000000 wm4.stm32f4xx_tim.h.31.b1d608fbde729347e4ccf70799e654d2
+                           .group:00000000 wm4.stm32f4xx_usart.h.31.f8d29b14aa4d39de5495adcc92749d3c
+                           .group:00000000 wm4.stm32f4xx_wwdg.h.31.b45a80fa1ec64984adf786f7e489f31b
+                           .group:00000000 wm4.misc.h.31.041217492a6cb86f2fb26099f373a465
+                           .group:00000000 wm4.stm32f4xx.h.6975.cdbdae9d5de06f1ba6b770f59cbe4d6c
+                           .group:00000000 wm4.usb_conf.h.69.07474af79ba33c49defd0cb9b2ee7820
+                           .group:00000000 wm4.usb_regs.h.30.8e11da7f9e8ef80e8c3ede3dea040a2e
+                           .group:00000000 wm4.usb_defines.h.30.25e1682f38ca1ccb768b1b48e673a175
+                           .group:00000000 wm4.usb_core.h.52.b8138d1f1482be33e5028c0dc9d2a5d3
+
+UNDEFINED SYMBOLS
+USB_OTG_SelectCore
+USB_OTG_DisableGlobalInt
+USB_OTG_CoreInit
+USB_OTG_SetCurrentMode
+USB_OTG_CoreInitHost
+USB_OTG_EnableGlobalInt
+USB_OTG_ResetPort
+USB_OTG_HC_Init
+USB_OTG_HC_StartXfer

@@ -1,0 +1,110 @@
+
+STM32F4_ADK.elf:     file format elf32-littlearm
+
+Sections:
+Idx Name          Size      VMA       LMA       File off  Algn
+  0 .text         000000e0  08000000  08000000  00008000  2**2
+                  CONTENTS, ALLOC, LOAD, READONLY, CODE
+  1 .init_array   00000004  080000e0  080000e0  000080e0  2**2
+                  CONTENTS, ALLOC, LOAD, DATA
+  2 .fini_array   00000004  080000e4  080000e4  000080e4  2**2
+                  CONTENTS, ALLOC, LOAD, DATA
+  3 .bss          0000001c  20000000  20000000  00010000  2**2
+                  ALLOC
+  4 ._user_heap_stack 00000400  2000001c  2000001c  00010000  2**0
+                  ALLOC
+  5 .ARM.attributes 00000031  00000000  00000000  000080e8  2**0
+                  CONTENTS, READONLY
+
+Disassembly of section .text:
+
+08000000 <deregister_tm_clones>:
+ 8000000:	b508      	push	{r3, lr}
+ 8000002:	f240 0000 	movw	r0, #0
+ 8000006:	4b07      	ldr	r3, [pc, #28]	; (8000024 <deregister_tm_clones+0x24>)
+ 8000008:	f2c2 0000 	movt	r0, #8192	; 0x2000
+ 800000c:	1a1b      	subs	r3, r3, r0
+ 800000e:	2b06      	cmp	r3, #6
+ 8000010:	d800      	bhi.n	8000014 <deregister_tm_clones+0x14>
+ 8000012:	bd08      	pop	{r3, pc}
+ 8000014:	f240 0300 	movw	r3, #0
+ 8000018:	f2c0 0300 	movt	r3, #0
+ 800001c:	2b00      	cmp	r3, #0
+ 800001e:	d0f8      	beq.n	8000012 <deregister_tm_clones+0x12>
+ 8000020:	4798      	blx	r3
+ 8000022:	e7f6      	b.n	8000012 <deregister_tm_clones+0x12>
+ 8000024:	20000003 	.word	0x20000003
+
+08000028 <register_tm_clones>:
+ 8000028:	b508      	push	{r3, lr}
+ 800002a:	f240 0000 	movw	r0, #0
+ 800002e:	f240 0300 	movw	r3, #0
+ 8000032:	f2c2 0000 	movt	r0, #8192	; 0x2000
+ 8000036:	f2c2 0300 	movt	r3, #8192	; 0x2000
+ 800003a:	1a1b      	subs	r3, r3, r0
+ 800003c:	109b      	asrs	r3, r3, #2
+ 800003e:	eb03 73d3 	add.w	r3, r3, r3, lsr #31
+ 8000042:	1059      	asrs	r1, r3, #1
+ 8000044:	d100      	bne.n	8000048 <register_tm_clones+0x20>
+ 8000046:	bd08      	pop	{r3, pc}
+ 8000048:	f240 0200 	movw	r2, #0
+ 800004c:	f2c0 0200 	movt	r2, #0
+ 8000050:	2a00      	cmp	r2, #0
+ 8000052:	d0f8      	beq.n	8000046 <register_tm_clones+0x1e>
+ 8000054:	4790      	blx	r2
+ 8000056:	e7f6      	b.n	8000046 <register_tm_clones+0x1e>
+
+08000058 <__do_global_dtors_aux>:
+ 8000058:	b510      	push	{r4, lr}
+ 800005a:	f240 0400 	movw	r4, #0
+ 800005e:	f2c2 0400 	movt	r4, #8192	; 0x2000
+ 8000062:	7823      	ldrb	r3, [r4, #0]
+ 8000064:	b973      	cbnz	r3, 8000084 <__do_global_dtors_aux+0x2c>
+ 8000066:	f7ff ffcb 	bl	8000000 <deregister_tm_clones>
+ 800006a:	f240 0300 	movw	r3, #0
+ 800006e:	f2c0 0300 	movt	r3, #0
+ 8000072:	b12b      	cbz	r3, 8000080 <__do_global_dtors_aux+0x28>
+ 8000074:	f240 00c8 	movw	r0, #200	; 0xc8
+ 8000078:	f6c0 0000 	movt	r0, #2048	; 0x800
+ 800007c:	f3af 8000 	nop.w
+ 8000080:	2301      	movs	r3, #1
+ 8000082:	7023      	strb	r3, [r4, #0]
+ 8000084:	bd10      	pop	{r4, pc}
+ 8000086:	bf00      	nop
+
+08000088 <frame_dummy>:
+ 8000088:	b508      	push	{r3, lr}
+ 800008a:	f240 0300 	movw	r3, #0
+ 800008e:	f2c0 0300 	movt	r3, #0
+ 8000092:	b14b      	cbz	r3, 80000a8 <frame_dummy+0x20>
+ 8000094:	f240 00c8 	movw	r0, #200	; 0xc8
+ 8000098:	f240 0104 	movw	r1, #4
+ 800009c:	f6c0 0000 	movt	r0, #2048	; 0x800
+ 80000a0:	f2c2 0100 	movt	r1, #8192	; 0x2000
+ 80000a4:	f3af 8000 	nop.w
+ 80000a8:	f240 0000 	movw	r0, #0
+ 80000ac:	f2c2 0000 	movt	r0, #8192	; 0x2000
+ 80000b0:	6803      	ldr	r3, [r0, #0]
+ 80000b2:	b12b      	cbz	r3, 80000c0 <frame_dummy+0x38>
+ 80000b4:	f240 0300 	movw	r3, #0
+ 80000b8:	f2c0 0300 	movt	r3, #0
+ 80000bc:	b103      	cbz	r3, 80000c0 <frame_dummy+0x38>
+ 80000be:	4798      	blx	r3
+ 80000c0:	e8bd 4008 	ldmia.w	sp!, {r3, lr}
+ 80000c4:	f7ff bfb0 	b.w	8000028 <register_tm_clones>
+
+080000c8 <_init>:
+ 80000c8:	b5f8      	push	{r3, r4, r5, r6, r7, lr}
+ 80000ca:	bf00      	nop
+ 80000cc:	bcf8      	pop	{r3, r4, r5, r6, r7}
+ 80000ce:	bc08      	pop	{r3}
+ 80000d0:	469e      	mov	lr, r3
+ 80000d2:	4770      	bx	lr
+
+080000d4 <_fini>:
+ 80000d4:	b5f8      	push	{r3, r4, r5, r6, r7, lr}
+ 80000d6:	bf00      	nop
+ 80000d8:	bcf8      	pop	{r3, r4, r5, r6, r7}
+ 80000da:	bc08      	pop	{r3}
+ 80000dc:	469e      	mov	lr, r3
+ 80000de:	4770      	bx	lr

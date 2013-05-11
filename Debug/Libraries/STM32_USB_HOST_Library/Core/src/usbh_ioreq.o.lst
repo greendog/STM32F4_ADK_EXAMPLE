@@ -1,0 +1,1522 @@
+   1              		.syntax unified
+   2              		.cpu cortex-m4
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 6
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.file	"usbh_ioreq.c"
+  15              		.text
+  16              	.Ltext0:
+  17              		.cfi_sections	.debug_frame
+  18              		.align	2
+  19              		.global	USBH_CtlReq
+  20              		.thumb
+  21              		.thumb_func
+  23              	USBH_CtlReq:
+  24              	.LFB110:
+  25              		.file 1 "../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c"
+   1:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** /** 
+   2:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   ******************************************************************************
+   3:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   * @file    usbh_ioreq.c 
+   4:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   * @author  MCD Application Team
+   5:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   * @version V2.1.0
+   6:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   * @date    19-March-2012
+   7:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   * @brief   This file handles the issuing of the USB transactions
+   8:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   ******************************************************************************
+   9:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   * @attention
+  10:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   *
+  11:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   * <h2><center>&copy; COPYRIGHT 2012 STMicroelectronics</center></h2>
+  12:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   *
+  13:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   * Licensed under MCD-ST Liberty SW License Agreement V2, (the "License");
+  14:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   * You may not use this file except in compliance with the License.
+  15:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   * You may obtain a copy of the License at:
+  16:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   *
+  17:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   *        http://www.st.com/software_license_agreement_liberty_v2
+  18:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   *
+  19:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   * Unless required by applicable law or agreed to in writing, software 
+  20:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   * distributed under the License is distributed on an "AS IS" BASIS, 
+  21:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  22:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   * See the License for the specific language governing permissions and
+  23:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   * limitations under the License.
+  24:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   *
+  25:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   ******************************************************************************
+  26:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   */ 
+  27:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** /* Includes ------------------------------------------------------------------*/
+  28:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** 
+  29:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** #include "usbh_ioreq.h"
+  30:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** 
+  31:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** /** @addtogroup USBH_LIB
+  32:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   * @{
+  33:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   */
+  34:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** 
+  35:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** /** @addtogroup USBH_LIB_CORE
+  36:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** * @{
+  37:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** */
+  38:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   
+  39:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** /** @defgroup USBH_IOREQ 
+  40:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   * @brief This file handles the standard protocol processing (USB v2.0)
+  41:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   * @{
+  42:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   */
+  43:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** 
+  44:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** 
+  45:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** /** @defgroup USBH_IOREQ_Private_Defines
+  46:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   * @{
+  47:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   */ 
+  48:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** /**
+  49:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   * @}
+  50:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   */ 
+  51:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****  
+  52:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** 
+  53:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** /** @defgroup USBH_IOREQ_Private_TypesDefinitions
+  54:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   * @{
+  55:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   */ 
+  56:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** /**
+  57:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   * @}
+  58:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   */ 
+  59:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** 
+  60:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** 
+  61:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** 
+  62:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** /** @defgroup USBH_IOREQ_Private_Macros
+  63:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   * @{
+  64:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   */ 
+  65:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** /**
+  66:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   * @}
+  67:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   */ 
+  68:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** 
+  69:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** 
+  70:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** /** @defgroup USBH_IOREQ_Private_Variables
+  71:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   * @{
+  72:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   */ 
+  73:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** /**
+  74:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   * @}
+  75:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   */ 
+  76:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** 
+  77:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** 
+  78:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** /** @defgroup USBH_IOREQ_Private_FunctionPrototypes
+  79:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   * @{
+  80:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   */ 
+  81:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** static USBH_Status USBH_SubmitSetupRequest(USBH_HOST *phost,
+  82:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****                                            uint8_t* buff, 
+  83:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****                                            uint16_t length);
+  84:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** 
+  85:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** /**
+  86:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   * @}
+  87:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   */ 
+  88:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** 
+  89:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** 
+  90:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** /** @defgroup USBH_IOREQ_Private_Functions
+  91:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   * @{
+  92:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   */ 
+  93:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** 
+  94:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** 
+  95:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** /**
+  96:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   * @brief  USBH_CtlReq
+  97:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   *         USBH_CtlReq sends a control request and provide the status after 
+  98:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   *            completion of the request
+  99:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   * @param  pdev: Selected device
+ 100:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   * @param  req: Setup Request Structure
+ 101:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   * @param  buff: data buffer address to store the response
+ 102:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   * @param  length: length of the response
+ 103:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   * @retval Status
+ 104:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   */
+ 105:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** USBH_Status USBH_CtlReq     (USB_OTG_CORE_HANDLE *pdev, 
+ 106:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****                              USBH_HOST           *phost, 
+ 107:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****                              uint8_t             *buff,
+ 108:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****                              uint16_t            length)
+ 109:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** {
+  26              		.loc 1 109 0
+  27              		.cfi_startproc
+  28              		@ args = 0, pretend = 0, frame = 24
+  29              		@ frame_needed = 1, uses_anonymous_args = 0
+  30 0000 80B5     		push	{r7, lr}
+  31              	.LCFI0:
+  32              		.cfi_def_cfa_offset 8
+  33              		.cfi_offset 7, -8
+  34              		.cfi_offset 14, -4
+  35 0002 86B0     		sub	sp, sp, #24
+  36              	.LCFI1:
+  37              		.cfi_def_cfa_offset 32
+  38 0004 00AF     		add	r7, sp, #0
+  39              	.LCFI2:
+  40              		.cfi_def_cfa_register 7
+  41 0006 F860     		str	r0, [r7, #12]
+  42 0008 B960     		str	r1, [r7, #8]
+  43 000a 7A60     		str	r2, [r7, #4]
+  44 000c 7B80     		strh	r3, [r7, #2]	@ movhi
+ 110:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   USBH_Status status;
+ 111:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   status = USBH_BUSY;
+  45              		.loc 1 111 0
+  46 000e 4FF00103 		mov	r3, #1
+  47 0012 FB75     		strb	r3, [r7, #23]
+ 112:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   
+ 113:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   switch (phost->RequestState)
+  48              		.loc 1 113 0
+  49 0014 BB68     		ldr	r3, [r7, #8]
+  50 0016 DB78     		ldrb	r3, [r3, #3]	@ zero_extendqisi2
+  51 0018 012B     		cmp	r3, #1
+  52 001a 02D0     		beq	.L3
+  53 001c 022B     		cmp	r3, #2
+  54 001e 0ED0     		beq	.L4
+  55 0020 35E0     		b	.L10
+  56              	.L3:
+ 114:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   {
+ 115:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   case CMD_SEND:
+ 116:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****     /* Start a SETUP transfer */
+ 117:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****     USBH_SubmitSetupRequest(phost, buff, length);
+  57              		.loc 1 117 0
+  58 0022 7B88     		ldrh	r3, [r7, #2]
+  59 0024 B868     		ldr	r0, [r7, #8]
+  60 0026 7968     		ldr	r1, [r7, #4]
+  61 0028 1A46     		mov	r2, r3
+  62 002a 00F08FFA 		bl	USBH_SubmitSetupRequest
+ 118:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****     phost->RequestState = CMD_WAIT;
+  63              		.loc 1 118 0
+  64 002e BB68     		ldr	r3, [r7, #8]
+  65 0030 4FF00202 		mov	r2, #2
+  66 0034 DA70     		strb	r2, [r3, #3]
+ 119:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****     status = USBH_BUSY;
+  67              		.loc 1 119 0
+  68 0036 4FF00103 		mov	r3, #1
+  69 003a FB75     		strb	r3, [r7, #23]
+ 120:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****     break;
+  70              		.loc 1 120 0
+  71 003c 29E0     		b	.L5
+  72              	.L4:
+ 121:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****     
+ 122:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   case CMD_WAIT:
+ 123:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****      if (phost->Control.state == CTRL_COMPLETE ) 
+  73              		.loc 1 123 0
+  74 003e BB68     		ldr	r3, [r7, #8]
+  75 0040 1B7F     		ldrb	r3, [r3, #28]	@ zero_extendqisi2
+  76 0042 0D2B     		cmp	r3, #13
+  77 0044 0BD1     		bne	.L6
+ 124:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****     {
+ 125:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****       /* Commands successfully sent and Response Received  */       
+ 126:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****       phost->RequestState = CMD_SEND;
+  78              		.loc 1 126 0
+  79 0046 BB68     		ldr	r3, [r7, #8]
+  80 0048 4FF00102 		mov	r2, #1
+  81 004c DA70     		strb	r2, [r3, #3]
+ 127:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****       phost->Control.state =CTRL_IDLE;  
+  82              		.loc 1 127 0
+  83 004e BB68     		ldr	r3, [r7, #8]
+  84 0050 4FF00002 		mov	r2, #0
+  85 0054 1A77     		strb	r2, [r3, #28]
+ 128:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****       status = USBH_OK;      
+  86              		.loc 1 128 0
+  87 0056 4FF00003 		mov	r3, #0
+  88 005a FB75     		strb	r3, [r7, #23]
+ 129:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****     }
+ 130:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****     else if  (phost->Control.state == CTRL_ERROR)
+ 131:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****     {
+ 132:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****       /* Failure Mode */
+ 133:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****       phost->RequestState = CMD_SEND;
+ 134:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****       status = USBH_FAIL;
+ 135:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****     }   
+ 136:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****      else if  (phost->Control.state == CTRL_STALLED )
+ 137:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****     {
+ 138:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****       /* Commands successfully sent and Response Received  */       
+ 139:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****       phost->RequestState = CMD_SEND;
+ 140:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****       status = USBH_NOT_SUPPORTED;
+ 141:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****     }
+ 142:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****     break;
+  89              		.loc 1 142 0
+  90 005c 18E0     		b	.L11
+  91              	.L6:
+ 130:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****     else if  (phost->Control.state == CTRL_ERROR)
+  92              		.loc 1 130 0
+  93 005e BB68     		ldr	r3, [r7, #8]
+  94 0060 1B7F     		ldrb	r3, [r3, #28]	@ zero_extendqisi2
+  95 0062 0B2B     		cmp	r3, #11
+  96 0064 07D1     		bne	.L8
+ 133:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****       phost->RequestState = CMD_SEND;
+  97              		.loc 1 133 0
+  98 0066 BB68     		ldr	r3, [r7, #8]
+  99 0068 4FF00102 		mov	r2, #1
+ 100 006c DA70     		strb	r2, [r3, #3]
+ 134:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****       status = USBH_FAIL;
+ 101              		.loc 1 134 0
+ 102 006e 4FF00203 		mov	r3, #2
+ 103 0072 FB75     		strb	r3, [r7, #23]
+ 104              		.loc 1 142 0
+ 105 0074 0CE0     		b	.L11
+ 106              	.L8:
+ 136:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****      else if  (phost->Control.state == CTRL_STALLED )
+ 107              		.loc 1 136 0
+ 108 0076 BB68     		ldr	r3, [r7, #8]
+ 109 0078 1B7F     		ldrb	r3, [r3, #28]	@ zero_extendqisi2
+ 110 007a 0C2B     		cmp	r3, #12
+ 111 007c 08D1     		bne	.L11
+ 139:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****       phost->RequestState = CMD_SEND;
+ 112              		.loc 1 139 0
+ 113 007e BB68     		ldr	r3, [r7, #8]
+ 114 0080 4FF00102 		mov	r2, #1
+ 115 0084 DA70     		strb	r2, [r3, #3]
+ 140:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****       status = USBH_NOT_SUPPORTED;
+ 116              		.loc 1 140 0
+ 117 0086 4FF00303 		mov	r3, #3
+ 118 008a FB75     		strb	r3, [r7, #23]
+ 119              		.loc 1 142 0
+ 120 008c 00E0     		b	.L11
+ 121              	.L10:
+ 143:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****     
+ 144:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   default:
+ 145:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****     break; 
+ 122              		.loc 1 145 0
+ 123 008e 00E0     		b	.L5
+ 124              	.L11:
+ 142:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****     break;
+ 125              		.loc 1 142 0
+ 126 0090 00BF     		nop
+ 127              	.L5:
+ 146:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   }
+ 147:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   return status;
+ 128              		.loc 1 147 0
+ 129 0092 FB7D     		ldrb	r3, [r7, #23]	@ zero_extendqisi2
+ 148:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** }
+ 130              		.loc 1 148 0
+ 131 0094 1846     		mov	r0, r3
+ 132 0096 07F11807 		add	r7, r7, #24
+ 133 009a BD46     		mov	sp, r7
+ 134 009c 80BD     		pop	{r7, pc}
+ 135              		.cfi_endproc
+ 136              	.LFE110:
+ 138 009e 00BF     		.align	2
+ 139              		.global	USBH_CtlSendSetup
+ 140              		.thumb
+ 141              		.thumb_func
+ 143              	USBH_CtlSendSetup:
+ 144              	.LFB111:
+ 149:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** 
+ 150:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** /**
+ 151:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   * @brief  USBH_CtlSendSetup
+ 152:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   *         Sends the Setup Packet to the Device
+ 153:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   * @param  pdev: Selected device
+ 154:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   * @param  buff: Buffer pointer from which the Data will be send to Device
+ 155:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   * @param  hc_num: Host channel Number
+ 156:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   * @retval Status
+ 157:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   */
+ 158:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** USBH_Status USBH_CtlSendSetup ( USB_OTG_CORE_HANDLE *pdev, 
+ 159:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****                                 uint8_t *buff, 
+ 160:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****                                 uint8_t hc_num){
+ 145              		.loc 1 160 0
+ 146              		.cfi_startproc
+ 147              		@ args = 0, pretend = 0, frame = 16
+ 148              		@ frame_needed = 1, uses_anonymous_args = 0
+ 149 00a0 80B5     		push	{r7, lr}
+ 150              	.LCFI3:
+ 151              		.cfi_def_cfa_offset 8
+ 152              		.cfi_offset 7, -8
+ 153              		.cfi_offset 14, -4
+ 154 00a2 84B0     		sub	sp, sp, #16
+ 155              	.LCFI4:
+ 156              		.cfi_def_cfa_offset 24
+ 157 00a4 00AF     		add	r7, sp, #0
+ 158              	.LCFI5:
+ 159              		.cfi_def_cfa_register 7
+ 160 00a6 F860     		str	r0, [r7, #12]
+ 161 00a8 B960     		str	r1, [r7, #8]
+ 162 00aa 1346     		mov	r3, r2
+ 163 00ac FB71     		strb	r3, [r7, #7]
+ 161:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   pdev->host.hc[hc_num].ep_is_in = 0;
+ 164              		.loc 1 161 0
+ 165 00ae FB79     		ldrb	r3, [r7, #7]	@ zero_extendqisi2
+ 166 00b0 FA68     		ldr	r2, [r7, #12]
+ 167 00b2 4FEA4313 		lsl	r3, r3, #5
+ 168 00b6 D318     		adds	r3, r2, r3
+ 169 00b8 03F56A73 		add	r3, r3, #936
+ 170 00bc 4FF00002 		mov	r2, #0
+ 171 00c0 9A71     		strb	r2, [r3, #6]
+ 162:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   pdev->host.hc[hc_num].data_pid = HC_PID_SETUP;   
+ 172              		.loc 1 162 0
+ 173 00c2 FB79     		ldrb	r3, [r7, #7]	@ zero_extendqisi2
+ 174 00c4 FA68     		ldr	r2, [r7, #12]
+ 175 00c6 03F11503 		add	r3, r3, #21
+ 176 00ca 4FEA4313 		lsl	r3, r3, #5
+ 177 00ce D318     		adds	r3, r2, r3
+ 178 00d0 03F58873 		add	r3, r3, #272
+ 179 00d4 4FF00302 		mov	r2, #3
+ 180 00d8 1A71     		strb	r2, [r3, #4]
+ 163:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   pdev->host.hc[hc_num].xfer_buff = buff;
+ 181              		.loc 1 163 0
+ 182 00da FB79     		ldrb	r3, [r7, #7]	@ zero_extendqisi2
+ 183 00dc FA68     		ldr	r2, [r7, #12]
+ 184 00de 03F11503 		add	r3, r3, #21
+ 185 00e2 4FEA4313 		lsl	r3, r3, #5
+ 186 00e6 D318     		adds	r3, r2, r3
+ 187 00e8 03F58C73 		add	r3, r3, #280
+ 188 00ec BA68     		ldr	r2, [r7, #8]
+ 189 00ee 1A60     		str	r2, [r3, #0]
+ 164:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   pdev->host.hc[hc_num].xfer_len = USBH_SETUP_PKT_SIZE;   
+ 190              		.loc 1 164 0
+ 191 00f0 FB79     		ldrb	r3, [r7, #7]	@ zero_extendqisi2
+ 192 00f2 FA68     		ldr	r2, [r7, #12]
+ 193 00f4 4FEA4313 		lsl	r3, r3, #5
+ 194 00f8 D318     		adds	r3, r2, r3
+ 195 00fa 03F56F73 		add	r3, r3, #956
+ 196 00fe 4FF00802 		mov	r2, #8
+ 197 0102 1A60     		str	r2, [r3, #0]
+ 165:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** 
+ 166:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   return (USBH_Status)HCD_SubmitRequest (pdev , hc_num);   
+ 198              		.loc 1 166 0
+ 199 0104 FB79     		ldrb	r3, [r7, #7]	@ zero_extendqisi2
+ 200 0106 F868     		ldr	r0, [r7, #12]
+ 201 0108 1946     		mov	r1, r3
+ 202 010a FFF7FEFF 		bl	HCD_SubmitRequest
+ 203 010e 0346     		mov	r3, r0
+ 204 0110 DBB2     		uxtb	r3, r3
+ 167:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** }
+ 205              		.loc 1 167 0
+ 206 0112 1846     		mov	r0, r3
+ 207 0114 07F11007 		add	r7, r7, #16
+ 208 0118 BD46     		mov	sp, r7
+ 209 011a 80BD     		pop	{r7, pc}
+ 210              		.cfi_endproc
+ 211              	.LFE111:
+ 213              		.align	2
+ 214              		.global	USBH_CtlSendData
+ 215              		.thumb
+ 216              		.thumb_func
+ 218              	USBH_CtlSendData:
+ 219              	.LFB112:
+ 168:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** 
+ 169:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** 
+ 170:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** /**
+ 171:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   * @brief  USBH_CtlSendData
+ 172:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   *         Sends a data Packet to the Device
+ 173:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   * @param  pdev: Selected device
+ 174:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   * @param  buff: Buffer pointer from which the Data will be sent to Device
+ 175:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   * @param  length: Length of the data to be sent
+ 176:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   * @param  hc_num: Host channel Number
+ 177:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   * @retval Status
+ 178:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   */
+ 179:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** USBH_Status USBH_CtlSendData ( USB_OTG_CORE_HANDLE *pdev, 
+ 180:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****                                 uint8_t *buff, 
+ 181:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****                                 uint16_t length,
+ 182:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****                                 uint8_t hc_num)
+ 183:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** {
+ 220              		.loc 1 183 0
+ 221              		.cfi_startproc
+ 222              		@ args = 0, pretend = 0, frame = 16
+ 223              		@ frame_needed = 1, uses_anonymous_args = 0
+ 224 011c 80B5     		push	{r7, lr}
+ 225              	.LCFI6:
+ 226              		.cfi_def_cfa_offset 8
+ 227              		.cfi_offset 7, -8
+ 228              		.cfi_offset 14, -4
+ 229 011e 84B0     		sub	sp, sp, #16
+ 230              	.LCFI7:
+ 231              		.cfi_def_cfa_offset 24
+ 232 0120 00AF     		add	r7, sp, #0
+ 233              	.LCFI8:
+ 234              		.cfi_def_cfa_register 7
+ 235 0122 F860     		str	r0, [r7, #12]
+ 236 0124 B960     		str	r1, [r7, #8]
+ 237 0126 FA80     		strh	r2, [r7, #6]	@ movhi
+ 238 0128 7B71     		strb	r3, [r7, #5]
+ 184:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   pdev->host.hc[hc_num].ep_is_in = 0;
+ 239              		.loc 1 184 0
+ 240 012a 7B79     		ldrb	r3, [r7, #5]	@ zero_extendqisi2
+ 241 012c FA68     		ldr	r2, [r7, #12]
+ 242 012e 4FEA4313 		lsl	r3, r3, #5
+ 243 0132 D318     		adds	r3, r2, r3
+ 244 0134 03F56A73 		add	r3, r3, #936
+ 245 0138 4FF00002 		mov	r2, #0
+ 246 013c 9A71     		strb	r2, [r3, #6]
+ 185:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   pdev->host.hc[hc_num].xfer_buff = buff;
+ 247              		.loc 1 185 0
+ 248 013e 7B79     		ldrb	r3, [r7, #5]	@ zero_extendqisi2
+ 249 0140 FA68     		ldr	r2, [r7, #12]
+ 250 0142 03F11503 		add	r3, r3, #21
+ 251 0146 4FEA4313 		lsl	r3, r3, #5
+ 252 014a D318     		adds	r3, r2, r3
+ 253 014c 03F58C73 		add	r3, r3, #280
+ 254 0150 BA68     		ldr	r2, [r7, #8]
+ 255 0152 1A60     		str	r2, [r3, #0]
+ 186:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   pdev->host.hc[hc_num].xfer_len = length;
+ 256              		.loc 1 186 0
+ 257 0154 7B79     		ldrb	r3, [r7, #5]	@ zero_extendqisi2
+ 258 0156 FA88     		ldrh	r2, [r7, #6]
+ 259 0158 F968     		ldr	r1, [r7, #12]
+ 260 015a 4FEA4313 		lsl	r3, r3, #5
+ 261 015e CB18     		adds	r3, r1, r3
+ 262 0160 03F56F73 		add	r3, r3, #956
+ 263 0164 1A60     		str	r2, [r3, #0]
+ 187:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****  
+ 188:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   if ( length == 0 )
+ 264              		.loc 1 188 0
+ 265 0166 FB88     		ldrh	r3, [r7, #6]
+ 266 0168 002B     		cmp	r3, #0
+ 267 016a 09D1     		bne	.L15
+ 189:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   { /* For Status OUT stage, Length==0, Status Out PID = 1 */
+ 190:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****     pdev->host.hc[hc_num].toggle_out = 1;   
+ 268              		.loc 1 190 0
+ 269 016c 7B79     		ldrb	r3, [r7, #5]	@ zero_extendqisi2
+ 270 016e FA68     		ldr	r2, [r7, #12]
+ 271 0170 03F11E03 		add	r3, r3, #30
+ 272 0174 4FEA4313 		lsl	r3, r3, #5
+ 273 0178 D318     		adds	r3, r2, r3
+ 274 017a 4FF00102 		mov	r2, #1
+ 275 017e 5A71     		strb	r2, [r3, #5]
+ 276              	.L15:
+ 191:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   }
+ 192:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****  
+ 193:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****  /* Set the Data Toggle bit as per the Flag */
+ 194:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   if ( pdev->host.hc[hc_num].toggle_out == 0)
+ 277              		.loc 1 194 0
+ 278 0180 7B79     		ldrb	r3, [r7, #5]	@ zero_extendqisi2
+ 279 0182 FA68     		ldr	r2, [r7, #12]
+ 280 0184 03F11E03 		add	r3, r3, #30
+ 281 0188 4FEA4313 		lsl	r3, r3, #5
+ 282 018c D318     		adds	r3, r2, r3
+ 283 018e 5B79     		ldrb	r3, [r3, #5]	@ zero_extendqisi2
+ 284 0190 002B     		cmp	r3, #0
+ 285 0192 0CD1     		bne	.L16
+ 195:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   { /* Put the PID 0 */
+ 196:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****       pdev->host.hc[hc_num].data_pid = HC_PID_DATA0;    
+ 286              		.loc 1 196 0
+ 287 0194 7B79     		ldrb	r3, [r7, #5]	@ zero_extendqisi2
+ 288 0196 FA68     		ldr	r2, [r7, #12]
+ 289 0198 03F11503 		add	r3, r3, #21
+ 290 019c 4FEA4313 		lsl	r3, r3, #5
+ 291 01a0 D318     		adds	r3, r2, r3
+ 292 01a2 03F58873 		add	r3, r3, #272
+ 293 01a6 4FF00002 		mov	r2, #0
+ 294 01aa 1A71     		strb	r2, [r3, #4]
+ 295 01ac 0BE0     		b	.L17
+ 296              	.L16:
+ 197:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   }
+ 198:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****  else
+ 199:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****  { /* Put the PID 1 */
+ 200:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****       pdev->host.hc[hc_num].data_pid = HC_PID_DATA1 ;
+ 297              		.loc 1 200 0
+ 298 01ae 7B79     		ldrb	r3, [r7, #5]	@ zero_extendqisi2
+ 299 01b0 FA68     		ldr	r2, [r7, #12]
+ 300 01b2 03F11503 		add	r3, r3, #21
+ 301 01b6 4FEA4313 		lsl	r3, r3, #5
+ 302 01ba D318     		adds	r3, r2, r3
+ 303 01bc 03F58873 		add	r3, r3, #272
+ 304 01c0 4FF00202 		mov	r2, #2
+ 305 01c4 1A71     		strb	r2, [r3, #4]
+ 306              	.L17:
+ 201:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****  }
+ 202:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** 
+ 203:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   HCD_SubmitRequest (pdev , hc_num);   
+ 307              		.loc 1 203 0
+ 308 01c6 7B79     		ldrb	r3, [r7, #5]	@ zero_extendqisi2
+ 309 01c8 F868     		ldr	r0, [r7, #12]
+ 310 01ca 1946     		mov	r1, r3
+ 311 01cc FFF7FEFF 		bl	HCD_SubmitRequest
+ 204:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****    
+ 205:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   return USBH_OK;
+ 312              		.loc 1 205 0
+ 313 01d0 4FF00003 		mov	r3, #0
+ 206:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** }
+ 314              		.loc 1 206 0
+ 315 01d4 1846     		mov	r0, r3
+ 316 01d6 07F11007 		add	r7, r7, #16
+ 317 01da BD46     		mov	sp, r7
+ 318 01dc 80BD     		pop	{r7, pc}
+ 319              		.cfi_endproc
+ 320              	.LFE112:
+ 322 01de 00BF     		.align	2
+ 323              		.global	USBH_CtlReceiveData
+ 324              		.thumb
+ 325              		.thumb_func
+ 327              	USBH_CtlReceiveData:
+ 328              	.LFB113:
+ 207:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** 
+ 208:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** 
+ 209:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** /**
+ 210:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   * @brief  USBH_CtlReceiveData
+ 211:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   *         Receives the Device Response to the Setup Packet
+ 212:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   * @param  pdev: Selected device
+ 213:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   * @param  buff: Buffer pointer in which the response needs to be copied
+ 214:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   * @param  length: Length of the data to be received
+ 215:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   * @param  hc_num: Host channel Number
+ 216:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   * @retval Status. 
+ 217:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   */
+ 218:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** USBH_Status USBH_CtlReceiveData(USB_OTG_CORE_HANDLE *pdev, 
+ 219:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****                                 uint8_t* buff, 
+ 220:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****                                 uint16_t length,
+ 221:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****                                 uint8_t hc_num)
+ 222:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** {
+ 329              		.loc 1 222 0
+ 330              		.cfi_startproc
+ 331              		@ args = 0, pretend = 0, frame = 16
+ 332              		@ frame_needed = 1, uses_anonymous_args = 0
+ 333 01e0 80B5     		push	{r7, lr}
+ 334              	.LCFI9:
+ 335              		.cfi_def_cfa_offset 8
+ 336              		.cfi_offset 7, -8
+ 337              		.cfi_offset 14, -4
+ 338 01e2 84B0     		sub	sp, sp, #16
+ 339              	.LCFI10:
+ 340              		.cfi_def_cfa_offset 24
+ 341 01e4 00AF     		add	r7, sp, #0
+ 342              	.LCFI11:
+ 343              		.cfi_def_cfa_register 7
+ 344 01e6 F860     		str	r0, [r7, #12]
+ 345 01e8 B960     		str	r1, [r7, #8]
+ 346 01ea FA80     		strh	r2, [r7, #6]	@ movhi
+ 347 01ec 7B71     		strb	r3, [r7, #5]
+ 223:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** 
+ 224:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   pdev->host.hc[hc_num].ep_is_in = 1;
+ 348              		.loc 1 224 0
+ 349 01ee 7B79     		ldrb	r3, [r7, #5]	@ zero_extendqisi2
+ 350 01f0 FA68     		ldr	r2, [r7, #12]
+ 351 01f2 4FEA4313 		lsl	r3, r3, #5
+ 352 01f6 D318     		adds	r3, r2, r3
+ 353 01f8 03F56A73 		add	r3, r3, #936
+ 354 01fc 4FF00102 		mov	r2, #1
+ 355 0200 9A71     		strb	r2, [r3, #6]
+ 225:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   pdev->host.hc[hc_num].data_pid = HC_PID_DATA1;
+ 356              		.loc 1 225 0
+ 357 0202 7B79     		ldrb	r3, [r7, #5]	@ zero_extendqisi2
+ 358 0204 FA68     		ldr	r2, [r7, #12]
+ 359 0206 03F11503 		add	r3, r3, #21
+ 360 020a 4FEA4313 		lsl	r3, r3, #5
+ 361 020e D318     		adds	r3, r2, r3
+ 362 0210 03F58873 		add	r3, r3, #272
+ 363 0214 4FF00202 		mov	r2, #2
+ 364 0218 1A71     		strb	r2, [r3, #4]
+ 226:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   pdev->host.hc[hc_num].xfer_buff = buff;
+ 365              		.loc 1 226 0
+ 366 021a 7B79     		ldrb	r3, [r7, #5]	@ zero_extendqisi2
+ 367 021c FA68     		ldr	r2, [r7, #12]
+ 368 021e 03F11503 		add	r3, r3, #21
+ 369 0222 4FEA4313 		lsl	r3, r3, #5
+ 370 0226 D318     		adds	r3, r2, r3
+ 371 0228 03F58C73 		add	r3, r3, #280
+ 372 022c BA68     		ldr	r2, [r7, #8]
+ 373 022e 1A60     		str	r2, [r3, #0]
+ 227:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   pdev->host.hc[hc_num].xfer_len = length;  
+ 374              		.loc 1 227 0
+ 375 0230 7B79     		ldrb	r3, [r7, #5]	@ zero_extendqisi2
+ 376 0232 FA88     		ldrh	r2, [r7, #6]
+ 377 0234 F968     		ldr	r1, [r7, #12]
+ 378 0236 4FEA4313 		lsl	r3, r3, #5
+ 379 023a CB18     		adds	r3, r1, r3
+ 380 023c 03F56F73 		add	r3, r3, #956
+ 381 0240 1A60     		str	r2, [r3, #0]
+ 228:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** 
+ 229:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   HCD_SubmitRequest (pdev , hc_num);   
+ 382              		.loc 1 229 0
+ 383 0242 7B79     		ldrb	r3, [r7, #5]	@ zero_extendqisi2
+ 384 0244 F868     		ldr	r0, [r7, #12]
+ 385 0246 1946     		mov	r1, r3
+ 386 0248 FFF7FEFF 		bl	HCD_SubmitRequest
+ 230:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   
+ 231:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   return USBH_OK;
+ 387              		.loc 1 231 0
+ 388 024c 4FF00003 		mov	r3, #0
+ 232:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   
+ 233:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** }
+ 389              		.loc 1 233 0
+ 390 0250 1846     		mov	r0, r3
+ 391 0252 07F11007 		add	r7, r7, #16
+ 392 0256 BD46     		mov	sp, r7
+ 393 0258 80BD     		pop	{r7, pc}
+ 394              		.cfi_endproc
+ 395              	.LFE113:
+ 397 025a 00BF     		.align	2
+ 398              		.global	USBH_BulkSendData
+ 399              		.thumb
+ 400              		.thumb_func
+ 402              	USBH_BulkSendData:
+ 403              	.LFB114:
+ 234:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** 
+ 235:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** 
+ 236:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** /**
+ 237:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   * @brief  USBH_BulkSendData
+ 238:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   *         Sends the Bulk Packet to the device
+ 239:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   * @param  pdev: Selected device
+ 240:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   * @param  buff: Buffer pointer from which the Data will be sent to Device
+ 241:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   * @param  length: Length of the data to be sent
+ 242:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   * @param  hc_num: Host channel Number
+ 243:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   * @retval Status
+ 244:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   */
+ 245:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** USBH_Status USBH_BulkSendData ( USB_OTG_CORE_HANDLE *pdev, 
+ 246:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****                                 uint8_t *buff, 
+ 247:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****                                 uint16_t length,
+ 248:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****                                 uint8_t hc_num)
+ 249:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** { 
+ 404              		.loc 1 249 0
+ 405              		.cfi_startproc
+ 406              		@ args = 0, pretend = 0, frame = 16
+ 407              		@ frame_needed = 1, uses_anonymous_args = 0
+ 408 025c 80B5     		push	{r7, lr}
+ 409              	.LCFI12:
+ 410              		.cfi_def_cfa_offset 8
+ 411              		.cfi_offset 7, -8
+ 412              		.cfi_offset 14, -4
+ 413 025e 84B0     		sub	sp, sp, #16
+ 414              	.LCFI13:
+ 415              		.cfi_def_cfa_offset 24
+ 416 0260 00AF     		add	r7, sp, #0
+ 417              	.LCFI14:
+ 418              		.cfi_def_cfa_register 7
+ 419 0262 F860     		str	r0, [r7, #12]
+ 420 0264 B960     		str	r1, [r7, #8]
+ 421 0266 FA80     		strh	r2, [r7, #6]	@ movhi
+ 422 0268 7B71     		strb	r3, [r7, #5]
+ 250:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   pdev->host.hc[hc_num].ep_is_in = 0;
+ 423              		.loc 1 250 0
+ 424 026a 7B79     		ldrb	r3, [r7, #5]	@ zero_extendqisi2
+ 425 026c FA68     		ldr	r2, [r7, #12]
+ 426 026e 4FEA4313 		lsl	r3, r3, #5
+ 427 0272 D318     		adds	r3, r2, r3
+ 428 0274 03F56A73 		add	r3, r3, #936
+ 429 0278 4FF00002 		mov	r2, #0
+ 430 027c 9A71     		strb	r2, [r3, #6]
+ 251:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   pdev->host.hc[hc_num].xfer_buff = buff;
+ 431              		.loc 1 251 0
+ 432 027e 7B79     		ldrb	r3, [r7, #5]	@ zero_extendqisi2
+ 433 0280 FA68     		ldr	r2, [r7, #12]
+ 434 0282 03F11503 		add	r3, r3, #21
+ 435 0286 4FEA4313 		lsl	r3, r3, #5
+ 436 028a D318     		adds	r3, r2, r3
+ 437 028c 03F58C73 		add	r3, r3, #280
+ 438 0290 BA68     		ldr	r2, [r7, #8]
+ 439 0292 1A60     		str	r2, [r3, #0]
+ 252:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   pdev->host.hc[hc_num].xfer_len = length;  
+ 440              		.loc 1 252 0
+ 441 0294 7B79     		ldrb	r3, [r7, #5]	@ zero_extendqisi2
+ 442 0296 FA88     		ldrh	r2, [r7, #6]
+ 443 0298 F968     		ldr	r1, [r7, #12]
+ 444 029a 4FEA4313 		lsl	r3, r3, #5
+ 445 029e CB18     		adds	r3, r1, r3
+ 446 02a0 03F56F73 		add	r3, r3, #956
+ 447 02a4 1A60     		str	r2, [r3, #0]
+ 253:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** 
+ 254:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****  /* Set the Data Toggle bit as per the Flag */
+ 255:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   if ( pdev->host.hc[hc_num].toggle_out == 0)
+ 448              		.loc 1 255 0
+ 449 02a6 7B79     		ldrb	r3, [r7, #5]	@ zero_extendqisi2
+ 450 02a8 FA68     		ldr	r2, [r7, #12]
+ 451 02aa 03F11E03 		add	r3, r3, #30
+ 452 02ae 4FEA4313 		lsl	r3, r3, #5
+ 453 02b2 D318     		adds	r3, r2, r3
+ 454 02b4 5B79     		ldrb	r3, [r3, #5]	@ zero_extendqisi2
+ 455 02b6 002B     		cmp	r3, #0
+ 456 02b8 0CD1     		bne	.L22
+ 256:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   { /* Put the PID 0 */
+ 257:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****       pdev->host.hc[hc_num].data_pid = HC_PID_DATA0;    
+ 457              		.loc 1 257 0
+ 458 02ba 7B79     		ldrb	r3, [r7, #5]	@ zero_extendqisi2
+ 459 02bc FA68     		ldr	r2, [r7, #12]
+ 460 02be 03F11503 		add	r3, r3, #21
+ 461 02c2 4FEA4313 		lsl	r3, r3, #5
+ 462 02c6 D318     		adds	r3, r2, r3
+ 463 02c8 03F58873 		add	r3, r3, #272
+ 464 02cc 4FF00002 		mov	r2, #0
+ 465 02d0 1A71     		strb	r2, [r3, #4]
+ 466 02d2 0BE0     		b	.L23
+ 467              	.L22:
+ 258:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   }
+ 259:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****  else
+ 260:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****  { /* Put the PID 1 */
+ 261:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****       pdev->host.hc[hc_num].data_pid = HC_PID_DATA1 ;
+ 468              		.loc 1 261 0
+ 469 02d4 7B79     		ldrb	r3, [r7, #5]	@ zero_extendqisi2
+ 470 02d6 FA68     		ldr	r2, [r7, #12]
+ 471 02d8 03F11503 		add	r3, r3, #21
+ 472 02dc 4FEA4313 		lsl	r3, r3, #5
+ 473 02e0 D318     		adds	r3, r2, r3
+ 474 02e2 03F58873 		add	r3, r3, #272
+ 475 02e6 4FF00202 		mov	r2, #2
+ 476 02ea 1A71     		strb	r2, [r3, #4]
+ 477              	.L23:
+ 262:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****  }
+ 263:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** 
+ 264:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   HCD_SubmitRequest (pdev , hc_num);   
+ 478              		.loc 1 264 0
+ 479 02ec 7B79     		ldrb	r3, [r7, #5]	@ zero_extendqisi2
+ 480 02ee F868     		ldr	r0, [r7, #12]
+ 481 02f0 1946     		mov	r1, r3
+ 482 02f2 FFF7FEFF 		bl	HCD_SubmitRequest
+ 265:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   return USBH_OK;
+ 483              		.loc 1 265 0
+ 484 02f6 4FF00003 		mov	r3, #0
+ 266:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** }
+ 485              		.loc 1 266 0
+ 486 02fa 1846     		mov	r0, r3
+ 487 02fc 07F11007 		add	r7, r7, #16
+ 488 0300 BD46     		mov	sp, r7
+ 489 0302 80BD     		pop	{r7, pc}
+ 490              		.cfi_endproc
+ 491              	.LFE114:
+ 493              		.align	2
+ 494              		.global	USBH_BulkReceiveData
+ 495              		.thumb
+ 496              		.thumb_func
+ 498              	USBH_BulkReceiveData:
+ 499              	.LFB115:
+ 267:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** 
+ 268:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** 
+ 269:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** /**
+ 270:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   * @brief  USBH_BulkReceiveData
+ 271:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   *         Receives IN bulk packet from device
+ 272:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   * @param  pdev: Selected device
+ 273:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   * @param  buff: Buffer pointer in which the received data packet to be copied
+ 274:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   * @param  length: Length of the data to be received
+ 275:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   * @param  hc_num: Host channel Number
+ 276:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   * @retval Status. 
+ 277:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   */
+ 278:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** USBH_Status USBH_BulkReceiveData( USB_OTG_CORE_HANDLE *pdev, 
+ 279:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****                                 uint8_t *buff, 
+ 280:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****                                 uint16_t length,
+ 281:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****                                 uint8_t hc_num)
+ 282:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** {
+ 500              		.loc 1 282 0
+ 501              		.cfi_startproc
+ 502              		@ args = 0, pretend = 0, frame = 16
+ 503              		@ frame_needed = 1, uses_anonymous_args = 0
+ 504 0304 80B5     		push	{r7, lr}
+ 505              	.LCFI15:
+ 506              		.cfi_def_cfa_offset 8
+ 507              		.cfi_offset 7, -8
+ 508              		.cfi_offset 14, -4
+ 509 0306 84B0     		sub	sp, sp, #16
+ 510              	.LCFI16:
+ 511              		.cfi_def_cfa_offset 24
+ 512 0308 00AF     		add	r7, sp, #0
+ 513              	.LCFI17:
+ 514              		.cfi_def_cfa_register 7
+ 515 030a F860     		str	r0, [r7, #12]
+ 516 030c B960     		str	r1, [r7, #8]
+ 517 030e FA80     		strh	r2, [r7, #6]	@ movhi
+ 518 0310 7B71     		strb	r3, [r7, #5]
+ 283:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   pdev->host.hc[hc_num].ep_is_in = 1;   
+ 519              		.loc 1 283 0
+ 520 0312 7B79     		ldrb	r3, [r7, #5]	@ zero_extendqisi2
+ 521 0314 FA68     		ldr	r2, [r7, #12]
+ 522 0316 4FEA4313 		lsl	r3, r3, #5
+ 523 031a D318     		adds	r3, r2, r3
+ 524 031c 03F56A73 		add	r3, r3, #936
+ 525 0320 4FF00102 		mov	r2, #1
+ 526 0324 9A71     		strb	r2, [r3, #6]
+ 284:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   pdev->host.hc[hc_num].xfer_buff = buff;
+ 527              		.loc 1 284 0
+ 528 0326 7B79     		ldrb	r3, [r7, #5]	@ zero_extendqisi2
+ 529 0328 FA68     		ldr	r2, [r7, #12]
+ 530 032a 03F11503 		add	r3, r3, #21
+ 531 032e 4FEA4313 		lsl	r3, r3, #5
+ 532 0332 D318     		adds	r3, r2, r3
+ 533 0334 03F58C73 		add	r3, r3, #280
+ 534 0338 BA68     		ldr	r2, [r7, #8]
+ 535 033a 1A60     		str	r2, [r3, #0]
+ 285:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   pdev->host.hc[hc_num].xfer_len = length;
+ 536              		.loc 1 285 0
+ 537 033c 7B79     		ldrb	r3, [r7, #5]	@ zero_extendqisi2
+ 538 033e FA88     		ldrh	r2, [r7, #6]
+ 539 0340 F968     		ldr	r1, [r7, #12]
+ 540 0342 4FEA4313 		lsl	r3, r3, #5
+ 541 0346 CB18     		adds	r3, r1, r3
+ 542 0348 03F56F73 		add	r3, r3, #956
+ 543 034c 1A60     		str	r2, [r3, #0]
+ 286:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   
+ 287:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** 
+ 288:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   if( pdev->host.hc[hc_num].toggle_in == 0)
+ 544              		.loc 1 288 0
+ 545 034e 7B79     		ldrb	r3, [r7, #5]	@ zero_extendqisi2
+ 546 0350 FA68     		ldr	r2, [r7, #12]
+ 547 0352 03F11E03 		add	r3, r3, #30
+ 548 0356 4FEA4313 		lsl	r3, r3, #5
+ 549 035a D318     		adds	r3, r2, r3
+ 550 035c 1B79     		ldrb	r3, [r3, #4]	@ zero_extendqisi2
+ 551 035e 002B     		cmp	r3, #0
+ 552 0360 0CD1     		bne	.L26
+ 289:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   {
+ 290:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****     pdev->host.hc[hc_num].data_pid = HC_PID_DATA0;
+ 553              		.loc 1 290 0
+ 554 0362 7B79     		ldrb	r3, [r7, #5]	@ zero_extendqisi2
+ 555 0364 FA68     		ldr	r2, [r7, #12]
+ 556 0366 03F11503 		add	r3, r3, #21
+ 557 036a 4FEA4313 		lsl	r3, r3, #5
+ 558 036e D318     		adds	r3, r2, r3
+ 559 0370 03F58873 		add	r3, r3, #272
+ 560 0374 4FF00002 		mov	r2, #0
+ 561 0378 1A71     		strb	r2, [r3, #4]
+ 562 037a 0BE0     		b	.L27
+ 563              	.L26:
+ 291:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   }
+ 292:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   else
+ 293:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   {
+ 294:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****     pdev->host.hc[hc_num].data_pid = HC_PID_DATA1;
+ 564              		.loc 1 294 0
+ 565 037c 7B79     		ldrb	r3, [r7, #5]	@ zero_extendqisi2
+ 566 037e FA68     		ldr	r2, [r7, #12]
+ 567 0380 03F11503 		add	r3, r3, #21
+ 568 0384 4FEA4313 		lsl	r3, r3, #5
+ 569 0388 D318     		adds	r3, r2, r3
+ 570 038a 03F58873 		add	r3, r3, #272
+ 571 038e 4FF00202 		mov	r2, #2
+ 572 0392 1A71     		strb	r2, [r3, #4]
+ 573              	.L27:
+ 295:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   }
+ 296:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** 
+ 297:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   HCD_SubmitRequest (pdev , hc_num);  
+ 574              		.loc 1 297 0
+ 575 0394 7B79     		ldrb	r3, [r7, #5]	@ zero_extendqisi2
+ 576 0396 F868     		ldr	r0, [r7, #12]
+ 577 0398 1946     		mov	r1, r3
+ 578 039a FFF7FEFF 		bl	HCD_SubmitRequest
+ 298:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   return USBH_OK;
+ 579              		.loc 1 298 0
+ 580 039e 4FF00003 		mov	r3, #0
+ 299:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** }
+ 581              		.loc 1 299 0
+ 582 03a2 1846     		mov	r0, r3
+ 583 03a4 07F11007 		add	r7, r7, #16
+ 584 03a8 BD46     		mov	sp, r7
+ 585 03aa 80BD     		pop	{r7, pc}
+ 586              		.cfi_endproc
+ 587              	.LFE115:
+ 589              		.align	2
+ 590              		.global	USBH_InterruptReceiveData
+ 591              		.thumb
+ 592              		.thumb_func
+ 594              	USBH_InterruptReceiveData:
+ 595              	.LFB116:
+ 300:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** 
+ 301:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** 
+ 302:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** /**
+ 303:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   * @brief  USBH_InterruptReceiveData
+ 304:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   *         Receives the Device Response to the Interrupt IN token
+ 305:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   * @param  pdev: Selected device
+ 306:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   * @param  buff: Buffer pointer in which the response needs to be copied
+ 307:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   * @param  length: Length of the data to be received
+ 308:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   * @param  hc_num: Host channel Number
+ 309:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   * @retval Status. 
+ 310:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   */
+ 311:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** USBH_Status USBH_InterruptReceiveData( USB_OTG_CORE_HANDLE *pdev, 
+ 312:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****                                 uint8_t *buff, 
+ 313:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****                                 uint8_t length,
+ 314:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****                                 uint8_t hc_num)
+ 315:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** {
+ 596              		.loc 1 315 0
+ 597              		.cfi_startproc
+ 598              		@ args = 0, pretend = 0, frame = 16
+ 599              		@ frame_needed = 1, uses_anonymous_args = 0
+ 600 03ac 80B5     		push	{r7, lr}
+ 601              	.LCFI18:
+ 602              		.cfi_def_cfa_offset 8
+ 603              		.cfi_offset 7, -8
+ 604              		.cfi_offset 14, -4
+ 605 03ae 84B0     		sub	sp, sp, #16
+ 606              	.LCFI19:
+ 607              		.cfi_def_cfa_offset 24
+ 608 03b0 00AF     		add	r7, sp, #0
+ 609              	.LCFI20:
+ 610              		.cfi_def_cfa_register 7
+ 611 03b2 F860     		str	r0, [r7, #12]
+ 612 03b4 B960     		str	r1, [r7, #8]
+ 613 03b6 FA71     		strb	r2, [r7, #7]
+ 614 03b8 BB71     		strb	r3, [r7, #6]
+ 316:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** 
+ 317:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   pdev->host.hc[hc_num].ep_is_in = 1;  
+ 615              		.loc 1 317 0
+ 616 03ba BB79     		ldrb	r3, [r7, #6]	@ zero_extendqisi2
+ 617 03bc FA68     		ldr	r2, [r7, #12]
+ 618 03be 4FEA4313 		lsl	r3, r3, #5
+ 619 03c2 D318     		adds	r3, r2, r3
+ 620 03c4 03F56A73 		add	r3, r3, #936
+ 621 03c8 4FF00102 		mov	r2, #1
+ 622 03cc 9A71     		strb	r2, [r3, #6]
+ 318:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   pdev->host.hc[hc_num].xfer_buff = buff;
+ 623              		.loc 1 318 0
+ 624 03ce BB79     		ldrb	r3, [r7, #6]	@ zero_extendqisi2
+ 625 03d0 FA68     		ldr	r2, [r7, #12]
+ 626 03d2 03F11503 		add	r3, r3, #21
+ 627 03d6 4FEA4313 		lsl	r3, r3, #5
+ 628 03da D318     		adds	r3, r2, r3
+ 629 03dc 03F58C73 		add	r3, r3, #280
+ 630 03e0 BA68     		ldr	r2, [r7, #8]
+ 631 03e2 1A60     		str	r2, [r3, #0]
+ 319:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   pdev->host.hc[hc_num].xfer_len = length;
+ 632              		.loc 1 319 0
+ 633 03e4 BB79     		ldrb	r3, [r7, #6]	@ zero_extendqisi2
+ 634 03e6 FA79     		ldrb	r2, [r7, #7]	@ zero_extendqisi2
+ 635 03e8 F968     		ldr	r1, [r7, #12]
+ 636 03ea 4FEA4313 		lsl	r3, r3, #5
+ 637 03ee CB18     		adds	r3, r1, r3
+ 638 03f0 03F56F73 		add	r3, r3, #956
+ 639 03f4 1A60     		str	r2, [r3, #0]
+ 320:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   
+ 321:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** 
+ 322:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   
+ 323:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   if(pdev->host.hc[hc_num].toggle_in == 0)
+ 640              		.loc 1 323 0
+ 641 03f6 BB79     		ldrb	r3, [r7, #6]	@ zero_extendqisi2
+ 642 03f8 FA68     		ldr	r2, [r7, #12]
+ 643 03fa 03F11E03 		add	r3, r3, #30
+ 644 03fe 4FEA4313 		lsl	r3, r3, #5
+ 645 0402 D318     		adds	r3, r2, r3
+ 646 0404 1B79     		ldrb	r3, [r3, #4]	@ zero_extendqisi2
+ 647 0406 002B     		cmp	r3, #0
+ 648 0408 0CD1     		bne	.L30
+ 324:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   {
+ 325:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****     pdev->host.hc[hc_num].data_pid = HC_PID_DATA0;
+ 649              		.loc 1 325 0
+ 650 040a BB79     		ldrb	r3, [r7, #6]	@ zero_extendqisi2
+ 651 040c FA68     		ldr	r2, [r7, #12]
+ 652 040e 03F11503 		add	r3, r3, #21
+ 653 0412 4FEA4313 		lsl	r3, r3, #5
+ 654 0416 D318     		adds	r3, r2, r3
+ 655 0418 03F58873 		add	r3, r3, #272
+ 656 041c 4FF00002 		mov	r2, #0
+ 657 0420 1A71     		strb	r2, [r3, #4]
+ 658 0422 0BE0     		b	.L31
+ 659              	.L30:
+ 326:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   }
+ 327:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   else
+ 328:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   {
+ 329:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****     pdev->host.hc[hc_num].data_pid = HC_PID_DATA1;
+ 660              		.loc 1 329 0
+ 661 0424 BB79     		ldrb	r3, [r7, #6]	@ zero_extendqisi2
+ 662 0426 FA68     		ldr	r2, [r7, #12]
+ 663 0428 03F11503 		add	r3, r3, #21
+ 664 042c 4FEA4313 		lsl	r3, r3, #5
+ 665 0430 D318     		adds	r3, r2, r3
+ 666 0432 03F58873 		add	r3, r3, #272
+ 667 0436 4FF00202 		mov	r2, #2
+ 668 043a 1A71     		strb	r2, [r3, #4]
+ 669              	.L31:
+ 330:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   }
+ 331:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** 
+ 332:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   /* toggle DATA PID */
+ 333:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   pdev->host.hc[hc_num].toggle_in ^= 1;  
+ 670              		.loc 1 333 0
+ 671 043c BB79     		ldrb	r3, [r7, #6]	@ zero_extendqisi2
+ 672 043e BA79     		ldrb	r2, [r7, #6]	@ zero_extendqisi2
+ 673 0440 F968     		ldr	r1, [r7, #12]
+ 674 0442 02F11E02 		add	r2, r2, #30
+ 675 0446 4FEA4212 		lsl	r2, r2, #5
+ 676 044a 8A18     		adds	r2, r1, r2
+ 677 044c 1279     		ldrb	r2, [r2, #4]	@ zero_extendqisi2
+ 678 044e 82F00102 		eor	r2, r2, #1
+ 679 0452 D2B2     		uxtb	r2, r2
+ 680 0454 F968     		ldr	r1, [r7, #12]
+ 681 0456 03F11E03 		add	r3, r3, #30
+ 682 045a 4FEA4313 		lsl	r3, r3, #5
+ 683 045e CB18     		adds	r3, r1, r3
+ 684 0460 1A71     		strb	r2, [r3, #4]
+ 334:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   
+ 335:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   HCD_SubmitRequest (pdev , hc_num);  
+ 685              		.loc 1 335 0
+ 686 0462 BB79     		ldrb	r3, [r7, #6]	@ zero_extendqisi2
+ 687 0464 F868     		ldr	r0, [r7, #12]
+ 688 0466 1946     		mov	r1, r3
+ 689 0468 FFF7FEFF 		bl	HCD_SubmitRequest
+ 336:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   
+ 337:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   return USBH_OK;
+ 690              		.loc 1 337 0
+ 691 046c 4FF00003 		mov	r3, #0
+ 338:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** }
+ 692              		.loc 1 338 0
+ 693 0470 1846     		mov	r0, r3
+ 694 0472 07F11007 		add	r7, r7, #16
+ 695 0476 BD46     		mov	sp, r7
+ 696 0478 80BD     		pop	{r7, pc}
+ 697              		.cfi_endproc
+ 698              	.LFE116:
+ 700 047a 00BF     		.align	2
+ 701              		.global	USBH_InterruptSendData
+ 702              		.thumb
+ 703              		.thumb_func
+ 705              	USBH_InterruptSendData:
+ 706              	.LFB117:
+ 339:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** 
+ 340:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** /**
+ 341:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   * @brief  USBH_InterruptSendData
+ 342:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   *         Sends the data on Interrupt OUT Endpoint
+ 343:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   * @param  pdev: Selected device
+ 344:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   * @param  buff: Buffer pointer from where the data needs to be copied
+ 345:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   * @param  length: Length of the data to be sent
+ 346:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   * @param  hc_num: Host channel Number
+ 347:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   * @retval Status. 
+ 348:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   */
+ 349:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** USBH_Status USBH_InterruptSendData( USB_OTG_CORE_HANDLE *pdev, 
+ 350:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****                                 uint8_t *buff, 
+ 351:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****                                 uint8_t length,
+ 352:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****                                 uint8_t hc_num)
+ 353:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** {
+ 707              		.loc 1 353 0
+ 708              		.cfi_startproc
+ 709              		@ args = 0, pretend = 0, frame = 16
+ 710              		@ frame_needed = 1, uses_anonymous_args = 0
+ 711 047c 80B5     		push	{r7, lr}
+ 712              	.LCFI21:
+ 713              		.cfi_def_cfa_offset 8
+ 714              		.cfi_offset 7, -8
+ 715              		.cfi_offset 14, -4
+ 716 047e 84B0     		sub	sp, sp, #16
+ 717              	.LCFI22:
+ 718              		.cfi_def_cfa_offset 24
+ 719 0480 00AF     		add	r7, sp, #0
+ 720              	.LCFI23:
+ 721              		.cfi_def_cfa_register 7
+ 722 0482 F860     		str	r0, [r7, #12]
+ 723 0484 B960     		str	r1, [r7, #8]
+ 724 0486 FA71     		strb	r2, [r7, #7]
+ 725 0488 BB71     		strb	r3, [r7, #6]
+ 354:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** 
+ 355:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   pdev->host.hc[hc_num].ep_is_in = 0;  
+ 726              		.loc 1 355 0
+ 727 048a BB79     		ldrb	r3, [r7, #6]	@ zero_extendqisi2
+ 728 048c FA68     		ldr	r2, [r7, #12]
+ 729 048e 4FEA4313 		lsl	r3, r3, #5
+ 730 0492 D318     		adds	r3, r2, r3
+ 731 0494 03F56A73 		add	r3, r3, #936
+ 732 0498 4FF00002 		mov	r2, #0
+ 733 049c 9A71     		strb	r2, [r3, #6]
+ 356:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   pdev->host.hc[hc_num].xfer_buff = buff;
+ 734              		.loc 1 356 0
+ 735 049e BB79     		ldrb	r3, [r7, #6]	@ zero_extendqisi2
+ 736 04a0 FA68     		ldr	r2, [r7, #12]
+ 737 04a2 03F11503 		add	r3, r3, #21
+ 738 04a6 4FEA4313 		lsl	r3, r3, #5
+ 739 04aa D318     		adds	r3, r2, r3
+ 740 04ac 03F58C73 		add	r3, r3, #280
+ 741 04b0 BA68     		ldr	r2, [r7, #8]
+ 742 04b2 1A60     		str	r2, [r3, #0]
+ 357:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   pdev->host.hc[hc_num].xfer_len = length;
+ 743              		.loc 1 357 0
+ 744 04b4 BB79     		ldrb	r3, [r7, #6]	@ zero_extendqisi2
+ 745 04b6 FA79     		ldrb	r2, [r7, #7]	@ zero_extendqisi2
+ 746 04b8 F968     		ldr	r1, [r7, #12]
+ 747 04ba 4FEA4313 		lsl	r3, r3, #5
+ 748 04be CB18     		adds	r3, r1, r3
+ 749 04c0 03F56F73 		add	r3, r3, #956
+ 750 04c4 1A60     		str	r2, [r3, #0]
+ 358:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   
+ 359:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   if(pdev->host.hc[hc_num].toggle_in == 0)
+ 751              		.loc 1 359 0
+ 752 04c6 BB79     		ldrb	r3, [r7, #6]	@ zero_extendqisi2
+ 753 04c8 FA68     		ldr	r2, [r7, #12]
+ 754 04ca 03F11E03 		add	r3, r3, #30
+ 755 04ce 4FEA4313 		lsl	r3, r3, #5
+ 756 04d2 D318     		adds	r3, r2, r3
+ 757 04d4 1B79     		ldrb	r3, [r3, #4]	@ zero_extendqisi2
+ 758 04d6 002B     		cmp	r3, #0
+ 759 04d8 0CD1     		bne	.L34
+ 360:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   {
+ 361:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****     pdev->host.hc[hc_num].data_pid = HC_PID_DATA0;
+ 760              		.loc 1 361 0
+ 761 04da BB79     		ldrb	r3, [r7, #6]	@ zero_extendqisi2
+ 762 04dc FA68     		ldr	r2, [r7, #12]
+ 763 04de 03F11503 		add	r3, r3, #21
+ 764 04e2 4FEA4313 		lsl	r3, r3, #5
+ 765 04e6 D318     		adds	r3, r2, r3
+ 766 04e8 03F58873 		add	r3, r3, #272
+ 767 04ec 4FF00002 		mov	r2, #0
+ 768 04f0 1A71     		strb	r2, [r3, #4]
+ 769 04f2 0BE0     		b	.L35
+ 770              	.L34:
+ 362:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   }
+ 363:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   else
+ 364:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   {
+ 365:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****     pdev->host.hc[hc_num].data_pid = HC_PID_DATA1;
+ 771              		.loc 1 365 0
+ 772 04f4 BB79     		ldrb	r3, [r7, #6]	@ zero_extendqisi2
+ 773 04f6 FA68     		ldr	r2, [r7, #12]
+ 774 04f8 03F11503 		add	r3, r3, #21
+ 775 04fc 4FEA4313 		lsl	r3, r3, #5
+ 776 0500 D318     		adds	r3, r2, r3
+ 777 0502 03F58873 		add	r3, r3, #272
+ 778 0506 4FF00202 		mov	r2, #2
+ 779 050a 1A71     		strb	r2, [r3, #4]
+ 780              	.L35:
+ 366:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   }
+ 367:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** 
+ 368:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   pdev->host.hc[hc_num].toggle_in ^= 1;  
+ 781              		.loc 1 368 0
+ 782 050c BB79     		ldrb	r3, [r7, #6]	@ zero_extendqisi2
+ 783 050e BA79     		ldrb	r2, [r7, #6]	@ zero_extendqisi2
+ 784 0510 F968     		ldr	r1, [r7, #12]
+ 785 0512 02F11E02 		add	r2, r2, #30
+ 786 0516 4FEA4212 		lsl	r2, r2, #5
+ 787 051a 8A18     		adds	r2, r1, r2
+ 788 051c 1279     		ldrb	r2, [r2, #4]	@ zero_extendqisi2
+ 789 051e 82F00102 		eor	r2, r2, #1
+ 790 0522 D2B2     		uxtb	r2, r2
+ 791 0524 F968     		ldr	r1, [r7, #12]
+ 792 0526 03F11E03 		add	r3, r3, #30
+ 793 052a 4FEA4313 		lsl	r3, r3, #5
+ 794 052e CB18     		adds	r3, r1, r3
+ 795 0530 1A71     		strb	r2, [r3, #4]
+ 369:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   
+ 370:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   HCD_SubmitRequest (pdev , hc_num);  
+ 796              		.loc 1 370 0
+ 797 0532 BB79     		ldrb	r3, [r7, #6]	@ zero_extendqisi2
+ 798 0534 F868     		ldr	r0, [r7, #12]
+ 799 0536 1946     		mov	r1, r3
+ 800 0538 FFF7FEFF 		bl	HCD_SubmitRequest
+ 371:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   
+ 372:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   return USBH_OK;
+ 801              		.loc 1 372 0
+ 802 053c 4FF00003 		mov	r3, #0
+ 373:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** }
+ 803              		.loc 1 373 0
+ 804 0540 1846     		mov	r0, r3
+ 805 0542 07F11007 		add	r7, r7, #16
+ 806 0546 BD46     		mov	sp, r7
+ 807 0548 80BD     		pop	{r7, pc}
+ 808              		.cfi_endproc
+ 809              	.LFE117:
+ 811 054a 00BF     		.align	2
+ 812              		.thumb
+ 813              		.thumb_func
+ 815              	USBH_SubmitSetupRequest:
+ 816              	.LFB118:
+ 374:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** 
+ 375:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** 
+ 376:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** /**
+ 377:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   * @brief  USBH_SubmitSetupRequest
+ 378:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   *         Start a setup transfer by changing the state-machine and 
+ 379:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   *         initializing  the required variables needed for the Control Transfer
+ 380:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   * @param  pdev: Selected device
+ 381:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   * @param  setup: Setup Request Structure
+ 382:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   * @param  buff: Buffer used for setup request
+ 383:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   * @param  length: Length of the data
+ 384:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   * @retval Status. 
+ 385:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** */
+ 386:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** static USBH_Status USBH_SubmitSetupRequest(USBH_HOST *phost,
+ 387:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****                                            uint8_t* buff, 
+ 388:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****                                            uint16_t length)
+ 389:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** {
+ 817              		.loc 1 389 0
+ 818              		.cfi_startproc
+ 819              		@ args = 0, pretend = 0, frame = 16
+ 820              		@ frame_needed = 1, uses_anonymous_args = 0
+ 821              		@ link register save eliminated.
+ 822 054c 80B4     		push	{r7}
+ 823              	.LCFI24:
+ 824              		.cfi_def_cfa_offset 4
+ 825              		.cfi_offset 7, -4
+ 826 054e 85B0     		sub	sp, sp, #20
+ 827              	.LCFI25:
+ 828              		.cfi_def_cfa_offset 24
+ 829 0550 00AF     		add	r7, sp, #0
+ 830              	.LCFI26:
+ 831              		.cfi_def_cfa_register 7
+ 832 0552 F860     		str	r0, [r7, #12]
+ 833 0554 B960     		str	r1, [r7, #8]
+ 834 0556 1346     		mov	r3, r2
+ 835 0558 FB80     		strh	r3, [r7, #6]	@ movhi
+ 390:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   
+ 391:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   /* Save Global State */
+ 392:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   phost->gStateBkp =   phost->gState; 
+ 836              		.loc 1 392 0
+ 837 055a FB68     		ldr	r3, [r7, #12]
+ 838 055c 1A78     		ldrb	r2, [r3, #0]	@ zero_extendqisi2
+ 839 055e FB68     		ldr	r3, [r7, #12]
+ 840 0560 5A70     		strb	r2, [r3, #1]
+ 393:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   
+ 394:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   /* Prepare the Transactions */
+ 395:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   phost->gState = HOST_CTRL_XFER;
+ 841              		.loc 1 395 0
+ 842 0562 FB68     		ldr	r3, [r7, #12]
+ 843 0564 4FF00702 		mov	r2, #7
+ 844 0568 1A70     		strb	r2, [r3, #0]
+ 396:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   phost->Control.buff = buff; 
+ 845              		.loc 1 396 0
+ 846 056a FB68     		ldr	r3, [r7, #12]
+ 847 056c BA68     		ldr	r2, [r7, #8]
+ 848 056e 9A60     		str	r2, [r3, #8]
+ 397:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   phost->Control.length = length;
+ 849              		.loc 1 397 0
+ 850 0570 FB68     		ldr	r3, [r7, #12]
+ 851 0572 FA88     		ldrh	r2, [r7, #6]	@ movhi
+ 852 0574 9A81     		strh	r2, [r3, #12]	@ movhi
+ 398:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   phost->Control.state = CTRL_SETUP;  
+ 853              		.loc 1 398 0
+ 854 0576 FB68     		ldr	r3, [r7, #12]
+ 855 0578 4FF00102 		mov	r2, #1
+ 856 057c 1A77     		strb	r2, [r3, #28]
+ 399:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** 
+ 400:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   return USBH_OK;  
+ 857              		.loc 1 400 0
+ 858 057e 4FF00003 		mov	r3, #0
+ 401:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** }
+ 859              		.loc 1 401 0
+ 860 0582 1846     		mov	r0, r3
+ 861 0584 07F11407 		add	r7, r7, #20
+ 862 0588 BD46     		mov	sp, r7
+ 863 058a 80BC     		pop	{r7}
+ 864 058c 7047     		bx	lr
+ 865              		.cfi_endproc
+ 866              	.LFE118:
+ 868 058e 00BF     		.align	2
+ 869              		.global	USBH_IsocReceiveData
+ 870              		.thumb
+ 871              		.thumb_func
+ 873              	USBH_IsocReceiveData:
+ 874              	.LFB119:
+ 402:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** 
+ 403:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** 
+ 404:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** /**
+ 405:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   * @brief  USBH_IsocReceiveData
+ 406:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   *         Receives the Device Response to the Isochronous IN token
+ 407:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   * @param  pdev: Selected device
+ 408:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   * @param  buff: Buffer pointer in which the response needs to be copied
+ 409:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   * @param  length: Length of the data to be received
+ 410:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   * @param  hc_num: Host channel Number
+ 411:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   * @retval Status. 
+ 412:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   */
+ 413:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** USBH_Status USBH_IsocReceiveData( USB_OTG_CORE_HANDLE *pdev, 
+ 414:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****                                 uint8_t *buff, 
+ 415:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****                                 uint32_t length,
+ 416:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****                                 uint8_t hc_num)
+ 417:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** {    
+ 875              		.loc 1 417 0
+ 876              		.cfi_startproc
+ 877              		@ args = 0, pretend = 0, frame = 16
+ 878              		@ frame_needed = 1, uses_anonymous_args = 0
+ 879 0590 80B5     		push	{r7, lr}
+ 880              	.LCFI27:
+ 881              		.cfi_def_cfa_offset 8
+ 882              		.cfi_offset 7, -8
+ 883              		.cfi_offset 14, -4
+ 884 0592 84B0     		sub	sp, sp, #16
+ 885              	.LCFI28:
+ 886              		.cfi_def_cfa_offset 24
+ 887 0594 00AF     		add	r7, sp, #0
+ 888              	.LCFI29:
+ 889              		.cfi_def_cfa_register 7
+ 890 0596 F860     		str	r0, [r7, #12]
+ 891 0598 B960     		str	r1, [r7, #8]
+ 892 059a 7A60     		str	r2, [r7, #4]
+ 893 059c FB70     		strb	r3, [r7, #3]
+ 418:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   
+ 419:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   pdev->host.hc[hc_num].ep_is_in = 1;  
+ 894              		.loc 1 419 0
+ 895 059e FB78     		ldrb	r3, [r7, #3]	@ zero_extendqisi2
+ 896 05a0 FA68     		ldr	r2, [r7, #12]
+ 897 05a2 4FEA4313 		lsl	r3, r3, #5
+ 898 05a6 D318     		adds	r3, r2, r3
+ 899 05a8 03F56A73 		add	r3, r3, #936
+ 900 05ac 4FF00102 		mov	r2, #1
+ 901 05b0 9A71     		strb	r2, [r3, #6]
+ 420:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   pdev->host.hc[hc_num].xfer_buff = buff;
+ 902              		.loc 1 420 0
+ 903 05b2 FB78     		ldrb	r3, [r7, #3]	@ zero_extendqisi2
+ 904 05b4 FA68     		ldr	r2, [r7, #12]
+ 905 05b6 03F11503 		add	r3, r3, #21
+ 906 05ba 4FEA4313 		lsl	r3, r3, #5
+ 907 05be D318     		adds	r3, r2, r3
+ 908 05c0 03F58C73 		add	r3, r3, #280
+ 909 05c4 BA68     		ldr	r2, [r7, #8]
+ 910 05c6 1A60     		str	r2, [r3, #0]
+ 421:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   pdev->host.hc[hc_num].xfer_len = length;
+ 911              		.loc 1 421 0
+ 912 05c8 FB78     		ldrb	r3, [r7, #3]	@ zero_extendqisi2
+ 913 05ca FA68     		ldr	r2, [r7, #12]
+ 914 05cc 4FEA4313 		lsl	r3, r3, #5
+ 915 05d0 D318     		adds	r3, r2, r3
+ 916 05d2 03F56F73 		add	r3, r3, #956
+ 917 05d6 7A68     		ldr	r2, [r7, #4]
+ 918 05d8 1A60     		str	r2, [r3, #0]
+ 422:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   pdev->host.hc[hc_num].data_pid = HC_PID_DATA0;
+ 919              		.loc 1 422 0
+ 920 05da FB78     		ldrb	r3, [r7, #3]	@ zero_extendqisi2
+ 921 05dc FA68     		ldr	r2, [r7, #12]
+ 922 05de 03F11503 		add	r3, r3, #21
+ 923 05e2 4FEA4313 		lsl	r3, r3, #5
+ 924 05e6 D318     		adds	r3, r2, r3
+ 925 05e8 03F58873 		add	r3, r3, #272
+ 926 05ec 4FF00002 		mov	r2, #0
+ 927 05f0 1A71     		strb	r2, [r3, #4]
+ 423:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   
+ 424:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** 
+ 425:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   HCD_SubmitRequest (pdev , hc_num);  
+ 928              		.loc 1 425 0
+ 929 05f2 FB78     		ldrb	r3, [r7, #3]	@ zero_extendqisi2
+ 930 05f4 F868     		ldr	r0, [r7, #12]
+ 931 05f6 1946     		mov	r1, r3
+ 932 05f8 FFF7FEFF 		bl	HCD_SubmitRequest
+ 426:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   
+ 427:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   return USBH_OK;
+ 933              		.loc 1 427 0
+ 934 05fc 4FF00003 		mov	r3, #0
+ 428:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** }
+ 935              		.loc 1 428 0
+ 936 0600 1846     		mov	r0, r3
+ 937 0602 07F11007 		add	r7, r7, #16
+ 938 0606 BD46     		mov	sp, r7
+ 939 0608 80BD     		pop	{r7, pc}
+ 940              		.cfi_endproc
+ 941              	.LFE119:
+ 943 060a 00BF     		.align	2
+ 944              		.global	USBH_IsocSendData
+ 945              		.thumb
+ 946              		.thumb_func
+ 948              	USBH_IsocSendData:
+ 949              	.LFB120:
+ 429:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** 
+ 430:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** /**
+ 431:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   * @brief  USBH_IsocSendData
+ 432:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   *         Sends the data on Isochronous OUT Endpoint
+ 433:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   * @param  pdev: Selected device
+ 434:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   * @param  buff: Buffer pointer from where the data needs to be copied
+ 435:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   * @param  length: Length of the data to be sent
+ 436:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   * @param  hc_num: Host channel Number
+ 437:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   * @retval Status. 
+ 438:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   */
+ 439:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** USBH_Status USBH_IsocSendData( USB_OTG_CORE_HANDLE *pdev, 
+ 440:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****                                 uint8_t *buff, 
+ 441:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****                                 uint32_t length,
+ 442:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****                                 uint8_t hc_num)
+ 443:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** {
+ 950              		.loc 1 443 0
+ 951              		.cfi_startproc
+ 952              		@ args = 0, pretend = 0, frame = 16
+ 953              		@ frame_needed = 1, uses_anonymous_args = 0
+ 954 060c 80B5     		push	{r7, lr}
+ 955              	.LCFI30:
+ 956              		.cfi_def_cfa_offset 8
+ 957              		.cfi_offset 7, -8
+ 958              		.cfi_offset 14, -4
+ 959 060e 84B0     		sub	sp, sp, #16
+ 960              	.LCFI31:
+ 961              		.cfi_def_cfa_offset 24
+ 962 0610 00AF     		add	r7, sp, #0
+ 963              	.LCFI32:
+ 964              		.cfi_def_cfa_register 7
+ 965 0612 F860     		str	r0, [r7, #12]
+ 966 0614 B960     		str	r1, [r7, #8]
+ 967 0616 7A60     		str	r2, [r7, #4]
+ 968 0618 FB70     		strb	r3, [r7, #3]
+ 444:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   
+ 445:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   pdev->host.hc[hc_num].ep_is_in = 0;  
+ 969              		.loc 1 445 0
+ 970 061a FB78     		ldrb	r3, [r7, #3]	@ zero_extendqisi2
+ 971 061c FA68     		ldr	r2, [r7, #12]
+ 972 061e 4FEA4313 		lsl	r3, r3, #5
+ 973 0622 D318     		adds	r3, r2, r3
+ 974 0624 03F56A73 		add	r3, r3, #936
+ 975 0628 4FF00002 		mov	r2, #0
+ 976 062c 9A71     		strb	r2, [r3, #6]
+ 446:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   pdev->host.hc[hc_num].xfer_buff = buff;
+ 977              		.loc 1 446 0
+ 978 062e FB78     		ldrb	r3, [r7, #3]	@ zero_extendqisi2
+ 979 0630 FA68     		ldr	r2, [r7, #12]
+ 980 0632 03F11503 		add	r3, r3, #21
+ 981 0636 4FEA4313 		lsl	r3, r3, #5
+ 982 063a D318     		adds	r3, r2, r3
+ 983 063c 03F58C73 		add	r3, r3, #280
+ 984 0640 BA68     		ldr	r2, [r7, #8]
+ 985 0642 1A60     		str	r2, [r3, #0]
+ 447:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   pdev->host.hc[hc_num].xfer_len = length;
+ 986              		.loc 1 447 0
+ 987 0644 FB78     		ldrb	r3, [r7, #3]	@ zero_extendqisi2
+ 988 0646 FA68     		ldr	r2, [r7, #12]
+ 989 0648 4FEA4313 		lsl	r3, r3, #5
+ 990 064c D318     		adds	r3, r2, r3
+ 991 064e 03F56F73 		add	r3, r3, #956
+ 992 0652 7A68     		ldr	r2, [r7, #4]
+ 993 0654 1A60     		str	r2, [r3, #0]
+ 448:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   pdev->host.hc[hc_num].data_pid = HC_PID_DATA0;
+ 994              		.loc 1 448 0
+ 995 0656 FB78     		ldrb	r3, [r7, #3]	@ zero_extendqisi2
+ 996 0658 FA68     		ldr	r2, [r7, #12]
+ 997 065a 03F11503 		add	r3, r3, #21
+ 998 065e 4FEA4313 		lsl	r3, r3, #5
+ 999 0662 D318     		adds	r3, r2, r3
+ 1000 0664 03F58873 		add	r3, r3, #272
+ 1001 0668 4FF00002 		mov	r2, #0
+ 1002 066c 1A71     		strb	r2, [r3, #4]
+ 449:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   
+ 450:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   HCD_SubmitRequest (pdev , hc_num);  
+ 1003              		.loc 1 450 0
+ 1004 066e FB78     		ldrb	r3, [r7, #3]	@ zero_extendqisi2
+ 1005 0670 F868     		ldr	r0, [r7, #12]
+ 1006 0672 1946     		mov	r1, r3
+ 1007 0674 FFF7FEFF 		bl	HCD_SubmitRequest
+ 451:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   
+ 452:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c ****   return USBH_OK;
+ 1008              		.loc 1 452 0
+ 1009 0678 4FF00003 		mov	r3, #0
+ 453:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_ioreq.c **** }
+ 1010              		.loc 1 453 0
+ 1011 067c 1846     		mov	r0, r3
+ 1012 067e 07F11007 		add	r7, r7, #16
+ 1013 0682 BD46     		mov	sp, r7
+ 1014 0684 80BD     		pop	{r7, pc}
+ 1015              		.cfi_endproc
+ 1016              	.LFE120:
+ 1018              	.Letext0:
+ 1019              		.file 2 "/opt/CodeSourcery/bin/../lib/gcc/arm-none-eabi/4.7.2/../../../../arm-none-eabi/include/st
+ 1020              		.file 3 "/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/STM32_USB_OTG_Drive
+ 1021              		.file 4 "/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/STM32_USB_OTG_Drive
+ 1022              		.file 5 "/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/STM32_USB_HOST_Libr
+ 1023              		.file 6 "/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/STM32_USB_HOST_Libr
+ 1024              		.file 7 "/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_
+DEFINED SYMBOLS
+                            *ABS*:00000000 usbh_ioreq.c
+     /tmp/ccLLheVw.s:18     .text:00000000 $t
+     /tmp/ccLLheVw.s:23     .text:00000000 USBH_CtlReq
+     /tmp/ccLLheVw.s:815    .text:0000054c USBH_SubmitSetupRequest
+     /tmp/ccLLheVw.s:143    .text:000000a0 USBH_CtlSendSetup
+     /tmp/ccLLheVw.s:218    .text:0000011c USBH_CtlSendData
+     /tmp/ccLLheVw.s:327    .text:000001e0 USBH_CtlReceiveData
+     /tmp/ccLLheVw.s:402    .text:0000025c USBH_BulkSendData
+     /tmp/ccLLheVw.s:498    .text:00000304 USBH_BulkReceiveData
+     /tmp/ccLLheVw.s:594    .text:000003ac USBH_InterruptReceiveData
+     /tmp/ccLLheVw.s:705    .text:0000047c USBH_InterruptSendData
+     /tmp/ccLLheVw.s:873    .text:00000590 USBH_IsocReceiveData
+     /tmp/ccLLheVw.s:948    .text:0000060c USBH_IsocSendData
+                     .debug_frame:00000010 $d
+                           .group:00000000 wm4.1.ee386580922180e5cad1057f989de60d
+                           .group:00000000 wm4.stm32f4xx.h.54.6e1f0ee5c76cc1e53c8ea6d18297b5fd
+                           .group:00000000 wm4.core_cm4.h.32.f824aba4d431a5bb4a51726bd5b62834
+                           .group:00000000 wm4.stdint.h.10.90b695f550ca6cc3fb08fa83baf01e05
+                           .group:00000000 wm4.core_cmInstr.h.25.f50f886f2edf670cf199b35fd96f5c91
+                           .group:00000000 wm4.core_cm4_simd.h.29.b4a3fdfb606cb3b26119424324d4b963
+                           .group:00000000 wm4.core_cm4.h.153.5393ef7e6cebf34dd51ca528f9218ab3
+                           .group:00000000 wm4.stm32f4xx.h.289.fa68dcae75666a037ce29b5a1b57e3b3
+                           .group:00000000 wm4.stm32f4xx_adc.h.108.1710484bf41297b93f825b3b15cbdff8
+                           .group:00000000 wm4.stm32f4xx_can.h.31.3bb56c6436c7a6e6af1611046e81f48c
+                           .group:00000000 wm4.stm32f4xx_cryp.h.31.94bbbb19b99df10306f31e78c333a77b
+                           .group:00000000 wm4.stm32f4xx_dac.h.31.b8d45e7eaf71ee4bf01c1317dbc06f77
+                           .group:00000000 wm4.stm32f4xx_dbgmcu.h.30.70a81ec54c2707baa9fca77391eeeaaa
+                           .group:00000000 wm4.stm32f4xx_dcmi.h.30.9d0942d58c357d2eed15e044bf9b4a77
+                           .group:00000000 wm4.stm32f4xx_dma.h.31.815bb924b30b1c776b3cd51113fdfe60
+                           .group:00000000 wm4.stm32f4xx_exti.h.31.86bd18e979f97217bb1d3b80fde0231e
+                           .group:00000000 wm4.stm32f4xx_flash.h.31.74f2ed42d890f144ca7eb5ae8172f0d0
+                           .group:00000000 wm4.stm32f4xx_fsmc.h.31.ff58629e0c603fb2f9b3f00c0657fdfa
+                           .group:00000000 wm4.stm32f4xx_hash.h.31.5c109425d30f0b9cc0a26ad38182d91f
+                           .group:00000000 wm4.stm32f4xx_gpio.h.31.d9aeae10cfa353d85d475c0d4900c452
+                           .group:00000000 wm4.stm32f4xx_i2c.h.31.edf5baa611075c49ae13f56be9040be3
+                           .group:00000000 wm4.stm32f4xx_iwdg.h.31.30e376e6d8d424aab7fddd66cf691c7b
+                           .group:00000000 wm4.stm32f4xx_pwr.h.31.bb774fc1b632cb8d2ecaec8c6524d2c0
+                           .group:00000000 wm4.stm32f4xx_rcc.h.30.820e94551583d2b835c8cf3ad722e16c
+                           .group:00000000 wm4.stm32f4xx_rng.h.31.1ec493d56b7a8e5a71238519cae6dea7
+                           .group:00000000 wm4.stm32f4xx_rtc.h.31.bddeb98c63c8fa06fac80b5dd8296471
+                           .group:00000000 wm4.stm32f4xx_sdio.h.31.8c6dff42ffa718b444c3420717601ff2
+                           .group:00000000 wm4.stm32f4xx_spi.h.31.fb1b2c8214b87a47d4457633b7c31c3c
+                           .group:00000000 wm4.stm32f4xx_syscfg.h.31.5a680f88d55b7816ae613c20f199cbd9
+                           .group:00000000 wm4.stm32f4xx_tim.h.31.b1d608fbde729347e4ccf70799e654d2
+                           .group:00000000 wm4.stm32f4xx_usart.h.31.f8d29b14aa4d39de5495adcc92749d3c
+                           .group:00000000 wm4.stm32f4xx_wwdg.h.31.b45a80fa1ec64984adf786f7e489f31b
+                           .group:00000000 wm4.misc.h.31.041217492a6cb86f2fb26099f373a465
+                           .group:00000000 wm4.stm32f4xx.h.6975.cdbdae9d5de06f1ba6b770f59cbe4d6c
+                           .group:00000000 wm4.usb_conf.h.69.07474af79ba33c49defd0cb9b2ee7820
+                           .group:00000000 wm4.usb_regs.h.30.8e11da7f9e8ef80e8c3ede3dea040a2e
+                           .group:00000000 wm4.usb_defines.h.30.25e1682f38ca1ccb768b1b48e673a175
+                           .group:00000000 wm4.usb_core.h.52.b8138d1f1482be33e5028c0dc9d2a5d3
+                           .group:00000000 wm4.usbh_def.h.42.eb4a6bc03c1613f622529e01c7f1c051
+                           .group:00000000 wm4.usbh_conf.h.24.1e4ade5fba437d91fca18dcf5f2907c4
+                           .group:00000000 wm4.usbh_core.h.55.3283e920dd206a3762220f568a9515d1
+                           .group:00000000 wm4.usbh_ioreq.h.54.c7adef33fe445a495777937496caca1c
+
+UNDEFINED SYMBOLS
+HCD_SubmitRequest

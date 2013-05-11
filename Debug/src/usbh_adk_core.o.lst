@@ -1,0 +1,2120 @@
+   1              		.syntax unified
+   2              		.cpu cortex-m4
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 6
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.file	"usbh_adk_core.c"
+  15              		.text
+  16              	.Ltext0:
+  17              		.cfi_sections	.debug_frame
+  18              		.comm	ADK_Machine,530,4
+  19              		.comm	ADK_Setup,8,4
+  20              		.global	USBH_ADK_cb
+  21              		.data
+  22              		.align	2
+  25              	USBH_ADK_cb:
+  26 0000 00000000 		.word	USBH_ADK_InterfaceInit
+  27 0004 00000000 		.word	USBH_ADK_InterfaceDeInit
+  28 0008 00000000 		.word	USBH_ADK_ClassRequest
+  29 000c 00000000 		.word	USBH_ADK_Handle
+  30              		.text
+  31              		.align	2
+  32              		.global	USBH_ADK_Init
+  33              		.thumb
+  34              		.thumb_func
+  36              	USBH_ADK_Init:
+  37              	.LFB110:
+  38              		.file 1 "../src/usbh_adk_core.c"
+   1:../src/usbh_adk_core.c **** /**
+   2:../src/usbh_adk_core.c ****   ******************************************************************************
+   3:../src/usbh_adk_core.c ****   * @file    usbh_adk_core.c
+   4:../src/usbh_adk_core.c ****   * @author  Yuuichi Akagawa
+   5:../src/usbh_adk_core.c ****   * @version V1.0.0
+   6:../src/usbh_adk_core.c ****   * @date    2012/03/05
+   7:../src/usbh_adk_core.c ****   * @brief   Android Open Accessory implementation
+   8:../src/usbh_adk_core.c ****   ******************************************************************************
+   9:../src/usbh_adk_core.c ****   * @attention
+  10:../src/usbh_adk_core.c ****   *
+  11:../src/usbh_adk_core.c ****   * Licensed under the Apache License, Version 2.0 (the "License");
+  12:../src/usbh_adk_core.c ****   * you may not use this file except in compliance with the License.
+  13:../src/usbh_adk_core.c ****   * You may obtain a copy of the License at
+  14:../src/usbh_adk_core.c ****   *
+  15:../src/usbh_adk_core.c ****   *      http://www.apache.org/licenses/LICENSE-2.0
+  16:../src/usbh_adk_core.c ****   *
+  17:../src/usbh_adk_core.c ****   * Unless required by applicable law or agreed to in writing, software
+  18:../src/usbh_adk_core.c ****   * distributed under the License is distributed on an "AS IS" BASIS,
+  19:../src/usbh_adk_core.c ****   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  20:../src/usbh_adk_core.c ****   * See the License for the specific language governing permissions and
+  21:../src/usbh_adk_core.c ****   * limitations under the License.
+  22:../src/usbh_adk_core.c ****   * <h2><center>&copy; COPYRIGHT (C)2012 Yuuichi Akagawa</center></h2>
+  23:../src/usbh_adk_core.c ****   *
+  24:../src/usbh_adk_core.c ****   ******************************************************************************
+  25:../src/usbh_adk_core.c ****   */
+  26:../src/usbh_adk_core.c **** 
+  27:../src/usbh_adk_core.c **** /* Includes ------------------------------------------------------------------*/
+  28:../src/usbh_adk_core.c **** #include "usbh_adk_core.h"
+  29:../src/usbh_adk_core.c **** #include "uart_debug.h"
+  30:../src/usbh_adk_core.c **** #include <stdlib.h>
+  31:../src/usbh_adk_core.c **** #include <stdio.h>
+  32:../src/usbh_adk_core.c **** 
+  33:../src/usbh_adk_core.c **** /** @defgroup USBH_ADK_CORE_Private_Variables
+  34:../src/usbh_adk_core.c **** * @{
+  35:../src/usbh_adk_core.c **** */
+  36:../src/usbh_adk_core.c **** #ifdef USB_OTG_HS_INTERNAL_DMA_ENABLED
+  37:../src/usbh_adk_core.c ****   #if defined ( __ICCARM__ ) /*!< IAR Compiler */
+  38:../src/usbh_adk_core.c ****     #pragma data_alignment=4
+  39:../src/usbh_adk_core.c ****   #endif
+  40:../src/usbh_adk_core.c **** #endif /* USB_OTG_HS_INTERNAL_DMA_ENABLED */
+  41:../src/usbh_adk_core.c **** __ALIGN_BEGIN ADK_Machine_TypeDef         ADK_Machine __ALIGN_END ;
+  42:../src/usbh_adk_core.c **** 
+  43:../src/usbh_adk_core.c **** #ifdef USB_OTG_HS_INTERNAL_DMA_ENABLED
+  44:../src/usbh_adk_core.c ****   #if defined ( __ICCARM__ ) /*!< IAR Compiler */
+  45:../src/usbh_adk_core.c ****     #pragma data_alignment=4
+  46:../src/usbh_adk_core.c ****   #endif
+  47:../src/usbh_adk_core.c **** #endif /* USB_OTG_HS_INTERNAL_DMA_ENABLED */
+  48:../src/usbh_adk_core.c **** __ALIGN_BEGIN USB_Setup_TypeDef           ADK_Setup __ALIGN_END ;
+  49:../src/usbh_adk_core.c **** 
+  50:../src/usbh_adk_core.c **** /**
+  51:../src/usbh_adk_core.c **** * @}
+  52:../src/usbh_adk_core.c **** */
+  53:../src/usbh_adk_core.c **** 
+  54:../src/usbh_adk_core.c **** /** @defgroup USBH_ADK_CORE_Private_FunctionPrototypes
+  55:../src/usbh_adk_core.c **** * @{
+  56:../src/usbh_adk_core.c **** */
+  57:../src/usbh_adk_core.c **** static USBH_Status USBH_ADK_InterfaceInit  (USB_OTG_CORE_HANDLE *pdev, void *phost);
+  58:../src/usbh_adk_core.c **** static void USBH_ADK_InterfaceDeInit  (USB_OTG_CORE_HANDLE *pdev, void *phost);
+  59:../src/usbh_adk_core.c **** static USBH_Status USBH_ADK_Handle(USB_OTG_CORE_HANDLE *pdev, void *phost);
+  60:../src/usbh_adk_core.c **** static USBH_Status USBH_ADK_ClassRequest(USB_OTG_CORE_HANDLE *pdev, void *phost);
+  61:../src/usbh_adk_core.c **** static USBH_Status USBH_ADK_getProtocol ( USB_OTG_CORE_HANDLE *pdev, USBH_HOST *phost);
+  62:../src/usbh_adk_core.c **** static USBH_Status USBH_ADK_sendString ( USB_OTG_CORE_HANDLE *pdev, USBH_HOST *phost, uint16_t inde
+  63:../src/usbh_adk_core.c **** static USBH_Status USBH_ADK_switch ( USB_OTG_CORE_HANDLE *pdev, USBH_HOST *phost);
+  64:../src/usbh_adk_core.c **** static USBH_Status USBH_ADK_configAndroid ( USB_OTG_CORE_HANDLE *pdev, USBH_HOST *phost);
+  65:../src/usbh_adk_core.c **** 
+  66:../src/usbh_adk_core.c **** USBH_Class_cb_TypeDef USBH_ADK_cb =
+  67:../src/usbh_adk_core.c **** {
+  68:../src/usbh_adk_core.c ****     USBH_ADK_InterfaceInit,
+  69:../src/usbh_adk_core.c ****     USBH_ADK_InterfaceDeInit,
+  70:../src/usbh_adk_core.c ****     USBH_ADK_ClassRequest,
+  71:../src/usbh_adk_core.c ****     USBH_ADK_Handle,
+  72:../src/usbh_adk_core.c **** };
+  73:../src/usbh_adk_core.c **** /**
+  74:../src/usbh_adk_core.c **** * @}
+  75:../src/usbh_adk_core.c **** */
+  76:../src/usbh_adk_core.c **** 
+  77:../src/usbh_adk_core.c **** /**
+  78:../src/usbh_adk_core.c ****   * @brief  USBH_ADK_Init
+  79:../src/usbh_adk_core.c ****   *         Initialization for ADK class.
+  80:../src/usbh_adk_core.c ****   * @param  manufacture: manufacturer name string(max 63 chars)
+  81:../src/usbh_adk_core.c ****   * @param  model: model name string (max 63 chars)
+  82:../src/usbh_adk_core.c ****   * @param  description: description string (max 63 chars)
+  83:../src/usbh_adk_core.c ****   * @param  version: version string (max 63 chars)
+  84:../src/usbh_adk_core.c ****   * @param  uri: URI string (max 63 chars)
+  85:../src/usbh_adk_core.c ****   * @param  serial: serial number string (max 63 chars)
+  86:../src/usbh_adk_core.c ****   * @retval None
+  87:../src/usbh_adk_core.c ****   */
+  88:../src/usbh_adk_core.c **** void USBH_ADK_Init(uint8_t* manufacture, uint8_t* model, uint8_t* description, uint8_t* version, ui
+  89:../src/usbh_adk_core.c **** {
+  39              		.loc 1 89 0
+  40              		.cfi_startproc
+  41              		@ args = 8, pretend = 0, frame = 16
+  42              		@ frame_needed = 1, uses_anonymous_args = 0
+  43 0000 80B5     		push	{r7, lr}
+  44              	.LCFI0:
+  45              		.cfi_def_cfa_offset 8
+  46              		.cfi_offset 7, -8
+  47              		.cfi_offset 14, -4
+  48 0002 84B0     		sub	sp, sp, #16
+  49              	.LCFI1:
+  50              		.cfi_def_cfa_offset 24
+  51 0004 00AF     		add	r7, sp, #0
+  52              	.LCFI2:
+  53              		.cfi_def_cfa_register 7
+  54 0006 F860     		str	r0, [r7, #12]
+  55 0008 B960     		str	r1, [r7, #8]
+  56 000a 7A60     		str	r2, [r7, #4]
+  57 000c 3B60     		str	r3, [r7, #0]
+  90:../src/usbh_adk_core.c **** 	strncpy(ADK_Machine.acc_manufacturer, manufacture, 64);
+  58              		.loc 1 90 0
+  59 000e 2848     		ldr	r0, .L2
+  60 0010 F968     		ldr	r1, [r7, #12]
+  61 0012 4FF04002 		mov	r2, #64
+  62 0016 FFF7FEFF 		bl	strncpy
+  91:../src/usbh_adk_core.c **** 	ADK_Machine.acc_manufacturer[63] = '\0';
+  63              		.loc 1 91 0
+  64 001a 264B     		ldr	r3, .L2+4
+  65 001c 4FF00002 		mov	r2, #0
+  66 0020 83F8CF20 		strb	r2, [r3, #207]
+  92:../src/usbh_adk_core.c **** 	strncpy(ADK_Machine.acc_model, model, 64);
+  67              		.loc 1 92 0
+  68 0024 2448     		ldr	r0, .L2+8
+  69 0026 B968     		ldr	r1, [r7, #8]
+  70 0028 4FF04002 		mov	r2, #64
+  71 002c FFF7FEFF 		bl	strncpy
+  93:../src/usbh_adk_core.c **** 	ADK_Machine.acc_model[63] = '\0';
+  72              		.loc 1 93 0
+  73 0030 204B     		ldr	r3, .L2+4
+  74 0032 4FF00002 		mov	r2, #0
+  75 0036 83F80F21 		strb	r2, [r3, #271]
+  94:../src/usbh_adk_core.c **** 	strncpy(ADK_Machine.acc_description, description, 64);
+  76              		.loc 1 94 0
+  77 003a 2048     		ldr	r0, .L2+12
+  78 003c 7968     		ldr	r1, [r7, #4]
+  79 003e 4FF04002 		mov	r2, #64
+  80 0042 FFF7FEFF 		bl	strncpy
+  95:../src/usbh_adk_core.c **** 	ADK_Machine.acc_description[63] = '\0';
+  81              		.loc 1 95 0
+  82 0046 1B4B     		ldr	r3, .L2+4
+  83 0048 4FF00002 		mov	r2, #0
+  84 004c 83F84F21 		strb	r2, [r3, #335]
+  96:../src/usbh_adk_core.c **** 	strncpy(ADK_Machine.acc_version, version, 64);
+  85              		.loc 1 96 0
+  86 0050 1B48     		ldr	r0, .L2+16
+  87 0052 3968     		ldr	r1, [r7, #0]
+  88 0054 4FF04002 		mov	r2, #64
+  89 0058 FFF7FEFF 		bl	strncpy
+  97:../src/usbh_adk_core.c **** 	ADK_Machine.acc_version[63] = '\0';
+  90              		.loc 1 97 0
+  91 005c 154B     		ldr	r3, .L2+4
+  92 005e 4FF00002 		mov	r2, #0
+  93 0062 83F88F21 		strb	r2, [r3, #399]
+  98:../src/usbh_adk_core.c **** 	strncpy(ADK_Machine.acc_uri, uri, 64);
+  94              		.loc 1 98 0
+  95 0066 1748     		ldr	r0, .L2+20
+  96 0068 B969     		ldr	r1, [r7, #24]
+  97 006a 4FF04002 		mov	r2, #64
+  98 006e FFF7FEFF 		bl	strncpy
+  99:../src/usbh_adk_core.c **** 	ADK_Machine.acc_uri[63] = '\0';
+  99              		.loc 1 99 0
+ 100 0072 104B     		ldr	r3, .L2+4
+ 101 0074 4FF00002 		mov	r2, #0
+ 102 0078 83F8CF21 		strb	r2, [r3, #463]
+ 100:../src/usbh_adk_core.c **** 	strncpy(ADK_Machine.acc_serial, serial, 64);
+ 103              		.loc 1 100 0
+ 104 007c 1248     		ldr	r0, .L2+24
+ 105 007e F969     		ldr	r1, [r7, #28]
+ 106 0080 4FF04002 		mov	r2, #64
+ 107 0084 FFF7FEFF 		bl	strncpy
+ 101:../src/usbh_adk_core.c **** 	ADK_Machine.acc_serial[63] = '\0';
+ 108              		.loc 1 101 0
+ 109 0088 0A4B     		ldr	r3, .L2+4
+ 110 008a 4FF00002 		mov	r2, #0
+ 111 008e 83F80F22 		strb	r2, [r3, #527]
+ 102:../src/usbh_adk_core.c **** 
+ 103:../src/usbh_adk_core.c **** 	ADK_Machine.initstate = ADK_INIT_SETUP;
+ 112              		.loc 1 103 0
+ 113 0092 084B     		ldr	r3, .L2+4
+ 114 0094 4FF00002 		mov	r2, #0
+ 115 0098 83F88E20 		strb	r2, [r3, #142]
+ 104:../src/usbh_adk_core.c **** 	ADK_Machine.state     = ADK_INITIALIZING;//ADK_ERROR;
+ 116              		.loc 1 104 0
+ 117 009c 054B     		ldr	r3, .L2+4
+ 118 009e 4FF00402 		mov	r2, #4
+ 119 00a2 83F88F20 		strb	r2, [r3, #143]
+ 105:../src/usbh_adk_core.c **** }
+ 120              		.loc 1 105 0
+ 121 00a6 07F11007 		add	r7, r7, #16
+ 122 00aa BD46     		mov	sp, r7
+ 123 00ac 80BD     		pop	{r7, pc}
+ 124              	.L3:
+ 125 00ae 00BF     		.align	2
+ 126              	.L2:
+ 127 00b0 90000000 		.word	ADK_Machine+144
+ 128 00b4 00000000 		.word	ADK_Machine
+ 129 00b8 D0000000 		.word	ADK_Machine+208
+ 130 00bc 10010000 		.word	ADK_Machine+272
+ 131 00c0 50010000 		.word	ADK_Machine+336
+ 132 00c4 90010000 		.word	ADK_Machine+400
+ 133 00c8 D0010000 		.word	ADK_Machine+464
+ 134              		.cfi_endproc
+ 135              	.LFE110:
+ 137              		.section	.rodata
+ 138              		.align	2
+ 139              	.LC0:
+ 140 0000 3E205553 		.ascii	"> USB_ADK_Init\012\000"
+ 140      425F4144 
+ 140      4B5F496E 
+ 140      69740A00 
+ 141              		.text
+ 142              		.align	2
+ 143              		.thumb
+ 144              		.thumb_func
+ 146              	USBH_ADK_InterfaceInit:
+ 147              	.LFB111:
+ 106:../src/usbh_adk_core.c **** 
+ 107:../src/usbh_adk_core.c **** /**
+ 108:../src/usbh_adk_core.c ****   * @brief  USBH_ADK_InterfaceInit
+ 109:../src/usbh_adk_core.c ****   *         Interface initialization for ADK class.
+ 110:../src/usbh_adk_core.c ****   * @param  pdev: Selected device
+ 111:../src/usbh_adk_core.c ****   * @param  hdev: Selected device property
+ 112:../src/usbh_adk_core.c ****   * @retval USBH_Status : Status of class request handled.
+ 113:../src/usbh_adk_core.c ****   */
+ 114:../src/usbh_adk_core.c **** static USBH_Status USBH_ADK_InterfaceInit ( USB_OTG_CORE_HANDLE *pdev, void *phost)
+ 115:../src/usbh_adk_core.c **** {
+ 148              		.loc 1 115 0
+ 149              		.cfi_startproc
+ 150              		@ args = 0, pretend = 0, frame = 16
+ 151              		@ frame_needed = 1, uses_anonymous_args = 0
+ 152 00cc 80B5     		push	{r7, lr}
+ 153              	.LCFI3:
+ 154              		.cfi_def_cfa_offset 8
+ 155              		.cfi_offset 7, -8
+ 156              		.cfi_offset 14, -4
+ 157 00ce 84B0     		sub	sp, sp, #16
+ 158              	.LCFI4:
+ 159              		.cfi_def_cfa_offset 24
+ 160 00d0 00AF     		add	r7, sp, #0
+ 161              	.LCFI5:
+ 162              		.cfi_def_cfa_register 7
+ 163 00d2 7860     		str	r0, [r7, #4]
+ 164 00d4 3960     		str	r1, [r7, #0]
+ 116:../src/usbh_adk_core.c **** 	USBH_Status status = USBH_OK; //USBH_OK ;
+ 165              		.loc 1 116 0
+ 166 00d6 4FF00003 		mov	r3, #0
+ 167 00da FB73     		strb	r3, [r7, #15]
+ 117:../src/usbh_adk_core.c **** 
+ 118:../src/usbh_adk_core.c **** 	ADK_Machine.inSize = 0;
+ 168              		.loc 1 118 0
+ 169 00dc 094B     		ldr	r3, .L6
+ 170 00de 4FF00002 		mov	r2, #0
+ 171 00e2 A3F88A20 		strh	r2, [r3, #138]	@ movhi
+ 119:../src/usbh_adk_core.c **** 	ADK_Machine.outSize = 0;
+ 172              		.loc 1 119 0
+ 173 00e6 074B     		ldr	r3, .L6
+ 174 00e8 4FF00002 		mov	r2, #0
+ 175 00ec A3F88C20 		strh	r2, [r3, #140]	@ movhi
+ 120:../src/usbh_adk_core.c **** 
+ 121:../src/usbh_adk_core.c **** #ifdef DEBUG
+ 122:../src/usbh_adk_core.c **** 	xputs("> USB_ADK_Init\n");
+ 176              		.loc 1 122 0
+ 177 00f0 0548     		ldr	r0, .L6+4
+ 178 00f2 FFF7FEFF 		bl	xputs
+ 123:../src/usbh_adk_core.c **** #endif
+ 124:../src/usbh_adk_core.c **** 	return status ;
+ 179              		.loc 1 124 0
+ 180 00f6 FB7B     		ldrb	r3, [r7, #15]	@ zero_extendqisi2
+ 125:../src/usbh_adk_core.c **** }
+ 181              		.loc 1 125 0
+ 182 00f8 1846     		mov	r0, r3
+ 183 00fa 07F11007 		add	r7, r7, #16
+ 184 00fe BD46     		mov	sp, r7
+ 185 0100 80BD     		pop	{r7, pc}
+ 186              	.L7:
+ 187 0102 00BF     		.align	2
+ 188              	.L6:
+ 189 0104 00000000 		.word	ADK_Machine
+ 190 0108 00000000 		.word	.LC0
+ 191              		.cfi_endproc
+ 192              	.LFE111:
+ 194              		.section	.rodata
+ 195              		.align	2
+ 196              	.LC1:
+ 197 0010 3E205553 		.ascii	"> USB_ADK_DeInit\012\000"
+ 197      425F4144 
+ 197      4B5F4465 
+ 197      496E6974 
+ 197      0A00
+ 198              		.text
+ 199              		.align	2
+ 200              		.thumb
+ 201              		.thumb_func
+ 203              	USBH_ADK_InterfaceDeInit:
+ 204              	.LFB112:
+ 126:../src/usbh_adk_core.c **** 
+ 127:../src/usbh_adk_core.c **** /**
+ 128:../src/usbh_adk_core.c ****   * @brief  USBH_ADK_InterfaceDeInit
+ 129:../src/usbh_adk_core.c ****   *         De-Initialize interface by freeing host channels allocated to interface
+ 130:../src/usbh_adk_core.c ****   * @param  pdev: Selected device
+ 131:../src/usbh_adk_core.c ****   * @param  hdev: Selected device property
+ 132:../src/usbh_adk_core.c ****   * @retval None
+ 133:../src/usbh_adk_core.c ****   */
+ 134:../src/usbh_adk_core.c **** void USBH_ADK_InterfaceDeInit ( USB_OTG_CORE_HANDLE *pdev, void *phost)
+ 135:../src/usbh_adk_core.c **** {
+ 205              		.loc 1 135 0
+ 206              		.cfi_startproc
+ 207              		@ args = 0, pretend = 0, frame = 8
+ 208              		@ frame_needed = 1, uses_anonymous_args = 0
+ 209 010c 80B5     		push	{r7, lr}
+ 210              	.LCFI6:
+ 211              		.cfi_def_cfa_offset 8
+ 212              		.cfi_offset 7, -8
+ 213              		.cfi_offset 14, -4
+ 214 010e 82B0     		sub	sp, sp, #8
+ 215              	.LCFI7:
+ 216              		.cfi_def_cfa_offset 16
+ 217 0110 00AF     		add	r7, sp, #0
+ 218              	.LCFI8:
+ 219              		.cfi_def_cfa_register 7
+ 220 0112 7860     		str	r0, [r7, #4]
+ 221 0114 3960     		str	r1, [r7, #0]
+ 136:../src/usbh_adk_core.c **** #ifdef DEBUG
+ 137:../src/usbh_adk_core.c **** 	xputs("> USB_ADK_DeInit\n");
+ 222              		.loc 1 137 0
+ 223 0116 1A48     		ldr	r0, .L11
+ 224 0118 FFF7FEFF 		bl	xputs
+ 138:../src/usbh_adk_core.c **** #endif
+ 139:../src/usbh_adk_core.c **** 	ADK_Machine.initstate = ADK_INIT_SETUP;
+ 225              		.loc 1 139 0
+ 226 011c 194B     		ldr	r3, .L11+4
+ 227 011e 4FF00002 		mov	r2, #0
+ 228 0122 83F88E20 		strb	r2, [r3, #142]
+ 140:../src/usbh_adk_core.c **** 
+ 141:../src/usbh_adk_core.c **** 	/* Switch to accessory mode,  Re-enumeration */
+ 142:../src/usbh_adk_core.c **** //	if(ADK_Machine.state == ADK_INITIALIZING)
+ 143:../src/usbh_adk_core.c **** //	{
+ 144:../src/usbh_adk_core.c **** //		pdev->host.ConnSts = 1;
+ 145:../src/usbh_adk_core.c **** //	}
+ 146:../src/usbh_adk_core.c **** 
+ 147:../src/usbh_adk_core.c **** 	/* close bulk transfer pipe */
+ 148:../src/usbh_adk_core.c **** 	if ( ADK_Machine.hc_num_out)
+ 229              		.loc 1 148 0
+ 230 0126 174B     		ldr	r3, .L11+4
+ 231 0128 DB78     		ldrb	r3, [r3, #3]	@ zero_extendqisi2
+ 232 012a 002B     		cmp	r3, #0
+ 233 012c 0FD0     		beq	.L9
+ 149:../src/usbh_adk_core.c **** 	{
+ 150:../src/usbh_adk_core.c **** 		USB_OTG_HC_Halt(pdev, ADK_Machine.hc_num_out);
+ 234              		.loc 1 150 0
+ 235 012e 154B     		ldr	r3, .L11+4
+ 236 0130 DB78     		ldrb	r3, [r3, #3]	@ zero_extendqisi2
+ 237 0132 7868     		ldr	r0, [r7, #4]
+ 238 0134 1946     		mov	r1, r3
+ 239 0136 FFF7FEFF 		bl	USB_OTG_HC_Halt
+ 151:../src/usbh_adk_core.c **** 	    USBH_Free_Channel  (pdev, ADK_Machine.hc_num_out);
+ 240              		.loc 1 151 0
+ 241 013a 124B     		ldr	r3, .L11+4
+ 242 013c DB78     		ldrb	r3, [r3, #3]	@ zero_extendqisi2
+ 243 013e 7868     		ldr	r0, [r7, #4]
+ 244 0140 1946     		mov	r1, r3
+ 245 0142 FFF7FEFF 		bl	USBH_Free_Channel
+ 152:../src/usbh_adk_core.c **** 	    ADK_Machine.hc_num_out = 0;     /* Reset the Channel as Free */
+ 246              		.loc 1 152 0
+ 247 0146 0F4B     		ldr	r3, .L11+4
+ 248 0148 4FF00002 		mov	r2, #0
+ 249 014c DA70     		strb	r2, [r3, #3]
+ 250              	.L9:
+ 153:../src/usbh_adk_core.c **** 	}
+ 154:../src/usbh_adk_core.c **** 	if ( ADK_Machine.hc_num_in)
+ 251              		.loc 1 154 0
+ 252 014e 0D4B     		ldr	r3, .L11+4
+ 253 0150 9B78     		ldrb	r3, [r3, #2]	@ zero_extendqisi2
+ 254 0152 002B     		cmp	r3, #0
+ 255 0154 0FD0     		beq	.L8
+ 155:../src/usbh_adk_core.c **** 	{
+ 156:../src/usbh_adk_core.c **** 	    USB_OTG_HC_Halt(pdev, ADK_Machine.hc_num_in);
+ 256              		.loc 1 156 0
+ 257 0156 0B4B     		ldr	r3, .L11+4
+ 258 0158 9B78     		ldrb	r3, [r3, #2]	@ zero_extendqisi2
+ 259 015a 7868     		ldr	r0, [r7, #4]
+ 260 015c 1946     		mov	r1, r3
+ 261 015e FFF7FEFF 		bl	USB_OTG_HC_Halt
+ 157:../src/usbh_adk_core.c **** 	    USBH_Free_Channel  (pdev, ADK_Machine.hc_num_in);
+ 262              		.loc 1 157 0
+ 263 0162 084B     		ldr	r3, .L11+4
+ 264 0164 9B78     		ldrb	r3, [r3, #2]	@ zero_extendqisi2
+ 265 0166 7868     		ldr	r0, [r7, #4]
+ 266 0168 1946     		mov	r1, r3
+ 267 016a FFF7FEFF 		bl	USBH_Free_Channel
+ 158:../src/usbh_adk_core.c **** 	    ADK_Machine.hc_num_in = 0;     /* Reset the Channel as Free */
+ 268              		.loc 1 158 0
+ 269 016e 054B     		ldr	r3, .L11+4
+ 270 0170 4FF00002 		mov	r2, #0
+ 271 0174 9A70     		strb	r2, [r3, #2]
+ 272              	.L8:
+ 159:../src/usbh_adk_core.c **** 	}
+ 160:../src/usbh_adk_core.c **** 
+ 161:../src/usbh_adk_core.c **** 	//restore NAK retry limit to default value
+ 162:../src/usbh_adk_core.c **** //	pdev->host.NakRetryLimit = USB_NAK_RETRY_ATTEMPTS;
+ 163:../src/usbh_adk_core.c **** }
+ 273              		.loc 1 163 0
+ 274 0176 07F10807 		add	r7, r7, #8
+ 275 017a BD46     		mov	sp, r7
+ 276 017c 80BD     		pop	{r7, pc}
+ 277              	.L12:
+ 278 017e 00BF     		.align	2
+ 279              	.L11:
+ 280 0180 10000000 		.word	.LC1
+ 281 0184 00000000 		.word	ADK_Machine
+ 282              		.cfi_endproc
+ 283              	.LFE112:
+ 285              		.section	.rodata
+ 286 0022 0000     		.align	2
+ 287              	.LC2:
+ 288 0024 3E205553 		.ascii	"> USB_ADK_ClassRequest\012\000"
+ 288      425F4144 
+ 288      4B5F436C 
+ 288      61737352 
+ 288      65717565 
+ 289              		.align	2
+ 290              	.LC3:
+ 291 003c 41444B3A 		.ascii	"ADK:device supports protcol 1\012\000"
+ 291      64657669 
+ 291      63652073 
+ 291      7570706F 
+ 291      72747320 
+ 292 005b 00       		.align	2
+ 293              	.LC4:
+ 294 005c 41444B3A 		.ascii	"ADK:could not read device protocol version\012\000"
+ 294      636F756C 
+ 294      64206E6F 
+ 294      74207265 
+ 294      61642064 
+ 295              		.align	2
+ 296              	.LC5:
+ 297 0088 41444B3A 		.ascii	"ADK:SEND_MANUFACTURER\012\000"
+ 297      53454E44 
+ 297      5F4D414E 
+ 297      55464143 
+ 297      54555245 
+ 298 009f 00       		.align	2
+ 299              	.LC6:
+ 300 00a0 41444B3A 		.ascii	"ADK:SEND_MODEL\012\000"
+ 300      53454E44 
+ 300      5F4D4F44 
+ 300      454C0A00 
+ 301              		.align	2
+ 302              	.LC7:
+ 303 00b0 41444B3A 		.ascii	"ADK:SEND_DESCRIPTION\012\000"
+ 303      53454E44 
+ 303      5F444553 
+ 303      43524950 
+ 303      54494F4E 
+ 304 00c6 0000     		.align	2
+ 305              	.LC8:
+ 306 00c8 41444B3A 		.ascii	"ADK:SEND_VERSION\012\000"
+ 306      53454E44 
+ 306      5F564552 
+ 306      53494F4E 
+ 306      0A00
+ 307 00da 0000     		.align	2
+ 308              	.LC9:
+ 309 00dc 41444B3A 		.ascii	"ADK:SEND_URI\012\000"
+ 309      53454E44 
+ 309      5F555249 
+ 309      0A00
+ 310 00ea 0000     		.align	2
+ 311              	.LC10:
+ 312 00ec 41444B3A 		.ascii	"ADK:SEND_SERIAL\012\000"
+ 312      53454E44 
+ 312      5F534552 
+ 312      49414C0A 
+ 312      00
+ 313 00fd 000000   		.align	2
+ 314              	.LC11:
+ 315 0100 41444B3A 		.ascii	"ADK:switch to accessory mode\012\000"
+ 315      73776974 
+ 315      63682074 
+ 315      6F206163 
+ 315      63657373 
+ 316 011e 0000     		.align	2
+ 317              	.LC12:
+ 318 0120 41444B3A 		.ascii	"ADK:configuration complete.\012\000"
+ 318      636F6E66 
+ 318      69677572 
+ 318      6174696F 
+ 318      6E20636F 
+ 319              		.text
+ 320              		.align	2
+ 321              		.thumb
+ 322              		.thumb_func
+ 324              	USBH_ADK_ClassRequest:
+ 325              	.LFB113:
+ 164:../src/usbh_adk_core.c **** 
+ 165:../src/usbh_adk_core.c **** /**
+ 166:../src/usbh_adk_core.c ****   * @brief  USBH_ADK_ClassRequest
+ 167:../src/usbh_adk_core.c ****   *         This function will only initialize the ADK state machine
+ 168:../src/usbh_adk_core.c ****   * @param  pdev: Selected device
+ 169:../src/usbh_adk_core.c ****   * @param  hdev: Selected device property
+ 170:../src/usbh_adk_core.c ****   * @retval USBH_Status : Status of class request handled.
+ 171:../src/usbh_adk_core.c ****   */
+ 172:../src/usbh_adk_core.c **** static USBH_Status USBH_ADK_ClassRequest(USB_OTG_CORE_HANDLE *pdev, void *phost)
+ 173:../src/usbh_adk_core.c **** {
+ 326              		.loc 1 173 0
+ 327              		.cfi_startproc
+ 328              		@ args = 0, pretend = 0, frame = 16
+ 329              		@ frame_needed = 1, uses_anonymous_args = 0
+ 330 0188 80B5     		push	{r7, lr}
+ 331              	.LCFI9:
+ 332              		.cfi_def_cfa_offset 8
+ 333              		.cfi_offset 7, -8
+ 334              		.cfi_offset 14, -4
+ 335 018a 84B0     		sub	sp, sp, #16
+ 336              	.LCFI10:
+ 337              		.cfi_def_cfa_offset 24
+ 338 018c 00AF     		add	r7, sp, #0
+ 339              	.LCFI11:
+ 340              		.cfi_def_cfa_register 7
+ 341 018e 7860     		str	r0, [r7, #4]
+ 342 0190 3960     		str	r1, [r7, #0]
+ 174:../src/usbh_adk_core.c **** 	USBH_HOST *pphost = phost;
+ 343              		.loc 1 174 0
+ 344 0192 3B68     		ldr	r3, [r7, #0]
+ 345 0194 BB60     		str	r3, [r7, #8]
+ 175:../src/usbh_adk_core.c **** 	USBH_Status status = USBH_BUSY ;
+ 346              		.loc 1 175 0
+ 347 0196 4FF00103 		mov	r3, #1
+ 348 019a FB73     		strb	r3, [r7, #15]
+ 176:../src/usbh_adk_core.c **** 
+ 177:../src/usbh_adk_core.c **** 	switch (ADK_Machine.initstate)
+ 349              		.loc 1 177 0
+ 350 019c A44B     		ldr	r3, .L56
+ 351 019e 93F88E30 		ldrb	r3, [r3, #142]	@ zero_extendqisi2
+ 352 01a2 0C2B     		cmp	r3, #12
+ 353 01a4 00F23281 		bhi	.L46
+ 354 01a8 01A2     		adr	r2, .L28
+ 355 01aa 52F823F0 		ldr	pc, [r2, r3, lsl #2]
+ 356 01ae 00BF     		.align	2
+ 357              	.L28:
+ 358 01b0 E5010000 		.word	.L15+1
+ 359 01b4 2F020000 		.word	.L16+1
+ 360 01b8 6D020000 		.word	.L17+1
+ 361 01bc 95020000 		.word	.L18+1
+ 362 01c0 BD020000 		.word	.L19+1
+ 363 01c4 E5020000 		.word	.L20+1
+ 364 01c8 0D030000 		.word	.L21+1
+ 365 01cc 35030000 		.word	.L22+1
+ 366 01d0 5B030000 		.word	.L23+1
+ 367 01d4 7B030000 		.word	.L24+1
+ 368 01d8 D9030000 		.word	.L25+1
+ 369 01dc ED030000 		.word	.L26+1
+ 370 01e0 05040000 		.word	.L27+1
+ 371              	.L15:
+ 178:../src/usbh_adk_core.c **** 	{
+ 179:../src/usbh_adk_core.c **** 		case ADK_INIT_SETUP:
+ 180:../src/usbh_adk_core.c **** #ifdef DEBUG
+ 181:../src/usbh_adk_core.c **** 			xputs("> USB_ADK_ClassRequest\n");
+ 372              		.loc 1 181 0
+ 373 01e4 9348     		ldr	r0, .L56+4
+ 374 01e6 FFF7FEFF 		bl	xputs
+ 182:../src/usbh_adk_core.c **** #endif
+ 183:../src/usbh_adk_core.c **** 			// minimize NAK retry limit
+ 184:../src/usbh_adk_core.c **** //		  	pdev->host.NakRetryLimit = USBH_ADK_NAK_RETRY_LIMIT;
+ 185:../src/usbh_adk_core.c **** 
+ 186:../src/usbh_adk_core.c **** 		  	//check vaild device
+ 187:../src/usbh_adk_core.c **** 			if(pphost->device_prop.Dev_Desc.idVendor == USB_ACCESSORY_VENDOR_ID &&
+ 375              		.loc 1 187 0
+ 376 01ea BB68     		ldr	r3, [r7, #8]
+ 377 01ec 5A8D     		ldrh	r2, [r3, #42]
+ 378 01ee 41F6D103 		movw	r3, #6353
+ 379 01f2 9A42     		cmp	r2, r3
+ 380 01f4 10D1     		bne	.L29
+ 188:../src/usbh_adk_core.c **** 			   (pphost->device_prop.Dev_Desc.idProduct == USB_ACCESSORY_PRODUCT_ID ||
+ 381              		.loc 1 188 0 discriminator 1
+ 382 01f6 BB68     		ldr	r3, [r7, #8]
+ 383 01f8 9B8D     		ldrh	r3, [r3, #44]
+ 187:../src/usbh_adk_core.c **** 			if(pphost->device_prop.Dev_Desc.idVendor == USB_ACCESSORY_VENDOR_ID &&
+ 384              		.loc 1 187 0 discriminator 1
+ 385 01fa B3F5345F 		cmp	r3, #11520
+ 386 01fe 05D0     		beq	.L30
+ 189:../src/usbh_adk_core.c **** 			    pphost->device_prop.Dev_Desc.idProduct == USB_ACCESSORY_ADB_PRODUCT_ID)
+ 387              		.loc 1 189 0
+ 388 0200 BB68     		ldr	r3, [r7, #8]
+ 389 0202 9A8D     		ldrh	r2, [r3, #44]
+ 188:../src/usbh_adk_core.c **** 			   (pphost->device_prop.Dev_Desc.idProduct == USB_ACCESSORY_PRODUCT_ID ||
+ 390              		.loc 1 188 0
+ 391 0204 42F60153 		movw	r3, #11521
+ 392 0208 9A42     		cmp	r2, r3
+ 393 020a 05D1     		bne	.L29
+ 394              	.L30:
+ 190:../src/usbh_adk_core.c **** 		    ){
+ 191:../src/usbh_adk_core.c **** 				ADK_Machine.initstate = ADK_INIT_CONFIGURE_ANDROID;
+ 395              		.loc 1 191 0
+ 396 020c 884B     		ldr	r3, .L56
+ 397 020e 4FF00A02 		mov	r2, #10
+ 398 0212 83F88E20 		strb	r2, [r3, #142]
+ 192:../src/usbh_adk_core.c **** 			}else{
+ 193:../src/usbh_adk_core.c **** 				ADK_Machine.initstate = ADK_INIT_GET_PROTOCOL;
+ 194:../src/usbh_adk_core.c **** 				ADK_Machine.protocol = -1;
+ 195:../src/usbh_adk_core.c **** 			}
+ 196:../src/usbh_adk_core.c **** 			break;
+ 399              		.loc 1 196 0
+ 400 0216 30E1     		b	.L32
+ 401              	.L29:
+ 193:../src/usbh_adk_core.c **** 				ADK_Machine.initstate = ADK_INIT_GET_PROTOCOL;
+ 402              		.loc 1 193 0
+ 403 0218 854B     		ldr	r3, .L56
+ 404 021a 4FF00102 		mov	r2, #1
+ 405 021e 83F88E20 		strb	r2, [r3, #142]
+ 194:../src/usbh_adk_core.c **** 				ADK_Machine.protocol = -1;
+ 406              		.loc 1 194 0
+ 407 0222 834B     		ldr	r3, .L56
+ 408 0224 4FF6FF72 		movw	r2, #65535
+ 409 0228 A3F81022 		strh	r2, [r3, #528]	@ movhi
+ 410              		.loc 1 196 0
+ 411 022c 25E1     		b	.L32
+ 412              	.L16:
+ 197:../src/usbh_adk_core.c **** 
+ 198:../src/usbh_adk_core.c **** 		case ADK_INIT_GET_PROTOCOL:
+ 199:../src/usbh_adk_core.c **** 			if ( USBH_ADK_getProtocol ( pdev, phost ) == USBH_OK ){
+ 413              		.loc 1 199 0
+ 414 022e 7868     		ldr	r0, [r7, #4]
+ 415 0230 3968     		ldr	r1, [r7, #0]
+ 416 0232 00F0BDF9 		bl	USBH_ADK_getProtocol
+ 417 0236 0346     		mov	r3, r0
+ 418 0238 002B     		cmp	r3, #0
+ 419 023a 40F0E980 		bne	.L47
+ 200:../src/usbh_adk_core.c **** 				if (ADK_Machine.protocol >= 1) {
+ 420              		.loc 1 200 0
+ 421 023e 7C4B     		ldr	r3, .L56
+ 422 0240 B3F81032 		ldrh	r3, [r3, #528]
+ 423 0244 002B     		cmp	r3, #0
+ 424 0246 08D0     		beq	.L34
+ 201:../src/usbh_adk_core.c **** 					ADK_Machine.initstate = ADK_INIT_SEND_MANUFACTURER;
+ 425              		.loc 1 201 0
+ 426 0248 794B     		ldr	r3, .L56
+ 427 024a 4FF00202 		mov	r2, #2
+ 428 024e 83F88E20 		strb	r2, [r3, #142]
+ 202:../src/usbh_adk_core.c **** #ifdef DEBUG
+ 203:../src/usbh_adk_core.c **** 					xputs("ADK:device supports protcol 1\n");
+ 429              		.loc 1 203 0
+ 430 0252 7948     		ldr	r0, .L56+8
+ 431 0254 FFF7FEFF 		bl	xputs
+ 204:../src/usbh_adk_core.c **** #endif
+ 205:../src/usbh_adk_core.c **** 				} else {
+ 206:../src/usbh_adk_core.c **** 					ADK_Machine.initstate = ADK_INIT_FAILED;
+ 207:../src/usbh_adk_core.c **** 		#ifdef DEBUG
+ 208:../src/usbh_adk_core.c **** 					xputs("ADK:could not read device protocol version\n");
+ 209:../src/usbh_adk_core.c **** 		#endif
+ 210:../src/usbh_adk_core.c **** 				}
+ 211:../src/usbh_adk_core.c **** 			}
+ 212:../src/usbh_adk_core.c **** 			break;
+ 432              		.loc 1 212 0
+ 433 0258 DAE0     		b	.L47
+ 434              	.L34:
+ 206:../src/usbh_adk_core.c **** 					ADK_Machine.initstate = ADK_INIT_FAILED;
+ 435              		.loc 1 206 0
+ 436 025a 754B     		ldr	r3, .L56
+ 437 025c 4FF00C02 		mov	r2, #12
+ 438 0260 83F88E20 		strb	r2, [r3, #142]
+ 208:../src/usbh_adk_core.c **** 					xputs("ADK:could not read device protocol version\n");
+ 439              		.loc 1 208 0
+ 440 0264 7548     		ldr	r0, .L56+12
+ 441 0266 FFF7FEFF 		bl	xputs
+ 442              		.loc 1 212 0
+ 443 026a D1E0     		b	.L47
+ 444              	.L17:
+ 213:../src/usbh_adk_core.c **** 	  case ADK_INIT_SEND_MANUFACTURER:
+ 214:../src/usbh_adk_core.c **** 			if( USBH_ADK_sendString ( pdev, phost, ACCESSORY_STRING_MANUFACTURER, (uint8_t*)ADK_Machine.acc_
+ 445              		.loc 1 214 0
+ 446 026c 7868     		ldr	r0, [r7, #4]
+ 447 026e 3968     		ldr	r1, [r7, #0]
+ 448 0270 4FF00002 		mov	r2, #0
+ 449 0274 724B     		ldr	r3, .L56+16
+ 450 0276 00F0C3F9 		bl	USBH_ADK_sendString
+ 451 027a 0346     		mov	r3, r0
+ 452 027c 002B     		cmp	r3, #0
+ 453 027e 40F0C980 		bne	.L48
+ 215:../src/usbh_adk_core.c **** 				ADK_Machine.initstate = ADK_INIT_SEND_MODEL;
+ 454              		.loc 1 215 0
+ 455 0282 6B4B     		ldr	r3, .L56
+ 456 0284 4FF00302 		mov	r2, #3
+ 457 0288 83F88E20 		strb	r2, [r3, #142]
+ 216:../src/usbh_adk_core.c **** #ifdef DEBUG
+ 217:../src/usbh_adk_core.c **** 					xputs("ADK:SEND_MANUFACTURER\n");
+ 458              		.loc 1 217 0
+ 459 028c 6D48     		ldr	r0, .L56+20
+ 460 028e FFF7FEFF 		bl	xputs
+ 218:../src/usbh_adk_core.c **** #endif
+ 219:../src/usbh_adk_core.c **** 			}
+ 220:../src/usbh_adk_core.c **** 			break;
+ 461              		.loc 1 220 0
+ 462 0292 BFE0     		b	.L48
+ 463              	.L18:
+ 221:../src/usbh_adk_core.c **** 	  case ADK_INIT_SEND_MODEL:
+ 222:../src/usbh_adk_core.c **** 			if( USBH_ADK_sendString ( pdev, phost, ACCESSORY_STRING_MODEL, (uint8_t*)ADK_Machine.acc_model)=
+ 464              		.loc 1 222 0
+ 465 0294 7868     		ldr	r0, [r7, #4]
+ 466 0296 3968     		ldr	r1, [r7, #0]
+ 467 0298 4FF00102 		mov	r2, #1
+ 468 029c 6A4B     		ldr	r3, .L56+24
+ 469 029e 00F0AFF9 		bl	USBH_ADK_sendString
+ 470 02a2 0346     		mov	r3, r0
+ 471 02a4 002B     		cmp	r3, #0
+ 472 02a6 40F0B780 		bne	.L49
+ 223:../src/usbh_adk_core.c **** 				ADK_Machine.initstate = ADK_INIT_SEND_DESCRIPTION;
+ 473              		.loc 1 223 0
+ 474 02aa 614B     		ldr	r3, .L56
+ 475 02ac 4FF00402 		mov	r2, #4
+ 476 02b0 83F88E20 		strb	r2, [r3, #142]
+ 224:../src/usbh_adk_core.c **** #ifdef DEBUG
+ 225:../src/usbh_adk_core.c **** 					xputs("ADK:SEND_MODEL\n");
+ 477              		.loc 1 225 0
+ 478 02b4 6548     		ldr	r0, .L56+28
+ 479 02b6 FFF7FEFF 		bl	xputs
+ 226:../src/usbh_adk_core.c **** #endif
+ 227:../src/usbh_adk_core.c **** 			}
+ 228:../src/usbh_adk_core.c **** 			break;
+ 480              		.loc 1 228 0
+ 481 02ba ADE0     		b	.L49
+ 482              	.L19:
+ 229:../src/usbh_adk_core.c **** 	  case ADK_INIT_SEND_DESCRIPTION:
+ 230:../src/usbh_adk_core.c **** 			if( USBH_ADK_sendString ( pdev, phost, ACCESSORY_STRING_DESCRIPTION, (uint8_t*)ADK_Machine.acc_d
+ 483              		.loc 1 230 0
+ 484 02bc 7868     		ldr	r0, [r7, #4]
+ 485 02be 3968     		ldr	r1, [r7, #0]
+ 486 02c0 4FF00202 		mov	r2, #2
+ 487 02c4 624B     		ldr	r3, .L56+32
+ 488 02c6 00F09BF9 		bl	USBH_ADK_sendString
+ 489 02ca 0346     		mov	r3, r0
+ 490 02cc 002B     		cmp	r3, #0
+ 491 02ce 40F0A580 		bne	.L50
+ 231:../src/usbh_adk_core.c **** 				ADK_Machine.initstate = ADK_INIT_SEND_VERSION;
+ 492              		.loc 1 231 0
+ 493 02d2 574B     		ldr	r3, .L56
+ 494 02d4 4FF00502 		mov	r2, #5
+ 495 02d8 83F88E20 		strb	r2, [r3, #142]
+ 232:../src/usbh_adk_core.c **** #ifdef DEBUG
+ 233:../src/usbh_adk_core.c **** 					xputs("ADK:SEND_DESCRIPTION\n");
+ 496              		.loc 1 233 0
+ 497 02dc 5D48     		ldr	r0, .L56+36
+ 498 02de FFF7FEFF 		bl	xputs
+ 234:../src/usbh_adk_core.c **** #endif
+ 235:../src/usbh_adk_core.c **** 			}
+ 236:../src/usbh_adk_core.c **** 			break;
+ 499              		.loc 1 236 0
+ 500 02e2 9BE0     		b	.L50
+ 501              	.L20:
+ 237:../src/usbh_adk_core.c **** 	  case ADK_INIT_SEND_VERSION:
+ 238:../src/usbh_adk_core.c **** 			if( USBH_ADK_sendString ( pdev, phost, ACCESSORY_STRING_VERSION, (uint8_t*)ADK_Machine.acc_versi
+ 502              		.loc 1 238 0
+ 503 02e4 7868     		ldr	r0, [r7, #4]
+ 504 02e6 3968     		ldr	r1, [r7, #0]
+ 505 02e8 4FF00302 		mov	r2, #3
+ 506 02ec 5A4B     		ldr	r3, .L56+40
+ 507 02ee 00F087F9 		bl	USBH_ADK_sendString
+ 508 02f2 0346     		mov	r3, r0
+ 509 02f4 002B     		cmp	r3, #0
+ 510 02f6 40F09380 		bne	.L51
+ 239:../src/usbh_adk_core.c **** 				ADK_Machine.initstate = ADK_INIT_SEND_URI;
+ 511              		.loc 1 239 0
+ 512 02fa 4D4B     		ldr	r3, .L56
+ 513 02fc 4FF00602 		mov	r2, #6
+ 514 0300 83F88E20 		strb	r2, [r3, #142]
+ 240:../src/usbh_adk_core.c **** #ifdef DEBUG
+ 241:../src/usbh_adk_core.c **** 					xputs("ADK:SEND_VERSION\n");
+ 515              		.loc 1 241 0
+ 516 0304 5548     		ldr	r0, .L56+44
+ 517 0306 FFF7FEFF 		bl	xputs
+ 242:../src/usbh_adk_core.c **** #endif
+ 243:../src/usbh_adk_core.c **** 			}
+ 244:../src/usbh_adk_core.c **** 			break;
+ 518              		.loc 1 244 0
+ 519 030a 89E0     		b	.L51
+ 520              	.L21:
+ 245:../src/usbh_adk_core.c **** 	  case ADK_INIT_SEND_URI:
+ 246:../src/usbh_adk_core.c **** 			if( USBH_ADK_sendString ( pdev, phost, ACCESSORY_STRING_URI, (uint8_t*)ADK_Machine.acc_uri)== US
+ 521              		.loc 1 246 0
+ 522 030c 7868     		ldr	r0, [r7, #4]
+ 523 030e 3968     		ldr	r1, [r7, #0]
+ 524 0310 4FF00402 		mov	r2, #4
+ 525 0314 524B     		ldr	r3, .L56+48
+ 526 0316 00F073F9 		bl	USBH_ADK_sendString
+ 527 031a 0346     		mov	r3, r0
+ 528 031c 002B     		cmp	r3, #0
+ 529 031e 40F08180 		bne	.L52
+ 247:../src/usbh_adk_core.c **** 				ADK_Machine.initstate = ADK_INIT_SEND_SERIAL;
+ 530              		.loc 1 247 0
+ 531 0322 434B     		ldr	r3, .L56
+ 532 0324 4FF00702 		mov	r2, #7
+ 533 0328 83F88E20 		strb	r2, [r3, #142]
+ 248:../src/usbh_adk_core.c **** #ifdef DEBUG
+ 249:../src/usbh_adk_core.c **** 					xputs("ADK:SEND_URI\n");
+ 534              		.loc 1 249 0
+ 535 032c 4D48     		ldr	r0, .L56+52
+ 536 032e FFF7FEFF 		bl	xputs
+ 250:../src/usbh_adk_core.c **** #endif
+ 251:../src/usbh_adk_core.c **** 			}
+ 252:../src/usbh_adk_core.c **** 			break;
+ 537              		.loc 1 252 0
+ 538 0332 77E0     		b	.L52
+ 539              	.L22:
+ 253:../src/usbh_adk_core.c **** 	  case ADK_INIT_SEND_SERIAL:
+ 254:../src/usbh_adk_core.c **** 			if( USBH_ADK_sendString ( pdev, phost, ACCESSORY_STRING_SERIAL, (uint8_t*)ADK_Machine.acc_serial
+ 540              		.loc 1 254 0
+ 541 0334 7868     		ldr	r0, [r7, #4]
+ 542 0336 3968     		ldr	r1, [r7, #0]
+ 543 0338 4FF00502 		mov	r2, #5
+ 544 033c 4A4B     		ldr	r3, .L56+56
+ 545 033e 00F05FF9 		bl	USBH_ADK_sendString
+ 546 0342 0346     		mov	r3, r0
+ 547 0344 002B     		cmp	r3, #0
+ 548 0346 6FD1     		bne	.L53
+ 255:../src/usbh_adk_core.c **** 				ADK_Machine.initstate = ADK_INIT_SWITCHING;
+ 549              		.loc 1 255 0
+ 550 0348 394B     		ldr	r3, .L56
+ 551 034a 4FF00802 		mov	r2, #8
+ 552 034e 83F88E20 		strb	r2, [r3, #142]
+ 256:../src/usbh_adk_core.c **** #ifdef DEBUG
+ 257:../src/usbh_adk_core.c **** 					xputs("ADK:SEND_SERIAL\n");
+ 553              		.loc 1 257 0
+ 554 0352 4648     		ldr	r0, .L56+60
+ 555 0354 FFF7FEFF 		bl	xputs
+ 258:../src/usbh_adk_core.c **** #endif
+ 259:../src/usbh_adk_core.c **** 			}
+ 260:../src/usbh_adk_core.c **** 			break;
+ 556              		.loc 1 260 0
+ 557 0358 66E0     		b	.L53
+ 558              	.L23:
+ 261:../src/usbh_adk_core.c **** 	  case ADK_INIT_SWITCHING:
+ 262:../src/usbh_adk_core.c **** 			if( USBH_ADK_switch ( pdev, phost)== USBH_OK ){
+ 559              		.loc 1 262 0
+ 560 035a 7868     		ldr	r0, [r7, #4]
+ 561 035c 3968     		ldr	r1, [r7, #0]
+ 562 035e 00F07DF9 		bl	USBH_ADK_switch
+ 563 0362 0346     		mov	r3, r0
+ 564 0364 002B     		cmp	r3, #0
+ 565 0366 61D1     		bne	.L54
+ 263:../src/usbh_adk_core.c **** 				ADK_Machine.initstate = ADK_INIT_GET_DEVDESC;
+ 566              		.loc 1 263 0
+ 567 0368 314B     		ldr	r3, .L56
+ 568 036a 4FF00902 		mov	r2, #9
+ 569 036e 83F88E20 		strb	r2, [r3, #142]
+ 264:../src/usbh_adk_core.c **** #ifdef DEBUG
+ 265:../src/usbh_adk_core.c **** 					xputs("ADK:switch to accessory mode\n");
+ 570              		.loc 1 265 0
+ 571 0372 3F48     		ldr	r0, .L56+64
+ 572 0374 FFF7FEFF 		bl	xputs
+ 266:../src/usbh_adk_core.c **** #endif
+ 267:../src/usbh_adk_core.c **** 			}
+ 268:../src/usbh_adk_core.c **** 			break;
+ 573              		.loc 1 268 0
+ 574 0378 58E0     		b	.L54
+ 575              	.L24:
+ 269:../src/usbh_adk_core.c **** 
+ 270:../src/usbh_adk_core.c **** 	  case ADK_INIT_GET_DEVDESC:
+ 271:../src/usbh_adk_core.c **** 			if( USBH_Get_DevDesc(pdev , phost, USB_DEVICE_DESC_SIZE)== USBH_OK ){
+ 576              		.loc 1 271 0
+ 577 037a 7868     		ldr	r0, [r7, #4]
+ 578 037c 3968     		ldr	r1, [r7, #0]
+ 579 037e 4FF01202 		mov	r2, #18
+ 580 0382 FFF7FEFF 		bl	USBH_Get_DevDesc
+ 581 0386 0346     		mov	r3, r0
+ 582 0388 002B     		cmp	r3, #0
+ 583 038a 75D1     		bne	.L55
+ 272:../src/usbh_adk_core.c **** 				ADK_Machine.initstate = ADK_INIT_DONE;
+ 584              		.loc 1 272 0
+ 585 038c 284B     		ldr	r3, .L56
+ 586 038e 4FF00B02 		mov	r2, #11
+ 587 0392 83F88E20 		strb	r2, [r3, #142]
+ 273:../src/usbh_adk_core.c **** 				ADK_Machine.pid = pphost->device_prop.Dev_Desc.idProduct;
+ 588              		.loc 1 273 0
+ 589 0396 BB68     		ldr	r3, [r7, #8]
+ 590 0398 9A8D     		ldrh	r2, [r3, #44]
+ 591 039a 254B     		ldr	r3, .L56
+ 592 039c 1A80     		strh	r2, [r3, #0]	@ movhi
+ 274:../src/usbh_adk_core.c **** 				//check vaild device
+ 275:../src/usbh_adk_core.c **** 				if(pphost->device_prop.Dev_Desc.idVendor == USB_ACCESSORY_VENDOR_ID &&
+ 593              		.loc 1 275 0
+ 594 039e BB68     		ldr	r3, [r7, #8]
+ 595 03a0 5A8D     		ldrh	r2, [r3, #42]
+ 596 03a2 41F6D103 		movw	r3, #6353
+ 597 03a6 9A42     		cmp	r2, r3
+ 598 03a8 10D1     		bne	.L43
+ 276:../src/usbh_adk_core.c **** 				   (pphost->device_prop.Dev_Desc.idProduct == USB_ACCESSORY_PRODUCT_ID ||
+ 599              		.loc 1 276 0 discriminator 1
+ 600 03aa BB68     		ldr	r3, [r7, #8]
+ 601 03ac 9B8D     		ldrh	r3, [r3, #44]
+ 275:../src/usbh_adk_core.c **** 				if(pphost->device_prop.Dev_Desc.idVendor == USB_ACCESSORY_VENDOR_ID &&
+ 602              		.loc 1 275 0 discriminator 1
+ 603 03ae B3F5345F 		cmp	r3, #11520
+ 604 03b2 05D0     		beq	.L44
+ 277:../src/usbh_adk_core.c **** 				    pphost->device_prop.Dev_Desc.idProduct == USB_ACCESSORY_ADB_PRODUCT_ID)
+ 605              		.loc 1 277 0
+ 606 03b4 BB68     		ldr	r3, [r7, #8]
+ 607 03b6 9A8D     		ldrh	r2, [r3, #44]
+ 276:../src/usbh_adk_core.c **** 				   (pphost->device_prop.Dev_Desc.idProduct == USB_ACCESSORY_PRODUCT_ID ||
+ 608              		.loc 1 276 0
+ 609 03b8 42F60153 		movw	r3, #11521
+ 610 03bc 9A42     		cmp	r2, r3
+ 611 03be 05D1     		bne	.L43
+ 612              	.L44:
+ 278:../src/usbh_adk_core.c **** 			    ){
+ 279:../src/usbh_adk_core.c **** 					ADK_Machine.initstate = ADK_INIT_CONFIGURE_ANDROID;
+ 613              		.loc 1 279 0
+ 614 03c0 1B4B     		ldr	r3, .L56
+ 615 03c2 4FF00A02 		mov	r2, #10
+ 616 03c6 83F88E20 		strb	r2, [r3, #142]
+ 280:../src/usbh_adk_core.c **** 				}else{
+ 281:../src/usbh_adk_core.c **** 					ADK_Machine.initstate = ADK_INIT_FAILED;
+ 282:../src/usbh_adk_core.c **** 				}
+ 283:../src/usbh_adk_core.c **** 			}
+ 284:../src/usbh_adk_core.c **** 			break;
+ 617              		.loc 1 284 0
+ 618 03ca 55E0     		b	.L55
+ 619              	.L43:
+ 281:../src/usbh_adk_core.c **** 					ADK_Machine.initstate = ADK_INIT_FAILED;
+ 620              		.loc 1 281 0
+ 621 03cc 184B     		ldr	r3, .L56
+ 622 03ce 4FF00C02 		mov	r2, #12
+ 623 03d2 83F88E20 		strb	r2, [r3, #142]
+ 624              		.loc 1 284 0
+ 625 03d6 4FE0     		b	.L55
+ 626              	.L25:
+ 285:../src/usbh_adk_core.c **** 
+ 286:../src/usbh_adk_core.c **** 	  case ADK_INIT_CONFIGURE_ANDROID:
+ 287:../src/usbh_adk_core.c **** 		    USBH_ADK_configAndroid(pdev, phost);
+ 627              		.loc 1 287 0
+ 628 03d8 7868     		ldr	r0, [r7, #4]
+ 629 03da 3968     		ldr	r1, [r7, #0]
+ 630 03dc 00F066F9 		bl	USBH_ADK_configAndroid
+ 288:../src/usbh_adk_core.c **** 		    ADK_Machine.initstate = ADK_INIT_DONE;
+ 631              		.loc 1 288 0
+ 632 03e0 134B     		ldr	r3, .L56
+ 633 03e2 4FF00B02 		mov	r2, #11
+ 634 03e6 83F88E20 		strb	r2, [r3, #142]
+ 289:../src/usbh_adk_core.c **** 		  	break;
+ 635              		.loc 1 289 0
+ 636 03ea 46E0     		b	.L32
+ 637              	.L26:
+ 290:../src/usbh_adk_core.c **** 
+ 291:../src/usbh_adk_core.c **** 	  case ADK_INIT_DONE:
+ 292:../src/usbh_adk_core.c **** 		  	status = USBH_OK;
+ 638              		.loc 1 292 0
+ 639 03ec 4FF00003 		mov	r3, #0
+ 640 03f0 FB73     		strb	r3, [r7, #15]
+ 293:../src/usbh_adk_core.c **** 		  	ADK_Machine.state = ADK_IDLE;
+ 641              		.loc 1 293 0
+ 642 03f2 0F4B     		ldr	r3, .L56
+ 643 03f4 4FF00002 		mov	r2, #0
+ 644 03f8 83F88F20 		strb	r2, [r3, #143]
+ 294:../src/usbh_adk_core.c **** #ifdef DEBUG
+ 295:../src/usbh_adk_core.c **** 					xputs("ADK:configuration complete.\n");
+ 645              		.loc 1 295 0
+ 646 03fc 1D48     		ldr	r0, .L56+68
+ 647 03fe FFF7FEFF 		bl	xputs
+ 296:../src/usbh_adk_core.c **** #endif
+ 297:../src/usbh_adk_core.c **** 		  	break;
+ 648              		.loc 1 297 0
+ 649 0402 3AE0     		b	.L32
+ 650              	.L27:
+ 298:../src/usbh_adk_core.c **** 
+ 299:../src/usbh_adk_core.c **** 	  case ADK_INIT_FAILED:
+ 300:../src/usbh_adk_core.c **** 			status = USBH_UNRECOVERED_ERROR;
+ 651              		.loc 1 300 0
+ 652 0404 4FF00403 		mov	r3, #4
+ 653 0408 FB73     		strb	r3, [r7, #15]
+ 301:../src/usbh_adk_core.c **** 			break;
+ 654              		.loc 1 301 0
+ 655 040a 36E0     		b	.L32
+ 656              	.L46:
+ 302:../src/usbh_adk_core.c **** 
+ 303:../src/usbh_adk_core.c **** 	  default:
+ 304:../src/usbh_adk_core.c **** 		  break;
+ 657              		.loc 1 304 0
+ 658 040c 00BF     		nop
+ 659 040e 34E0     		b	.L32
+ 660              	.L47:
+ 212:../src/usbh_adk_core.c **** 			break;
+ 661              		.loc 1 212 0
+ 662 0410 00BF     		nop
+ 663 0412 32E0     		b	.L32
+ 664              	.L48:
+ 220:../src/usbh_adk_core.c **** 			break;
+ 665              		.loc 1 220 0
+ 666 0414 00BF     		nop
+ 667 0416 30E0     		b	.L32
+ 668              	.L49:
+ 228:../src/usbh_adk_core.c **** 			break;
+ 669              		.loc 1 228 0
+ 670 0418 00BF     		nop
+ 671 041a 2EE0     		b	.L32
+ 672              	.L50:
+ 236:../src/usbh_adk_core.c **** 			break;
+ 673              		.loc 1 236 0
+ 674 041c 00BF     		nop
+ 675 041e 2CE0     		b	.L32
+ 676              	.L51:
+ 244:../src/usbh_adk_core.c **** 			break;
+ 677              		.loc 1 244 0
+ 678 0420 00BF     		nop
+ 679 0422 2AE0     		b	.L32
+ 680              	.L52:
+ 252:../src/usbh_adk_core.c **** 			break;
+ 681              		.loc 1 252 0
+ 682 0424 00BF     		nop
+ 683 0426 28E0     		b	.L32
+ 684              	.L53:
+ 260:../src/usbh_adk_core.c **** 			break;
+ 685              		.loc 1 260 0
+ 686 0428 00BF     		nop
+ 687 042a 26E0     		b	.L32
+ 688              	.L54:
+ 268:../src/usbh_adk_core.c **** 			break;
+ 689              		.loc 1 268 0
+ 690 042c 00BF     		nop
+ 691 042e 24E0     		b	.L32
+ 692              	.L57:
+ 693              		.align	2
+ 694              	.L56:
+ 695 0430 00000000 		.word	ADK_Machine
+ 696 0434 24000000 		.word	.LC2
+ 697 0438 3C000000 		.word	.LC3
+ 698 043c 5C000000 		.word	.LC4
+ 699 0440 90000000 		.word	ADK_Machine+144
+ 700 0444 88000000 		.word	.LC5
+ 701 0448 D0000000 		.word	ADK_Machine+208
+ 702 044c A0000000 		.word	.LC6
+ 703 0450 10010000 		.word	ADK_Machine+272
+ 704 0454 B0000000 		.word	.LC7
+ 705 0458 50010000 		.word	ADK_Machine+336
+ 706 045c C8000000 		.word	.LC8
+ 707 0460 90010000 		.word	ADK_Machine+400
+ 708 0464 DC000000 		.word	.LC9
+ 709 0468 D0010000 		.word	ADK_Machine+464
+ 710 046c EC000000 		.word	.LC10
+ 711 0470 00010000 		.word	.LC11
+ 712 0474 20010000 		.word	.LC12
+ 713              	.L55:
+ 284:../src/usbh_adk_core.c **** 			break;
+ 714              		.loc 1 284 0
+ 715 0478 00BF     		nop
+ 716              	.L32:
+ 305:../src/usbh_adk_core.c **** 	  }
+ 306:../src/usbh_adk_core.c **** 
+ 307:../src/usbh_adk_core.c **** 	return status;
+ 717              		.loc 1 307 0
+ 718 047a FB7B     		ldrb	r3, [r7, #15]	@ zero_extendqisi2
+ 308:../src/usbh_adk_core.c **** }
+ 719              		.loc 1 308 0
+ 720 047c 1846     		mov	r0, r3
+ 721 047e 07F11007 		add	r7, r7, #16
+ 722 0482 BD46     		mov	sp, r7
+ 723 0484 80BD     		pop	{r7, pc}
+ 724              		.cfi_endproc
+ 725              	.LFE113:
+ 727 0486 00BF     		.align	2
+ 728              		.thumb
+ 729              		.thumb_func
+ 731              	USBH_ADK_Handle:
+ 732              	.LFB114:
+ 309:../src/usbh_adk_core.c **** 
+ 310:../src/usbh_adk_core.c **** /**
+ 311:../src/usbh_adk_core.c ****   * @brief  USBH_ADK_Handle
+ 312:../src/usbh_adk_core.c ****   *         ADK state machine handler
+ 313:../src/usbh_adk_core.c ****   * @param  pdev: Selected device
+ 314:../src/usbh_adk_core.c ****   * @param  hdev: Selected device property
+ 315:../src/usbh_adk_core.c ****   * @retval USBH_Status
+ 316:../src/usbh_adk_core.c ****   */
+ 317:../src/usbh_adk_core.c **** static USBH_Status USBH_ADK_Handle(USB_OTG_CORE_HANDLE *pdev, void   *phost)
+ 318:../src/usbh_adk_core.c **** {
+ 733              		.loc 1 318 0
+ 734              		.cfi_startproc
+ 735              		@ args = 0, pretend = 0, frame = 16
+ 736              		@ frame_needed = 1, uses_anonymous_args = 0
+ 737 0488 80B5     		push	{r7, lr}
+ 738              	.LCFI12:
+ 739              		.cfi_def_cfa_offset 8
+ 740              		.cfi_offset 7, -8
+ 741              		.cfi_offset 14, -4
+ 742 048a 84B0     		sub	sp, sp, #16
+ 743              	.LCFI13:
+ 744              		.cfi_def_cfa_offset 24
+ 745 048c 00AF     		add	r7, sp, #0
+ 746              	.LCFI14:
+ 747              		.cfi_def_cfa_register 7
+ 748 048e 7860     		str	r0, [r7, #4]
+ 749 0490 3960     		str	r1, [r7, #0]
+ 319:../src/usbh_adk_core.c **** 	USBH_Status status = USBH_BUSY;
+ 750              		.loc 1 319 0
+ 751 0492 4FF00103 		mov	r3, #1
+ 752 0496 FB73     		strb	r3, [r7, #15]
+ 320:../src/usbh_adk_core.c **** 	URB_STATE URB_Status;
+ 321:../src/usbh_adk_core.c **** 	HC_STATUS HCD_Status;
+ 322:../src/usbh_adk_core.c **** 	uint32_t HCD_GXferCnt;
+ 323:../src/usbh_adk_core.c **** 
+ 324:../src/usbh_adk_core.c **** 	switch (ADK_Machine.state)
+ 753              		.loc 1 324 0
+ 754 0498 424B     		ldr	r3, .L72
+ 755 049a 93F88F30 		ldrb	r3, [r3, #143]	@ zero_extendqisi2
+ 756 049e 032B     		cmp	r3, #3
+ 757 04a0 72D8     		bhi	.L69
+ 758 04a2 01A2     		adr	r2, .L64
+ 759 04a4 52F823F0 		ldr	pc, [r2, r3, lsl #2]
+ 760              		.align	2
+ 761              	.L64:
+ 762 04a8 B9040000 		.word	.L60+1
+ 763 04ac C3040000 		.word	.L61+1
+ 764 04b0 73050000 		.word	.L62+1
+ 765 04b4 23050000 		.word	.L63+1
+ 766              	.L60:
+ 325:../src/usbh_adk_core.c **** 	{
+ 326:../src/usbh_adk_core.c **** 		case ADK_IDLE:
+ 327:../src/usbh_adk_core.c **** 			ADK_Machine.state = ADK_SEND_DATA;
+ 767              		.loc 1 327 0
+ 768 04b8 3A4B     		ldr	r3, .L72
+ 769 04ba 4FF00102 		mov	r2, #1
+ 770 04be 83F88F20 		strb	r2, [r3, #143]
+ 771              	.L61:
+ 328:../src/usbh_adk_core.c **** 
+ 329:../src/usbh_adk_core.c **** 		case ADK_SEND_DATA:
+ 330:../src/usbh_adk_core.c **** 			URB_Status = HCD_GetURB_State(pdev , ADK_Machine.hc_num_out);
+ 772              		.loc 1 330 0
+ 773 04c2 384B     		ldr	r3, .L72
+ 774 04c4 DB78     		ldrb	r3, [r3, #3]	@ zero_extendqisi2
+ 775 04c6 7868     		ldr	r0, [r7, #4]
+ 776 04c8 1946     		mov	r1, r3
+ 777 04ca FFF7FEFF 		bl	HCD_GetURB_State
+ 778 04ce 0346     		mov	r3, r0
+ 779 04d0 BB73     		strb	r3, [r7, #14]
+ 331:../src/usbh_adk_core.c **** 			HCD_Status = HCD_GetHCState(pdev , ADK_Machine.hc_num_out);
+ 780              		.loc 1 331 0
+ 781 04d2 344B     		ldr	r3, .L72
+ 782 04d4 DB78     		ldrb	r3, [r3, #3]	@ zero_extendqisi2
+ 783 04d6 7868     		ldr	r0, [r7, #4]
+ 784 04d8 1946     		mov	r1, r3
+ 785 04da FFF7FEFF 		bl	HCD_GetHCState
+ 786 04de 0346     		mov	r3, r0
+ 787 04e0 7B73     		strb	r3, [r7, #13]
+ 332:../src/usbh_adk_core.c **** 			HCD_GXferCnt = HCD_GetXferCnt(pdev , ADK_Machine.hc_num_out);
+ 788              		.loc 1 332 0
+ 789 04e2 304B     		ldr	r3, .L72
+ 790 04e4 DB78     		ldrb	r3, [r3, #3]	@ zero_extendqisi2
+ 791 04e6 7868     		ldr	r0, [r7, #4]
+ 792 04e8 1946     		mov	r1, r3
+ 793 04ea FFF7FEFF 		bl	HCD_GetXferCnt
+ 794 04ee B860     		str	r0, [r7, #8]
+ 333:../src/usbh_adk_core.c **** 
+ 334:../src/usbh_adk_core.c **** 			if(ADK_Machine.outSize > 0){
+ 795              		.loc 1 334 0
+ 796 04f0 2C4B     		ldr	r3, .L72
+ 797 04f2 B3F88C30 		ldrh	r3, [r3, #140]
+ 798 04f6 002B     		cmp	r3, #0
+ 799 04f8 48D0     		beq	.L70
+ 335:../src/usbh_adk_core.c **** 				USBH_BulkSendData(pdev, ADK_Machine.outbuff, ADK_Machine.outSize, ADK_Machine.hc_num_out);
+ 800              		.loc 1 335 0
+ 801 04fa 2A4B     		ldr	r3, .L72
+ 802 04fc B3F88C20 		ldrh	r2, [r3, #140]
+ 803 0500 284B     		ldr	r3, .L72
+ 804 0502 DB78     		ldrb	r3, [r3, #3]	@ zero_extendqisi2
+ 805 0504 7868     		ldr	r0, [r7, #4]
+ 806 0506 2849     		ldr	r1, .L72+4
+ 807 0508 FFF7FEFF 		bl	USBH_BulkSendData
+ 336:../src/usbh_adk_core.c **** 				ADK_Machine.outSize = 0;
+ 808              		.loc 1 336 0
+ 809 050c 254B     		ldr	r3, .L72
+ 810 050e 4FF00002 		mov	r2, #0
+ 811 0512 A3F88C20 		strh	r2, [r3, #140]	@ movhi
+ 337:../src/usbh_adk_core.c **** 				ADK_Machine.state = ADK_GET_DATA;
+ 812              		.loc 1 337 0
+ 813 0516 234B     		ldr	r3, .L72
+ 814 0518 4FF00302 		mov	r2, #3
+ 815 051c 83F88F20 		strb	r2, [r3, #143]
+ 338:../src/usbh_adk_core.c **** 			}
+ 339:../src/usbh_adk_core.c **** 			break;
+ 816              		.loc 1 339 0
+ 817 0520 34E0     		b	.L70
+ 818              	.L63:
+ 340:../src/usbh_adk_core.c **** 
+ 341:../src/usbh_adk_core.c **** 		case ADK_GET_DATA:
+ 342:../src/usbh_adk_core.c **** 			URB_Status = HCD_GetURB_State(pdev , ADK_Machine.hc_num_in);
+ 819              		.loc 1 342 0
+ 820 0522 204B     		ldr	r3, .L72
+ 821 0524 9B78     		ldrb	r3, [r3, #2]	@ zero_extendqisi2
+ 822 0526 7868     		ldr	r0, [r7, #4]
+ 823 0528 1946     		mov	r1, r3
+ 824 052a FFF7FEFF 		bl	HCD_GetURB_State
+ 825 052e 0346     		mov	r3, r0
+ 826 0530 BB73     		strb	r3, [r7, #14]
+ 343:../src/usbh_adk_core.c **** 			HCD_Status = HCD_GetHCState(pdev , ADK_Machine.hc_num_in);
+ 827              		.loc 1 343 0
+ 828 0532 1C4B     		ldr	r3, .L72
+ 829 0534 9B78     		ldrb	r3, [r3, #2]	@ zero_extendqisi2
+ 830 0536 7868     		ldr	r0, [r7, #4]
+ 831 0538 1946     		mov	r1, r3
+ 832 053a FFF7FEFF 		bl	HCD_GetHCState
+ 833 053e 0346     		mov	r3, r0
+ 834 0540 7B73     		strb	r3, [r7, #13]
+ 344:../src/usbh_adk_core.c **** 			HCD_GXferCnt = HCD_GetXferCnt(pdev , ADK_Machine.hc_num_in);
+ 835              		.loc 1 344 0
+ 836 0542 184B     		ldr	r3, .L72
+ 837 0544 9B78     		ldrb	r3, [r3, #2]	@ zero_extendqisi2
+ 838 0546 7868     		ldr	r0, [r7, #4]
+ 839 0548 1946     		mov	r1, r3
+ 840 054a FFF7FEFF 		bl	HCD_GetXferCnt
+ 841 054e B860     		str	r0, [r7, #8]
+ 345:../src/usbh_adk_core.c **** 			if( URB_Status > URB_DONE){
+ 842              		.loc 1 345 0
+ 843 0550 BB7B     		ldrb	r3, [r7, #14]	@ zero_extendqisi2
+ 844 0552 012B     		cmp	r3, #1
+ 845 0554 1CD8     		bhi	.L71
+ 846              	.L67:
+ 346:../src/usbh_adk_core.c **** 				break;
+ 347:../src/usbh_adk_core.c **** 			}
+ 348:../src/usbh_adk_core.c **** 			USBH_BulkReceiveData(pdev, ADK_Machine.inbuff, USBH_ADK_DATA_SIZE, ADK_Machine.hc_num_in);
+ 847              		.loc 1 348 0
+ 848 0556 134B     		ldr	r3, .L72
+ 849 0558 9B78     		ldrb	r3, [r3, #2]	@ zero_extendqisi2
+ 850 055a 7868     		ldr	r0, [r7, #4]
+ 851 055c 1349     		ldr	r1, .L72+8
+ 852 055e 4FF04002 		mov	r2, #64
+ 853 0562 FFF7FEFF 		bl	USBH_BulkReceiveData
+ 349:../src/usbh_adk_core.c **** 			ADK_Machine.state = ADK_IDLE;
+ 854              		.loc 1 349 0
+ 855 0566 0F4B     		ldr	r3, .L72
+ 856 0568 4FF00002 		mov	r2, #0
+ 857 056c 83F88F20 		strb	r2, [r3, #143]
+ 350:../src/usbh_adk_core.c **** 			break;
+ 858              		.loc 1 350 0
+ 859 0570 0FE0     		b	.L66
+ 860              	.L62:
+ 351:../src/usbh_adk_core.c **** 
+ 352:../src/usbh_adk_core.c **** 		case ADK_BUSY:
+ 353:../src/usbh_adk_core.c **** 			ADK_Machine.state = ADK_IDLE;
+ 861              		.loc 1 353 0
+ 862 0572 0C4B     		ldr	r3, .L72
+ 863 0574 4FF00002 		mov	r2, #0
+ 864 0578 83F88F20 		strb	r2, [r3, #143]
+ 354:../src/usbh_adk_core.c **** 			ADK_Machine.outSize = 0;
+ 865              		.loc 1 354 0
+ 866 057c 094B     		ldr	r3, .L72
+ 867 057e 4FF00002 		mov	r2, #0
+ 868 0582 A3F88C20 		strh	r2, [r3, #140]	@ movhi
+ 355:../src/usbh_adk_core.c **** 			break;
+ 869              		.loc 1 355 0
+ 870 0586 04E0     		b	.L66
+ 871              	.L69:
+ 356:../src/usbh_adk_core.c **** 
+ 357:../src/usbh_adk_core.c **** 		default:
+ 358:../src/usbh_adk_core.c **** 			break;
+ 872              		.loc 1 358 0
+ 873 0588 00BF     		nop
+ 874 058a 02E0     		b	.L66
+ 875              	.L70:
+ 339:../src/usbh_adk_core.c **** 			break;
+ 876              		.loc 1 339 0
+ 877 058c 00BF     		nop
+ 878 058e 00E0     		b	.L66
+ 879              	.L71:
+ 346:../src/usbh_adk_core.c **** 				break;
+ 880              		.loc 1 346 0
+ 881 0590 00BF     		nop
+ 882              	.L66:
+ 359:../src/usbh_adk_core.c **** 	}
+ 360:../src/usbh_adk_core.c **** 	status = USBH_OK;
+ 883              		.loc 1 360 0
+ 884 0592 4FF00003 		mov	r3, #0
+ 885 0596 FB73     		strb	r3, [r7, #15]
+ 361:../src/usbh_adk_core.c **** 	return status;
+ 886              		.loc 1 361 0
+ 887 0598 FB7B     		ldrb	r3, [r7, #15]	@ zero_extendqisi2
+ 362:../src/usbh_adk_core.c **** }
+ 888              		.loc 1 362 0
+ 889 059a 1846     		mov	r0, r3
+ 890 059c 07F11007 		add	r7, r7, #16
+ 891 05a0 BD46     		mov	sp, r7
+ 892 05a2 80BD     		pop	{r7, pc}
+ 893              	.L73:
+ 894              		.align	2
+ 895              	.L72:
+ 896 05a4 00000000 		.word	ADK_Machine
+ 897 05a8 4A000000 		.word	ADK_Machine+74
+ 898 05ac 0A000000 		.word	ADK_Machine+10
+ 899              		.cfi_endproc
+ 900              	.LFE114:
+ 902              		.align	2
+ 903              		.thumb
+ 904              		.thumb_func
+ 906              	USBH_ADK_getProtocol:
+ 907              	.LFB115:
+ 363:../src/usbh_adk_core.c **** 
+ 364:../src/usbh_adk_core.c **** /**
+ 365:../src/usbh_adk_core.c ****   * @brief  USBH_ADK_getProtocol
+ 366:../src/usbh_adk_core.c ****   *         Inquiry protocol version number from Android device.
+ 367:../src/usbh_adk_core.c ****   * @param  pdev: Selected device
+ 368:../src/usbh_adk_core.c ****   * @param  hdev: Selected device property
+ 369:../src/usbh_adk_core.c ****   * @retval USBH_Status
+ 370:../src/usbh_adk_core.c ****   */
+ 371:../src/usbh_adk_core.c **** static USBH_Status USBH_ADK_getProtocol ( USB_OTG_CORE_HANDLE *pdev, USBH_HOST *phost)
+ 372:../src/usbh_adk_core.c **** {
+ 908              		.loc 1 372 0
+ 909              		.cfi_startproc
+ 910              		@ args = 0, pretend = 0, frame = 8
+ 911              		@ frame_needed = 1, uses_anonymous_args = 0
+ 912 05b0 80B5     		push	{r7, lr}
+ 913              	.LCFI15:
+ 914              		.cfi_def_cfa_offset 8
+ 915              		.cfi_offset 7, -8
+ 916              		.cfi_offset 14, -4
+ 917 05b2 82B0     		sub	sp, sp, #8
+ 918              	.LCFI16:
+ 919              		.cfi_def_cfa_offset 16
+ 920 05b4 00AF     		add	r7, sp, #0
+ 921              	.LCFI17:
+ 922              		.cfi_def_cfa_register 7
+ 923 05b6 7860     		str	r0, [r7, #4]
+ 924 05b8 3960     		str	r1, [r7, #0]
+ 373:../src/usbh_adk_core.c **** 	phost->Control.setup.b.bmRequestType = USB_D2H | USB_REQ_TYPE_VENDOR | USB_REQ_RECIPIENT_DEVICE;
+ 925              		.loc 1 373 0
+ 926 05ba 3B68     		ldr	r3, [r7, #0]
+ 927 05bc 4FF0C002 		mov	r2, #192
+ 928 05c0 1A75     		strb	r2, [r3, #20]
+ 374:../src/usbh_adk_core.c **** 	phost->Control.setup.b.bRequest = ACCESSORY_GET_PROTOCOL;
+ 929              		.loc 1 374 0
+ 930 05c2 3B68     		ldr	r3, [r7, #0]
+ 931 05c4 4FF03302 		mov	r2, #51
+ 932 05c8 5A75     		strb	r2, [r3, #21]
+ 375:../src/usbh_adk_core.c **** 	phost->Control.setup.b.wValue.w = 0;
+ 933              		.loc 1 375 0
+ 934 05ca 3B68     		ldr	r3, [r7, #0]
+ 935 05cc 4FF00002 		mov	r2, #0
+ 936 05d0 DA82     		strh	r2, [r3, #22]	@ movhi
+ 376:../src/usbh_adk_core.c **** 	phost->Control.setup.b.wIndex.w = 0;
+ 937              		.loc 1 376 0
+ 938 05d2 3B68     		ldr	r3, [r7, #0]
+ 939 05d4 4FF00002 		mov	r2, #0
+ 940 05d8 1A83     		strh	r2, [r3, #24]	@ movhi
+ 377:../src/usbh_adk_core.c **** 	phost->Control.setup.b.wLength.w = 2;
+ 941              		.loc 1 377 0
+ 942 05da 3B68     		ldr	r3, [r7, #0]
+ 943 05dc 4FF00202 		mov	r2, #2
+ 944 05e0 5A83     		strh	r2, [r3, #26]	@ movhi
+ 378:../src/usbh_adk_core.c **** 
+ 379:../src/usbh_adk_core.c **** 	/* Control Request */
+ 380:../src/usbh_adk_core.c **** 	return USBH_CtlReq(pdev, phost, &ADK_Machine.protocol , 2 );
+ 945              		.loc 1 380 0
+ 946 05e2 7868     		ldr	r0, [r7, #4]
+ 947 05e4 3968     		ldr	r1, [r7, #0]
+ 948 05e6 054A     		ldr	r2, .L76
+ 949 05e8 4FF00203 		mov	r3, #2
+ 950 05ec FFF7FEFF 		bl	USBH_CtlReq
+ 951 05f0 0346     		mov	r3, r0
+ 381:../src/usbh_adk_core.c **** }
+ 952              		.loc 1 381 0
+ 953 05f2 1846     		mov	r0, r3
+ 954 05f4 07F10807 		add	r7, r7, #8
+ 955 05f8 BD46     		mov	sp, r7
+ 956 05fa 80BD     		pop	{r7, pc}
+ 957              	.L77:
+ 958              		.align	2
+ 959              	.L76:
+ 960 05fc 10020000 		.word	ADK_Machine+528
+ 961              		.cfi_endproc
+ 962              	.LFE115:
+ 964              		.align	2
+ 965              		.thumb
+ 966              		.thumb_func
+ 968              	USBH_ADK_sendString:
+ 969              	.LFB116:
+ 382:../src/usbh_adk_core.c **** 
+ 383:../src/usbh_adk_core.c **** /**
+ 384:../src/usbh_adk_core.c ****   * @brief  USBH_ADK_sendString
+ 385:../src/usbh_adk_core.c ****   *         Send identifying string information to the Android device.
+ 386:../src/usbh_adk_core.c ****   * @param  pdev: Selected device
+ 387:../src/usbh_adk_core.c ****   * @param  hdev: Selected device property
+ 388:../src/usbh_adk_core.c ****   * @param  index: String ID
+ 389:../src/usbh_adk_core.c ****   * @param  buff: Identifying string
+ 390:../src/usbh_adk_core.c ****   * @retval USBH_Status
+ 391:../src/usbh_adk_core.c ****   */
+ 392:../src/usbh_adk_core.c **** static USBH_Status USBH_ADK_sendString ( USB_OTG_CORE_HANDLE *pdev, USBH_HOST *phost, uint16_t inde
+ 393:../src/usbh_adk_core.c **** {
+ 970              		.loc 1 393 0
+ 971              		.cfi_startproc
+ 972              		@ args = 0, pretend = 0, frame = 24
+ 973              		@ frame_needed = 1, uses_anonymous_args = 0
+ 974 0600 80B5     		push	{r7, lr}
+ 975              	.LCFI18:
+ 976              		.cfi_def_cfa_offset 8
+ 977              		.cfi_offset 7, -8
+ 978              		.cfi_offset 14, -4
+ 979 0602 86B0     		sub	sp, sp, #24
+ 980              	.LCFI19:
+ 981              		.cfi_def_cfa_offset 32
+ 982 0604 00AF     		add	r7, sp, #0
+ 983              	.LCFI20:
+ 984              		.cfi_def_cfa_register 7
+ 985 0606 F860     		str	r0, [r7, #12]
+ 986 0608 B960     		str	r1, [r7, #8]
+ 987 060a 3B60     		str	r3, [r7, #0]
+ 988 060c 1346     		mov	r3, r2	@ movhi
+ 989 060e FB80     		strh	r3, [r7, #6]	@ movhi
+ 394:../src/usbh_adk_core.c **** 	uint16_t length;
+ 395:../src/usbh_adk_core.c **** 	length = (uint16_t)strlen(buff)+1;
+ 990              		.loc 1 395 0
+ 991 0610 3868     		ldr	r0, [r7, #0]
+ 992 0612 FFF7FEFF 		bl	strlen
+ 993 0616 0346     		mov	r3, r0
+ 994 0618 9BB2     		uxth	r3, r3
+ 995 061a 03F10103 		add	r3, r3, #1
+ 996 061e FB82     		strh	r3, [r7, #22]	@ movhi
+ 396:../src/usbh_adk_core.c **** 
+ 397:../src/usbh_adk_core.c **** 	phost->Control.setup.b.bmRequestType = USB_H2D | USB_REQ_TYPE_VENDOR | USB_REQ_RECIPIENT_DEVICE;
+ 997              		.loc 1 397 0
+ 998 0620 BB68     		ldr	r3, [r7, #8]
+ 999 0622 4FF04002 		mov	r2, #64
+ 1000 0626 1A75     		strb	r2, [r3, #20]
+ 398:../src/usbh_adk_core.c **** 	phost->Control.setup.b.bRequest = ACCESSORY_SEND_STRING;
+ 1001              		.loc 1 398 0
+ 1002 0628 BB68     		ldr	r3, [r7, #8]
+ 1003 062a 4FF03402 		mov	r2, #52
+ 1004 062e 5A75     		strb	r2, [r3, #21]
+ 399:../src/usbh_adk_core.c **** 	phost->Control.setup.b.wValue.w = 0;
+ 1005              		.loc 1 399 0
+ 1006 0630 BB68     		ldr	r3, [r7, #8]
+ 1007 0632 4FF00002 		mov	r2, #0
+ 1008 0636 DA82     		strh	r2, [r3, #22]	@ movhi
+ 400:../src/usbh_adk_core.c **** 	phost->Control.setup.b.wIndex.w = index;
+ 1009              		.loc 1 400 0
+ 1010 0638 BB68     		ldr	r3, [r7, #8]
+ 1011 063a FA88     		ldrh	r2, [r7, #6]	@ movhi
+ 1012 063c 1A83     		strh	r2, [r3, #24]	@ movhi
+ 401:../src/usbh_adk_core.c **** 	phost->Control.setup.b.wLength.w = length;
+ 1013              		.loc 1 401 0
+ 1014 063e BB68     		ldr	r3, [r7, #8]
+ 1015 0640 FA8A     		ldrh	r2, [r7, #22]	@ movhi
+ 1016 0642 5A83     		strh	r2, [r3, #26]	@ movhi
+ 402:../src/usbh_adk_core.c **** 
+ 403:../src/usbh_adk_core.c **** 	/* Control Request */
+ 404:../src/usbh_adk_core.c **** 	return USBH_CtlReq(pdev, phost, buff , length );
+ 1017              		.loc 1 404 0
+ 1018 0644 FB8A     		ldrh	r3, [r7, #22]
+ 1019 0646 F868     		ldr	r0, [r7, #12]
+ 1020 0648 B968     		ldr	r1, [r7, #8]
+ 1021 064a 3A68     		ldr	r2, [r7, #0]
+ 1022 064c FFF7FEFF 		bl	USBH_CtlReq
+ 1023 0650 0346     		mov	r3, r0
+ 405:../src/usbh_adk_core.c **** }
+ 1024              		.loc 1 405 0
+ 1025 0652 1846     		mov	r0, r3
+ 1026 0654 07F11807 		add	r7, r7, #24
+ 1027 0658 BD46     		mov	sp, r7
+ 1028 065a 80BD     		pop	{r7, pc}
+ 1029              		.cfi_endproc
+ 1030              	.LFE116:
+ 1032              		.align	2
+ 1033              		.thumb
+ 1034              		.thumb_func
+ 1036              	USBH_ADK_switch:
+ 1037              	.LFB117:
+ 406:../src/usbh_adk_core.c **** 
+ 407:../src/usbh_adk_core.c **** /**
+ 408:../src/usbh_adk_core.c ****   * @brief  USBH_ADK_switch
+ 409:../src/usbh_adk_core.c ****   *         Request the Android device start up in accessory mode.
+ 410:../src/usbh_adk_core.c ****   * @param  pdev: Selected device
+ 411:../src/usbh_adk_core.c ****   * @param  hdev: Selected device property
+ 412:../src/usbh_adk_core.c ****   * @retval USBH_Status
+ 413:../src/usbh_adk_core.c ****   */
+ 414:../src/usbh_adk_core.c **** static USBH_Status USBH_ADK_switch ( USB_OTG_CORE_HANDLE *pdev, USBH_HOST *phost)
+ 415:../src/usbh_adk_core.c **** {
+ 1038              		.loc 1 415 0
+ 1039              		.cfi_startproc
+ 1040              		@ args = 0, pretend = 0, frame = 8
+ 1041              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1042 065c 80B5     		push	{r7, lr}
+ 1043              	.LCFI21:
+ 1044              		.cfi_def_cfa_offset 8
+ 1045              		.cfi_offset 7, -8
+ 1046              		.cfi_offset 14, -4
+ 1047 065e 82B0     		sub	sp, sp, #8
+ 1048              	.LCFI22:
+ 1049              		.cfi_def_cfa_offset 16
+ 1050 0660 00AF     		add	r7, sp, #0
+ 1051              	.LCFI23:
+ 1052              		.cfi_def_cfa_register 7
+ 1053 0662 7860     		str	r0, [r7, #4]
+ 1054 0664 3960     		str	r1, [r7, #0]
+ 416:../src/usbh_adk_core.c **** 	phost->Control.setup.b.bmRequestType = USB_H2D | USB_REQ_TYPE_VENDOR | USB_REQ_RECIPIENT_DEVICE;
+ 1055              		.loc 1 416 0
+ 1056 0666 3B68     		ldr	r3, [r7, #0]
+ 1057 0668 4FF04002 		mov	r2, #64
+ 1058 066c 1A75     		strb	r2, [r3, #20]
+ 417:../src/usbh_adk_core.c **** 	phost->Control.setup.b.bRequest = ACCESSORY_START;
+ 1059              		.loc 1 417 0
+ 1060 066e 3B68     		ldr	r3, [r7, #0]
+ 1061 0670 4FF03502 		mov	r2, #53
+ 1062 0674 5A75     		strb	r2, [r3, #21]
+ 418:../src/usbh_adk_core.c **** 	phost->Control.setup.b.wValue.w = 0;
+ 1063              		.loc 1 418 0
+ 1064 0676 3B68     		ldr	r3, [r7, #0]
+ 1065 0678 4FF00002 		mov	r2, #0
+ 1066 067c DA82     		strh	r2, [r3, #22]	@ movhi
+ 419:../src/usbh_adk_core.c **** 	phost->Control.setup.b.wIndex.w = 0;
+ 1067              		.loc 1 419 0
+ 1068 067e 3B68     		ldr	r3, [r7, #0]
+ 1069 0680 4FF00002 		mov	r2, #0
+ 1070 0684 1A83     		strh	r2, [r3, #24]	@ movhi
+ 420:../src/usbh_adk_core.c **** 	phost->Control.setup.b.wLength.w = 0;
+ 1071              		.loc 1 420 0
+ 1072 0686 3B68     		ldr	r3, [r7, #0]
+ 1073 0688 4FF00002 		mov	r2, #0
+ 1074 068c 5A83     		strh	r2, [r3, #26]	@ movhi
+ 421:../src/usbh_adk_core.c **** 
+ 422:../src/usbh_adk_core.c **** 	/* Control Request */
+ 423:../src/usbh_adk_core.c **** 	return USBH_CtlReq(pdev, phost, 0 , 0);
+ 1075              		.loc 1 423 0
+ 1076 068e 7868     		ldr	r0, [r7, #4]
+ 1077 0690 3968     		ldr	r1, [r7, #0]
+ 1078 0692 4FF00002 		mov	r2, #0
+ 1079 0696 4FF00003 		mov	r3, #0
+ 1080 069a FFF7FEFF 		bl	USBH_CtlReq
+ 1081 069e 0346     		mov	r3, r0
+ 424:../src/usbh_adk_core.c **** }
+ 1082              		.loc 1 424 0
+ 1083 06a0 1846     		mov	r0, r3
+ 1084 06a2 07F10807 		add	r7, r7, #8
+ 1085 06a6 BD46     		mov	sp, r7
+ 1086 06a8 80BD     		pop	{r7, pc}
+ 1087              		.cfi_endproc
+ 1088              	.LFE117:
+ 1090              		.section	.rodata
+ 1091 013d 000000   		.align	2
+ 1092              	.LC13:
+ 1093 0140 41444B3A 		.ascii	"ADK:configure bulk endpoint\012\000"
+ 1093      636F6E66 
+ 1093      69677572 
+ 1093      65206275 
+ 1093      6C6B2065 
+ 1094 015d 000000   		.text
+ 1095 06aa 00BF     		.align	2
+ 1096              		.thumb
+ 1097              		.thumb_func
+ 1099              	USBH_ADK_configAndroid:
+ 1100              	.LFB118:
+ 425:../src/usbh_adk_core.c **** 
+ 426:../src/usbh_adk_core.c **** /**
+ 427:../src/usbh_adk_core.c ****   * @brief  USBH_ADK_configAndroid
+ 428:../src/usbh_adk_core.c ****   *         Setup bulk transfer endpoint and open channel.
+ 429:../src/usbh_adk_core.c ****   * @param  pdev: Selected device
+ 430:../src/usbh_adk_core.c ****   * @param  hdev: Selected device property
+ 431:../src/usbh_adk_core.c ****   * @retval USBH_Status
+ 432:../src/usbh_adk_core.c ****   */
+ 433:../src/usbh_adk_core.c **** static USBH_Status USBH_ADK_configAndroid ( USB_OTG_CORE_HANDLE *pdev, USBH_HOST *phost)
+ 434:../src/usbh_adk_core.c **** {
+ 1101              		.loc 1 434 0
+ 1102              		.cfi_startproc
+ 1103              		@ args = 0, pretend = 0, frame = 16
+ 1104              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1105 06ac 90B5     		push	{r4, r7, lr}
+ 1106              	.LCFI24:
+ 1107              		.cfi_def_cfa_offset 12
+ 1108              		.cfi_offset 4, -12
+ 1109              		.cfi_offset 7, -8
+ 1110              		.cfi_offset 14, -4
+ 1111 06ae 87B0     		sub	sp, sp, #28
+ 1112              	.LCFI25:
+ 1113              		.cfi_def_cfa_offset 40
+ 1114 06b0 02AF     		add	r7, sp, #8
+ 1115              	.LCFI26:
+ 1116              		.cfi_def_cfa 7, 32
+ 1117 06b2 7860     		str	r0, [r7, #4]
+ 1118 06b4 3960     		str	r1, [r7, #0]
+ 435:../src/usbh_adk_core.c **** 	USBH_HOST *pphost = phost;
+ 1119              		.loc 1 435 0
+ 1120 06b6 3B68     		ldr	r3, [r7, #0]
+ 1121 06b8 FB60     		str	r3, [r7, #12]
+ 436:../src/usbh_adk_core.c **** #ifdef DEBUG
+ 437:../src/usbh_adk_core.c **** 					xputs("ADK:configure bulk endpoint\n");
+ 1122              		.loc 1 437 0
+ 1123 06ba 3C48     		ldr	r0, .L88
+ 1124 06bc FFF7FEFF 		bl	xputs
+ 438:../src/usbh_adk_core.c **** #endif
+ 439:../src/usbh_adk_core.c ****     if(pphost->device_prop.Ep_Desc[0][0].bEndpointAddress & 0x80)
+ 1125              		.loc 1 439 0
+ 1126 06c0 FB68     		ldr	r3, [r7, #12]
+ 1127 06c2 93F85230 		ldrb	r3, [r3, #82]	@ zero_extendqisi2
+ 1128 06c6 DBB2     		uxtb	r3, r3
+ 1129 06c8 5BB2     		sxtb	r3, r3
+ 1130 06ca 002B     		cmp	r3, #0
+ 1131 06cc 0ADA     		bge	.L83
+ 440:../src/usbh_adk_core.c ****     {
+ 441:../src/usbh_adk_core.c ****       ADK_Machine.BulkInEp = (pphost->device_prop.Ep_Desc[0][0].bEndpointAddress);
+ 1132              		.loc 1 441 0
+ 1133 06ce FB68     		ldr	r3, [r7, #12]
+ 1134 06d0 93F85220 		ldrb	r2, [r3, #82]	@ zero_extendqisi2
+ 1135 06d4 364B     		ldr	r3, .L88+4
+ 1136 06d6 5A71     		strb	r2, [r3, #5]
+ 442:../src/usbh_adk_core.c ****       ADK_Machine.BulkInEpSize  = pphost->device_prop.Ep_Desc[0][0].wMaxPacketSize;
+ 1137              		.loc 1 442 0
+ 1138 06d8 FB68     		ldr	r3, [r7, #12]
+ 1139 06da B3F85420 		ldrh	r2, [r3, #84]
+ 1140 06de 344B     		ldr	r3, .L88+4
+ 1141 06e0 DA80     		strh	r2, [r3, #6]	@ movhi
+ 1142 06e2 09E0     		b	.L84
+ 1143              	.L83:
+ 443:../src/usbh_adk_core.c ****     }
+ 444:../src/usbh_adk_core.c ****     else
+ 445:../src/usbh_adk_core.c ****     {
+ 446:../src/usbh_adk_core.c ****       ADK_Machine.BulkOutEp = (pphost->device_prop.Ep_Desc[0][0].bEndpointAddress);
+ 1144              		.loc 1 446 0
+ 1145 06e4 FB68     		ldr	r3, [r7, #12]
+ 1146 06e6 93F85220 		ldrb	r2, [r3, #82]	@ zero_extendqisi2
+ 1147 06ea 314B     		ldr	r3, .L88+4
+ 1148 06ec 1A71     		strb	r2, [r3, #4]
+ 447:../src/usbh_adk_core.c ****       ADK_Machine.BulkOutEpSize  = pphost->device_prop.Ep_Desc[0] [0].wMaxPacketSize;
+ 1149              		.loc 1 447 0
+ 1150 06ee FB68     		ldr	r3, [r7, #12]
+ 1151 06f0 B3F85420 		ldrh	r2, [r3, #84]
+ 1152 06f4 2E4B     		ldr	r3, .L88+4
+ 1153 06f6 1A81     		strh	r2, [r3, #8]	@ movhi
+ 1154              	.L84:
+ 448:../src/usbh_adk_core.c ****     }
+ 449:../src/usbh_adk_core.c **** 
+ 450:../src/usbh_adk_core.c ****     if(pphost->device_prop.Ep_Desc[0][1].bEndpointAddress & 0x80)
+ 1155              		.loc 1 450 0
+ 1156 06f8 FB68     		ldr	r3, [r7, #12]
+ 1157 06fa 93F85A30 		ldrb	r3, [r3, #90]	@ zero_extendqisi2
+ 1158 06fe DBB2     		uxtb	r3, r3
+ 1159 0700 5BB2     		sxtb	r3, r3
+ 1160 0702 002B     		cmp	r3, #0
+ 1161 0704 0ADA     		bge	.L85
+ 451:../src/usbh_adk_core.c ****     {
+ 452:../src/usbh_adk_core.c ****       ADK_Machine.BulkInEp = (pphost->device_prop.Ep_Desc[0][1].bEndpointAddress);
+ 1162              		.loc 1 452 0
+ 1163 0706 FB68     		ldr	r3, [r7, #12]
+ 1164 0708 93F85A20 		ldrb	r2, [r3, #90]	@ zero_extendqisi2
+ 1165 070c 284B     		ldr	r3, .L88+4
+ 1166 070e 5A71     		strb	r2, [r3, #5]
+ 453:../src/usbh_adk_core.c ****       ADK_Machine.BulkInEpSize  = pphost->device_prop.Ep_Desc[0][1].wMaxPacketSize;
+ 1167              		.loc 1 453 0
+ 1168 0710 FB68     		ldr	r3, [r7, #12]
+ 1169 0712 B3F85C20 		ldrh	r2, [r3, #92]
+ 1170 0716 264B     		ldr	r3, .L88+4
+ 1171 0718 DA80     		strh	r2, [r3, #6]	@ movhi
+ 1172 071a 09E0     		b	.L86
+ 1173              	.L85:
+ 454:../src/usbh_adk_core.c ****     }
+ 455:../src/usbh_adk_core.c ****     else
+ 456:../src/usbh_adk_core.c ****     {
+ 457:../src/usbh_adk_core.c ****       ADK_Machine.BulkOutEp = (pphost->device_prop.Ep_Desc[0][1].bEndpointAddress);
+ 1174              		.loc 1 457 0
+ 1175 071c FB68     		ldr	r3, [r7, #12]
+ 1176 071e 93F85A20 		ldrb	r2, [r3, #90]	@ zero_extendqisi2
+ 1177 0722 234B     		ldr	r3, .L88+4
+ 1178 0724 1A71     		strb	r2, [r3, #4]
+ 458:../src/usbh_adk_core.c ****       ADK_Machine.BulkOutEpSize  = pphost->device_prop.Ep_Desc[0][1].wMaxPacketSize;
+ 1179              		.loc 1 458 0
+ 1180 0726 FB68     		ldr	r3, [r7, #12]
+ 1181 0728 B3F85C20 		ldrh	r2, [r3, #92]
+ 1182 072c 204B     		ldr	r3, .L88+4
+ 1183 072e 1A81     		strh	r2, [r3, #8]	@ movhi
+ 1184              	.L86:
+ 459:../src/usbh_adk_core.c ****     }
+ 460:../src/usbh_adk_core.c **** 
+ 461:../src/usbh_adk_core.c ****     ADK_Machine.hc_num_out = USBH_Alloc_Channel(pdev, ADK_Machine.BulkOutEp);
+ 1185              		.loc 1 461 0
+ 1186 0730 1F4B     		ldr	r3, .L88+4
+ 1187 0732 1B79     		ldrb	r3, [r3, #4]	@ zero_extendqisi2
+ 1188 0734 7868     		ldr	r0, [r7, #4]
+ 1189 0736 1946     		mov	r1, r3
+ 1190 0738 FFF7FEFF 		bl	USBH_Alloc_Channel
+ 1191 073c 0346     		mov	r3, r0
+ 1192 073e 1A46     		mov	r2, r3
+ 1193 0740 1B4B     		ldr	r3, .L88+4
+ 1194 0742 DA70     		strb	r2, [r3, #3]
+ 462:../src/usbh_adk_core.c ****     ADK_Machine.hc_num_in  = USBH_Alloc_Channel(pdev, ADK_Machine.BulkInEp);
+ 1195              		.loc 1 462 0
+ 1196 0744 1A4B     		ldr	r3, .L88+4
+ 1197 0746 5B79     		ldrb	r3, [r3, #5]	@ zero_extendqisi2
+ 1198 0748 7868     		ldr	r0, [r7, #4]
+ 1199 074a 1946     		mov	r1, r3
+ 1200 074c FFF7FEFF 		bl	USBH_Alloc_Channel
+ 1201 0750 0346     		mov	r3, r0
+ 1202 0752 1A46     		mov	r2, r3
+ 1203 0754 164B     		ldr	r3, .L88+4
+ 1204 0756 9A70     		strb	r2, [r3, #2]
+ 463:../src/usbh_adk_core.c **** 
+ 464:../src/usbh_adk_core.c ****     /* Open the new channels */
+ 465:../src/usbh_adk_core.c ****     USBH_Open_Channel  (pdev,
+ 1205              		.loc 1 465 0
+ 1206 0758 154B     		ldr	r3, .L88+4
+ 1207 075a D978     		ldrb	r1, [r3, #3]	@ zero_extendqisi2
+ 466:../src/usbh_adk_core.c ****                         ADK_Machine.hc_num_out,
+ 467:../src/usbh_adk_core.c ****                         pphost->device_prop.address,
+ 1208              		.loc 1 467 0
+ 1209 075c FB68     		ldr	r3, [r7, #12]
+ 465:../src/usbh_adk_core.c ****     USBH_Open_Channel  (pdev,
+ 1210              		.loc 1 465 0
+ 1211 075e 93F82020 		ldrb	r2, [r3, #32]	@ zero_extendqisi2
+ 468:../src/usbh_adk_core.c ****                         pphost->device_prop.speed,
+ 1212              		.loc 1 468 0
+ 1213 0762 FB68     		ldr	r3, [r7, #12]
+ 465:../src/usbh_adk_core.c ****     USBH_Open_Channel  (pdev,
+ 1214              		.loc 1 465 0
+ 1215 0764 93F82130 		ldrb	r3, [r3, #33]	@ zero_extendqisi2
+ 1216 0768 1148     		ldr	r0, .L88+4
+ 1217 076a 0089     		ldrh	r0, [r0, #8]
+ 1218 076c 4FF00204 		mov	r4, #2
+ 1219 0770 0094     		str	r4, [sp, #0]
+ 1220 0772 0190     		str	r0, [sp, #4]
+ 1221 0774 7868     		ldr	r0, [r7, #4]
+ 1222 0776 FFF7FEFF 		bl	USBH_Open_Channel
+ 469:../src/usbh_adk_core.c ****                         EP_TYPE_BULK,
+ 470:../src/usbh_adk_core.c ****                         ADK_Machine.BulkOutEpSize);
+ 471:../src/usbh_adk_core.c **** 
+ 472:../src/usbh_adk_core.c ****     USBH_Open_Channel  (pdev,
+ 1223              		.loc 1 472 0
+ 1224 077a 0D4B     		ldr	r3, .L88+4
+ 1225 077c 9978     		ldrb	r1, [r3, #2]	@ zero_extendqisi2
+ 473:../src/usbh_adk_core.c ****                         ADK_Machine.hc_num_in,
+ 474:../src/usbh_adk_core.c ****                         pphost->device_prop.address,
+ 1226              		.loc 1 474 0
+ 1227 077e FB68     		ldr	r3, [r7, #12]
+ 472:../src/usbh_adk_core.c ****     USBH_Open_Channel  (pdev,
+ 1228              		.loc 1 472 0
+ 1229 0780 93F82020 		ldrb	r2, [r3, #32]	@ zero_extendqisi2
+ 475:../src/usbh_adk_core.c ****                         pphost->device_prop.speed,
+ 1230              		.loc 1 475 0
+ 1231 0784 FB68     		ldr	r3, [r7, #12]
+ 472:../src/usbh_adk_core.c ****     USBH_Open_Channel  (pdev,
+ 1232              		.loc 1 472 0
+ 1233 0786 93F82130 		ldrb	r3, [r3, #33]	@ zero_extendqisi2
+ 1234 078a 0948     		ldr	r0, .L88+4
+ 1235 078c C088     		ldrh	r0, [r0, #6]
+ 1236 078e 4FF00204 		mov	r4, #2
+ 1237 0792 0094     		str	r4, [sp, #0]
+ 1238 0794 0190     		str	r0, [sp, #4]
+ 1239 0796 7868     		ldr	r0, [r7, #4]
+ 1240 0798 FFF7FEFF 		bl	USBH_Open_Channel
+ 476:../src/usbh_adk_core.c ****                         EP_TYPE_BULK,
+ 477:../src/usbh_adk_core.c ****                         ADK_Machine.BulkInEpSize);
+ 478:../src/usbh_adk_core.c **** 
+ 479:../src/usbh_adk_core.c **** 	return USBH_OK;
+ 1241              		.loc 1 479 0
+ 1242 079c 4FF00003 		mov	r3, #0
+ 480:../src/usbh_adk_core.c **** }
+ 1243              		.loc 1 480 0
+ 1244 07a0 1846     		mov	r0, r3
+ 1245 07a2 07F11407 		add	r7, r7, #20
+ 1246 07a6 BD46     		mov	sp, r7
+ 1247 07a8 90BD     		pop	{r4, r7, pc}
+ 1248              	.L89:
+ 1249 07aa 00BF     		.align	2
+ 1250              	.L88:
+ 1251 07ac 40010000 		.word	.LC13
+ 1252 07b0 00000000 		.word	ADK_Machine
+ 1253              		.cfi_endproc
+ 1254              	.LFE118:
+ 1256              		.align	2
+ 1257              		.global	USBH_ADK_write
+ 1258              		.thumb
+ 1259              		.thumb_func
+ 1261              	USBH_ADK_write:
+ 1262              	.LFB119:
+ 481:../src/usbh_adk_core.c **** 
+ 482:../src/usbh_adk_core.c **** /**
+ 483:../src/usbh_adk_core.c ****   * @brief  USBH_ADK_write
+ 484:../src/usbh_adk_core.c ****   *         Send data to Android device.
+ 485:../src/usbh_adk_core.c ****   * @param  pdev: Selected device
+ 486:../src/usbh_adk_core.c ****   * @param  buff: send data
+ 487:../src/usbh_adk_core.c ****   * @param  len : send data length
+ 488:../src/usbh_adk_core.c ****   * @retval USBH_Status
+ 489:../src/usbh_adk_core.c ****   */
+ 490:../src/usbh_adk_core.c **** USBH_Status USBH_ADK_write(USB_OTG_CORE_HANDLE *pdev, uint8_t *buff, uint16_t len)
+ 491:../src/usbh_adk_core.c **** {
+ 1263              		.loc 1 491 0
+ 1264              		.cfi_startproc
+ 1265              		@ args = 0, pretend = 0, frame = 16
+ 1266              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1267 07b4 80B5     		push	{r7, lr}
+ 1268              	.LCFI27:
+ 1269              		.cfi_def_cfa_offset 8
+ 1270              		.cfi_offset 7, -8
+ 1271              		.cfi_offset 14, -4
+ 1272 07b6 84B0     		sub	sp, sp, #16
+ 1273              	.LCFI28:
+ 1274              		.cfi_def_cfa_offset 24
+ 1275 07b8 00AF     		add	r7, sp, #0
+ 1276              	.LCFI29:
+ 1277              		.cfi_def_cfa_register 7
+ 1278 07ba F860     		str	r0, [r7, #12]
+ 1279 07bc B960     		str	r1, [r7, #8]
+ 1280 07be 1346     		mov	r3, r2
+ 1281 07c0 FB80     		strh	r3, [r7, #6]	@ movhi
+ 492:../src/usbh_adk_core.c **** 	memcpy(ADK_Machine.outbuff, buff, len);
+ 1282              		.loc 1 492 0
+ 1283 07c2 FB88     		ldrh	r3, [r7, #6]
+ 1284 07c4 0748     		ldr	r0, .L92
+ 1285 07c6 B968     		ldr	r1, [r7, #8]
+ 1286 07c8 1A46     		mov	r2, r3
+ 1287 07ca FFF7FEFF 		bl	memcpy
+ 493:../src/usbh_adk_core.c **** 	ADK_Machine.outSize = len;
+ 1288              		.loc 1 493 0
+ 1289 07ce 064B     		ldr	r3, .L92+4
+ 1290 07d0 FA88     		ldrh	r2, [r7, #6]	@ movhi
+ 1291 07d2 A3F88C20 		strh	r2, [r3, #140]	@ movhi
+ 494:../src/usbh_adk_core.c **** 	return USBH_OK;
+ 1292              		.loc 1 494 0
+ 1293 07d6 4FF00003 		mov	r3, #0
+ 495:../src/usbh_adk_core.c **** }
+ 1294              		.loc 1 495 0
+ 1295 07da 1846     		mov	r0, r3
+ 1296 07dc 07F11007 		add	r7, r7, #16
+ 1297 07e0 BD46     		mov	sp, r7
+ 1298 07e2 80BD     		pop	{r7, pc}
+ 1299              	.L93:
+ 1300              		.align	2
+ 1301              	.L92:
+ 1302 07e4 4A000000 		.word	ADK_Machine+74
+ 1303 07e8 00000000 		.word	ADK_Machine
+ 1304              		.cfi_endproc
+ 1305              	.LFE119:
+ 1307              		.align	2
+ 1308              		.global	USBH_ADK_read
+ 1309              		.thumb
+ 1310              		.thumb_func
+ 1312              	USBH_ADK_read:
+ 1313              	.LFB120:
+ 496:../src/usbh_adk_core.c **** 
+ 497:../src/usbh_adk_core.c **** /**
+ 498:../src/usbh_adk_core.c ****   * @brief  USBH_ADK_read
+ 499:../src/usbh_adk_core.c ****   *         Receive data from  Android device.
+ 500:../src/usbh_adk_core.c ****   * @param  pdev: Selected device
+ 501:../src/usbh_adk_core.c ****   * @param  buff: receive data
+ 502:../src/usbh_adk_core.c ****   * @param  len : receive data buffer length
+ 503:../src/usbh_adk_core.c ****   * @retval received data length
+ 504:../src/usbh_adk_core.c ****   */
+ 505:../src/usbh_adk_core.c **** uint16_t USBH_ADK_read(USB_OTG_CORE_HANDLE *pdev, uint8_t *buff, uint16_t len)
+ 506:../src/usbh_adk_core.c **** {
+ 1314              		.loc 1 506 0
+ 1315              		.cfi_startproc
+ 1316              		@ args = 0, pretend = 0, frame = 24
+ 1317              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1318 07ec 80B5     		push	{r7, lr}
+ 1319              	.LCFI30:
+ 1320              		.cfi_def_cfa_offset 8
+ 1321              		.cfi_offset 7, -8
+ 1322              		.cfi_offset 14, -4
+ 1323 07ee 86B0     		sub	sp, sp, #24
+ 1324              	.LCFI31:
+ 1325              		.cfi_def_cfa_offset 32
+ 1326 07f0 00AF     		add	r7, sp, #0
+ 1327              	.LCFI32:
+ 1328              		.cfi_def_cfa_register 7
+ 1329 07f2 F860     		str	r0, [r7, #12]
+ 1330 07f4 B960     		str	r1, [r7, #8]
+ 1331 07f6 1346     		mov	r3, r2
+ 1332 07f8 FB80     		strh	r3, [r7, #6]	@ movhi
+ 507:../src/usbh_adk_core.c **** 	uint32_t xfercount;
+ 508:../src/usbh_adk_core.c **** 	xfercount = HCD_GetXferCnt(pdev, ADK_Machine.hc_num_in);
+ 1333              		.loc 1 508 0
+ 1334 07fa 0E4B     		ldr	r3, .L97
+ 1335 07fc 9B78     		ldrb	r3, [r3, #2]	@ zero_extendqisi2
+ 1336 07fe F868     		ldr	r0, [r7, #12]
+ 1337 0800 1946     		mov	r1, r3
+ 1338 0802 FFF7FEFF 		bl	HCD_GetXferCnt
+ 1339 0806 7861     		str	r0, [r7, #20]
+ 509:../src/usbh_adk_core.c **** 	if( xfercount > 0 ){
+ 1340              		.loc 1 509 0
+ 1341 0808 7B69     		ldr	r3, [r7, #20]
+ 1342 080a 002B     		cmp	r3, #0
+ 1343 080c 0AD0     		beq	.L95
+ 1344              	.LBB2:
+ 510:../src/usbh_adk_core.c **** 		memcpy(buff, ADK_Machine.inbuff, len);
+ 1345              		.loc 1 510 0
+ 1346 080e FB88     		ldrh	r3, [r7, #6]
+ 1347 0810 B868     		ldr	r0, [r7, #8]
+ 1348 0812 0949     		ldr	r1, .L97+4
+ 1349 0814 1A46     		mov	r2, r3
+ 1350 0816 FFF7FEFF 		bl	memcpy
+ 511:../src/usbh_adk_core.c **** 		ADK_Machine.inSize = 0;
+ 1351              		.loc 1 511 0
+ 1352 081a 064B     		ldr	r3, .L97
+ 1353 081c 4FF00002 		mov	r2, #0
+ 1354 0820 A3F88A20 		strh	r2, [r3, #138]	@ movhi
+ 1355              	.L95:
+ 1356              	.LBE2:
+ 512:../src/usbh_adk_core.c **** 	}
+ 513:../src/usbh_adk_core.c **** 	return (uint16_t)xfercount;
+ 1357              		.loc 1 513 0
+ 1358 0824 7B69     		ldr	r3, [r7, #20]
+ 1359 0826 9BB2     		uxth	r3, r3
+ 514:../src/usbh_adk_core.c **** }
+ 1360              		.loc 1 514 0
+ 1361 0828 1846     		mov	r0, r3
+ 1362 082a 07F11807 		add	r7, r7, #24
+ 1363 082e BD46     		mov	sp, r7
+ 1364 0830 80BD     		pop	{r7, pc}
+ 1365              	.L98:
+ 1366 0832 00BF     		.align	2
+ 1367              	.L97:
+ 1368 0834 00000000 		.word	ADK_Machine
+ 1369 0838 0A000000 		.word	ADK_Machine+10
+ 1370              		.cfi_endproc
+ 1371              	.LFE120:
+ 1373              		.align	2
+ 1374              		.global	USBH_ADK_getStatus
+ 1375              		.thumb
+ 1376              		.thumb_func
+ 1378              	USBH_ADK_getStatus:
+ 1379              	.LFB121:
+ 515:../src/usbh_adk_core.c **** 
+ 516:../src/usbh_adk_core.c **** /**
+ 517:../src/usbh_adk_core.c ****   * @brief  USBH_ADK_getStatus
+ 518:../src/usbh_adk_core.c ****   *         Return ADK_Machine.state
+ 519:../src/usbh_adk_core.c ****   * @param  None
+ 520:../src/usbh_adk_core.c ****   * @retval ADK_Machine.state
+ 521:../src/usbh_adk_core.c ****   */
+ 522:../src/usbh_adk_core.c **** ADK_State USBH_ADK_getStatus(void)
+ 523:../src/usbh_adk_core.c **** {
+ 1380              		.loc 1 523 0
+ 1381              		.cfi_startproc
+ 1382              		@ args = 0, pretend = 0, frame = 0
+ 1383              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1384              		@ link register save eliminated.
+ 1385 083c 80B4     		push	{r7}
+ 1386              	.LCFI33:
+ 1387              		.cfi_def_cfa_offset 4
+ 1388              		.cfi_offset 7, -4
+ 1389 083e 00AF     		add	r7, sp, #0
+ 1390              	.LCFI34:
+ 1391              		.cfi_def_cfa_register 7
+ 524:../src/usbh_adk_core.c **** 	return ADK_Machine.state;
+ 1392              		.loc 1 524 0
+ 1393 0840 034B     		ldr	r3, .L101
+ 1394 0842 93F88F30 		ldrb	r3, [r3, #143]	@ zero_extendqisi2
+ 525:../src/usbh_adk_core.c **** }
+ 1395              		.loc 1 525 0
+ 1396 0846 1846     		mov	r0, r3
+ 1397 0848 BD46     		mov	sp, r7
+ 1398 084a 80BC     		pop	{r7}
+ 1399 084c 7047     		bx	lr
+ 1400              	.L102:
+ 1401 084e 00BF     		.align	2
+ 1402              	.L101:
+ 1403 0850 00000000 		.word	ADK_Machine
+ 1404              		.cfi_endproc
+ 1405              	.LFE121:
+ 1407              	.Letext0:
+ 1408              		.file 2 "/opt/CodeSourcery/bin/../lib/gcc/arm-none-eabi/4.7.2/../../../../arm-none-eabi/include/st
+ 1409              		.file 3 "/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/STM32_USB_OTG_Drive
+ 1410              		.file 4 "/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/STM32_USB_OTG_Drive
+ 1411              		.file 5 "/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/STM32_USB_HOST_Libr
+ 1412              		.file 6 "/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/STM32_USB_HOST_Libr
+ 1413              		.file 7 "/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/inc/usbh_adk_core.h"
+ 1414              		.file 8 "<built-in>"
+ 1415              		.file 9 "/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_
+DEFINED SYMBOLS
+                            *ABS*:00000000 usbh_adk_core.c
+                            *COM*:00000212 ADK_Machine
+                            *COM*:00000008 ADK_Setup
+     /tmp/ccxZWWlp.s:25     .data:00000000 USBH_ADK_cb
+     /tmp/ccxZWWlp.s:22     .data:00000000 $d
+     /tmp/ccxZWWlp.s:146    .text:000000cc USBH_ADK_InterfaceInit
+     /tmp/ccxZWWlp.s:203    .text:0000010c USBH_ADK_InterfaceDeInit
+     /tmp/ccxZWWlp.s:324    .text:00000188 USBH_ADK_ClassRequest
+     /tmp/ccxZWWlp.s:731    .text:00000488 USBH_ADK_Handle
+     /tmp/ccxZWWlp.s:31     .text:00000000 $t
+     /tmp/ccxZWWlp.s:36     .text:00000000 USBH_ADK_Init
+     /tmp/ccxZWWlp.s:127    .text:000000b0 $d
+     /tmp/ccxZWWlp.s:138    .rodata:00000000 $d
+     /tmp/ccxZWWlp.s:142    .text:000000cc $t
+     /tmp/ccxZWWlp.s:189    .text:00000104 $d
+     /tmp/ccxZWWlp.s:199    .text:0000010c $t
+     /tmp/ccxZWWlp.s:280    .text:00000180 $d
+     /tmp/ccxZWWlp.s:320    .text:00000188 $t
+     /tmp/ccxZWWlp.s:358    .text:000001b0 $d
+     /tmp/ccxZWWlp.s:373    .text:000001e4 $t
+     /tmp/ccxZWWlp.s:906    .text:000005b0 USBH_ADK_getProtocol
+     /tmp/ccxZWWlp.s:968    .text:00000600 USBH_ADK_sendString
+     /tmp/ccxZWWlp.s:1036   .text:0000065c USBH_ADK_switch
+     /tmp/ccxZWWlp.s:1099   .text:000006ac USBH_ADK_configAndroid
+     /tmp/ccxZWWlp.s:695    .text:00000430 $d
+     /tmp/ccxZWWlp.s:715    .text:00000478 $t
+     /tmp/ccxZWWlp.s:762    .text:000004a8 $d
+     /tmp/ccxZWWlp.s:768    .text:000004b8 $t
+     /tmp/ccxZWWlp.s:896    .text:000005a4 $d
+     /tmp/ccxZWWlp.s:902    .text:000005b0 $t
+     /tmp/ccxZWWlp.s:960    .text:000005fc $d
+     /tmp/ccxZWWlp.s:964    .text:00000600 $t
+     /tmp/ccxZWWlp.s:1251   .text:000007ac $d
+     /tmp/ccxZWWlp.s:1256   .text:000007b4 $t
+     /tmp/ccxZWWlp.s:1261   .text:000007b4 USBH_ADK_write
+     /tmp/ccxZWWlp.s:1302   .text:000007e4 $d
+     /tmp/ccxZWWlp.s:1307   .text:000007ec $t
+     /tmp/ccxZWWlp.s:1312   .text:000007ec USBH_ADK_read
+     /tmp/ccxZWWlp.s:1368   .text:00000834 $d
+     /tmp/ccxZWWlp.s:1373   .text:0000083c $t
+     /tmp/ccxZWWlp.s:1378   .text:0000083c USBH_ADK_getStatus
+     /tmp/ccxZWWlp.s:1403   .text:00000850 $d
+                     .debug_frame:00000010 $d
+                           .group:00000000 wm4.1.ee386580922180e5cad1057f989de60d
+                           .group:00000000 wm4.stm32f4xx.h.54.6e1f0ee5c76cc1e53c8ea6d18297b5fd
+                           .group:00000000 wm4.core_cm4.h.32.f824aba4d431a5bb4a51726bd5b62834
+                           .group:00000000 wm4.stdint.h.10.90b695f550ca6cc3fb08fa83baf01e05
+                           .group:00000000 wm4.core_cmInstr.h.25.f50f886f2edf670cf199b35fd96f5c91
+                           .group:00000000 wm4.core_cm4_simd.h.29.b4a3fdfb606cb3b26119424324d4b963
+                           .group:00000000 wm4.core_cm4.h.153.5393ef7e6cebf34dd51ca528f9218ab3
+                           .group:00000000 wm4.stm32f4xx.h.289.fa68dcae75666a037ce29b5a1b57e3b3
+                           .group:00000000 wm4.stm32f4xx_adc.h.108.1710484bf41297b93f825b3b15cbdff8
+                           .group:00000000 wm4.stm32f4xx_can.h.31.3bb56c6436c7a6e6af1611046e81f48c
+                           .group:00000000 wm4.stm32f4xx_cryp.h.31.94bbbb19b99df10306f31e78c333a77b
+                           .group:00000000 wm4.stm32f4xx_dac.h.31.b8d45e7eaf71ee4bf01c1317dbc06f77
+                           .group:00000000 wm4.stm32f4xx_dbgmcu.h.30.70a81ec54c2707baa9fca77391eeeaaa
+                           .group:00000000 wm4.stm32f4xx_dcmi.h.30.9d0942d58c357d2eed15e044bf9b4a77
+                           .group:00000000 wm4.stm32f4xx_dma.h.31.815bb924b30b1c776b3cd51113fdfe60
+                           .group:00000000 wm4.stm32f4xx_exti.h.31.86bd18e979f97217bb1d3b80fde0231e
+                           .group:00000000 wm4.stm32f4xx_flash.h.31.74f2ed42d890f144ca7eb5ae8172f0d0
+                           .group:00000000 wm4.stm32f4xx_fsmc.h.31.ff58629e0c603fb2f9b3f00c0657fdfa
+                           .group:00000000 wm4.stm32f4xx_hash.h.31.5c109425d30f0b9cc0a26ad38182d91f
+                           .group:00000000 wm4.stm32f4xx_gpio.h.31.d9aeae10cfa353d85d475c0d4900c452
+                           .group:00000000 wm4.stm32f4xx_i2c.h.31.edf5baa611075c49ae13f56be9040be3
+                           .group:00000000 wm4.stm32f4xx_iwdg.h.31.30e376e6d8d424aab7fddd66cf691c7b
+                           .group:00000000 wm4.stm32f4xx_pwr.h.31.bb774fc1b632cb8d2ecaec8c6524d2c0
+                           .group:00000000 wm4.stm32f4xx_rcc.h.30.820e94551583d2b835c8cf3ad722e16c
+                           .group:00000000 wm4.stm32f4xx_rng.h.31.1ec493d56b7a8e5a71238519cae6dea7
+                           .group:00000000 wm4.stm32f4xx_rtc.h.31.bddeb98c63c8fa06fac80b5dd8296471
+                           .group:00000000 wm4.stm32f4xx_sdio.h.31.8c6dff42ffa718b444c3420717601ff2
+                           .group:00000000 wm4.stm32f4xx_spi.h.31.fb1b2c8214b87a47d4457633b7c31c3c
+                           .group:00000000 wm4.stm32f4xx_syscfg.h.31.5a680f88d55b7816ae613c20f199cbd9
+                           .group:00000000 wm4.stm32f4xx_tim.h.31.b1d608fbde729347e4ccf70799e654d2
+                           .group:00000000 wm4.stm32f4xx_usart.h.31.f8d29b14aa4d39de5495adcc92749d3c
+                           .group:00000000 wm4.stm32f4xx_wwdg.h.31.b45a80fa1ec64984adf786f7e489f31b
+                           .group:00000000 wm4.misc.h.31.041217492a6cb86f2fb26099f373a465
+                           .group:00000000 wm4.stm32f4xx.h.6975.cdbdae9d5de06f1ba6b770f59cbe4d6c
+                           .group:00000000 wm4.usb_conf.h.69.07474af79ba33c49defd0cb9b2ee7820
+                           .group:00000000 wm4.usb_regs.h.30.8e11da7f9e8ef80e8c3ede3dea040a2e
+                           .group:00000000 wm4.usb_defines.h.30.25e1682f38ca1ccb768b1b48e673a175
+                           .group:00000000 wm4.usb_core.h.52.b8138d1f1482be33e5028c0dc9d2a5d3
+                           .group:00000000 wm4.usbh_def.h.42.eb4a6bc03c1613f622529e01c7f1c051
+                           .group:00000000 wm4.usbh_conf.h.24.1e4ade5fba437d91fca18dcf5f2907c4
+                           .group:00000000 wm4.usbh_core.h.55.3283e920dd206a3762220f568a9515d1
+                           .group:00000000 wm4.usbh_ioreq.h.54.c7adef33fe445a495777937496caca1c
+                           .group:00000000 wm4.usbh_hcs.h.30.10149d241036be3b1683c6645dc3088f
+                           .group:00000000 wm4.usbh_stdreq.h.30.b3a519a52d62508eec848dea4363d387
+                           .group:00000000 wm4.usbh_adk_core.h.41.4c786e0c56a54ca9b1dc1521ac83cad0
+                           .group:00000000 wm4.xprintf.h.6.00689df3f6a5f182b13a53f215fa2291
+                           .group:00000000 wm4.newlib.h.8.e1d498e57c12962fc6d7be5061a6981a
+                           .group:00000000 wm4.config.h.148.52fe83653334d06815a0c57b59a3e584
+                           .group:00000000 wm4._ansi.h.23.95dee4059009fe3ab635a191bb73dc66
+                           .group:00000000 wm4.stdlib.h.18.6f6153fd5cb89acd58c0f0ab1f77e147
+                           .group:00000000 wm4.stddef.h.187.40b3a084f9bc2c020a9e00b9eabe9c14
+                           .group:00000000 wm4._default_types.h.6.1dbd2e581fd590860c7c17f21d147e91
+                           .group:00000000 wm4.lock.h.2.9bc98482741e5e2a9450b12934a684ea
+                           .group:00000000 wm4.stddef.h.349.31f4c5baff3fa2689010b32028da9c47
+                           .group:00000000 wm4.reent.h.16.4b443e0a625b48622aee485d980b00f4
+                           .group:00000000 wm4.assert.h.11.060c3dc511517628fd4f958fa9448dce
+                           .group:00000000 wm4.reent.h.492.84a17b766fc6e12f346fb69d05439229
+                           .group:00000000 wm4.alloca.h.8.dfc0c703c47ec3e69746825b17d9e66d
+                           .group:00000000 wm4.stdlib.h.55.22eafe60f8565d898cbb44515781114b
+                           .group:00000000 wm4.stdio.h.27.f2ac352bab34f31f9f478442827b2ba6
+                           .group:00000000 wm4.stddef.h.235.d9f4f80b8c4429535175712282cda6a6
+                           .group:00000000 wm4.stdarg.h.34.3a23a216c0c293b3d2ea2e89281481e6
+                           .group:00000000 wm4.types.h.23.0d949686bbcadd1621462d4fa1f884f9
+                           .group:00000000 wm4.stddef.h.40.b60a1c1ee3f272eef5327a730cbabca6
+                           .group:00000000 wm4.types.h.2.e9cec8c90ab35f77d9f499e06ae02400
+                           .group:00000000 wm4.types.h.80.f2bfdfeee9f340633702c07fad9b5e01
+                           .group:00000000 wm4.stdio.h.2.4aa87247282eca6c8f36f9de33d8df1a
+                           .group:00000000 wm4.stdio.h.63.1f4bc553faa62c5c69dd9cb47f9f1417
+
+UNDEFINED SYMBOLS
+strncpy
+xputs
+USB_OTG_HC_Halt
+USBH_Free_Channel
+USBH_Get_DevDesc
+HCD_GetURB_State
+HCD_GetHCState
+HCD_GetXferCnt
+USBH_BulkSendData
+USBH_BulkReceiveData
+USBH_CtlReq
+strlen
+USBH_Alloc_Channel
+USBH_Open_Channel
+memcpy

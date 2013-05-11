@@ -1,0 +1,2738 @@
+   1              		.syntax unified
+   2              		.cpu cortex-m4
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 6
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.file	"usbh_core.c"
+  15              		.text
+  16              	.Ltext0:
+  17              		.cfi_sections	.debug_frame
+  18              		.global	USBH_HCD_INT_cb
+  19              		.data
+  20              		.align	2
+  23              	USBH_HCD_INT_cb:
+  24 0000 00000000 		.word	USBH_SOF
+  25 0004 00000000 		.word	USBH_Connected
+  26 0008 00000000 		.word	USBH_Disconnected
+  27              		.global	USBH_HCD_INT_fops
+  28              		.align	2
+  31              	USBH_HCD_INT_fops:
+  32 000c 00000000 		.word	USBH_HCD_INT_cb
+  33              		.text
+  34              		.align	2
+  35              		.global	USBH_Connected
+  36              		.thumb
+  37              		.thumb_func
+  39              	USBH_Connected:
+  40              	.LFB110:
+  41              		.file 1 "../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c"
+   1:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** /**
+   2:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   ******************************************************************************
+   3:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   * @file    usbh_core.c 
+   4:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   * @author  MCD Application Team
+   5:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   * @version V2.1.0
+   6:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   * @date    19-March-2012
+   7:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   * @brief   This file implements the functions for the core state machine process
+   8:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   *          the enumeration and the control transfer process
+   9:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   ******************************************************************************
+  10:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   * @attention
+  11:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   *
+  12:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   * <h2><center>&copy; COPYRIGHT 2012 STMicroelectronics</center></h2>
+  13:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   *
+  14:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   * Licensed under MCD-ST Liberty SW License Agreement V2, (the "License");
+  15:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   * You may not use this file except in compliance with the License.
+  16:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   * You may obtain a copy of the License at:
+  17:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   *
+  18:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   *        http://www.st.com/software_license_agreement_liberty_v2
+  19:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   *
+  20:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   * Unless required by applicable law or agreed to in writing, software 
+  21:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   * distributed under the License is distributed on an "AS IS" BASIS, 
+  22:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  23:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   * See the License for the specific language governing permissions and
+  24:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   * limitations under the License.
+  25:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   *
+  26:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   ******************************************************************************
+  27:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   */ 
+  28:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** /* Includes ------------------------------------------------------------------*/
+  29:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** 
+  30:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** #include "usbh_ioreq.h"
+  31:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** #include "usb_bsp.h"
+  32:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** #include "usbh_hcs.h"
+  33:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** #include "usbh_stdreq.h"
+  34:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** #include "usbh_core.h"
+  35:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** #include "usb_hcd_int.h"
+  36:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** 
+  37:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** 
+  38:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** /** @addtogroup USBH_LIB
+  39:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   * @{
+  40:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   */
+  41:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** 
+  42:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** /** @addtogroup USBH_LIB_CORE
+  43:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** * @{
+  44:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** */
+  45:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** 
+  46:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** /** @defgroup USBH_CORE 
+  47:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   * @brief TThis file handles the basic enumaration when a device is connected 
+  48:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   *          to the host.
+  49:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   * @{
+  50:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   */ 
+  51:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** 
+  52:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** /** @defgroup USBH_CORE_Private_TypesDefinitions
+  53:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   * @{
+  54:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   */ 
+  55:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** uint8_t USBH_Disconnected (USB_OTG_CORE_HANDLE *pdev); 
+  56:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** uint8_t USBH_Connected (USB_OTG_CORE_HANDLE *pdev); 
+  57:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** uint8_t USBH_SOF (USB_OTG_CORE_HANDLE *pdev); 
+  58:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** 
+  59:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** USBH_HCD_INT_cb_TypeDef USBH_HCD_INT_cb = 
+  60:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** {
+  61:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   USBH_SOF,
+  62:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   USBH_Connected, 
+  63:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   USBH_Disconnected,    
+  64:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** };
+  65:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** 
+  66:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** USBH_HCD_INT_cb_TypeDef  *USBH_HCD_INT_fops = &USBH_HCD_INT_cb;
+  67:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** /**
+  68:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   * @}
+  69:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   */ 
+  70:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** 
+  71:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** 
+  72:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** /** @defgroup USBH_CORE_Private_Defines
+  73:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   * @{
+  74:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   */ 
+  75:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** /**
+  76:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   * @}
+  77:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   */ 
+  78:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** 
+  79:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** 
+  80:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** /** @defgroup USBH_CORE_Private_Macros
+  81:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   * @{
+  82:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   */ 
+  83:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** /**
+  84:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   * @}
+  85:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   */ 
+  86:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** 
+  87:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** 
+  88:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** /** @defgroup USBH_CORE_Private_Variables
+  89:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   * @{
+  90:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   */ 
+  91:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** /**
+  92:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   * @}
+  93:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   */ 
+  94:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** 
+  95:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** 
+  96:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** /** @defgroup USBH_CORE_Private_FunctionPrototypes
+  97:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   * @{
+  98:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   */
+  99:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** static USBH_Status USBH_HandleEnum(USB_OTG_CORE_HANDLE *pdev, USBH_HOST *phost);
+ 100:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** USBH_Status USBH_HandleControl (USB_OTG_CORE_HANDLE *pdev, USBH_HOST *phost);
+ 101:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** 
+ 102:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** /**
+ 103:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   * @}
+ 104:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   */ 
+ 105:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** 
+ 106:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** 
+ 107:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** /** @defgroup USBH_CORE_Private_Functions
+ 108:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   * @{
+ 109:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   */ 
+ 110:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** 
+ 111:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** 
+ 112:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** /**
+ 113:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   * @brief  USBH_Connected
+ 114:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   *         USB Connect callback function from the Interrupt. 
+ 115:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   * @param  selected device
+ 116:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   * @retval Status
+ 117:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** */
+ 118:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** uint8_t USBH_Connected (USB_OTG_CORE_HANDLE *pdev)
+ 119:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** {
+  42              		.loc 1 119 0
+  43              		.cfi_startproc
+  44              		@ args = 0, pretend = 0, frame = 8
+  45              		@ frame_needed = 1, uses_anonymous_args = 0
+  46              		@ link register save eliminated.
+  47 0000 80B4     		push	{r7}
+  48              	.LCFI0:
+  49              		.cfi_def_cfa_offset 4
+  50              		.cfi_offset 7, -4
+  51 0002 83B0     		sub	sp, sp, #12
+  52              	.LCFI1:
+  53              		.cfi_def_cfa_offset 16
+  54 0004 00AF     		add	r7, sp, #0
+  55              	.LCFI2:
+  56              		.cfi_def_cfa_register 7
+  57 0006 7860     		str	r0, [r7, #4]
+ 120:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   pdev->host.ConnSts = 1;
+  58              		.loc 1 120 0
+  59 0008 7B68     		ldr	r3, [r7, #4]
+  60 000a 4FF00102 		mov	r2, #1
+  61 000e C3F81023 		str	r2, [r3, #784]
+ 121:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   return 0;
+  62              		.loc 1 121 0
+  63 0012 4FF00003 		mov	r3, #0
+ 122:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** }
+  64              		.loc 1 122 0
+  65 0016 1846     		mov	r0, r3
+  66 0018 07F10C07 		add	r7, r7, #12
+  67 001c BD46     		mov	sp, r7
+  68 001e 80BC     		pop	{r7}
+  69 0020 7047     		bx	lr
+  70              		.cfi_endproc
+  71              	.LFE110:
+  73 0022 00BF     		.align	2
+  74              		.global	USBH_Disconnected
+  75              		.thumb
+  76              		.thumb_func
+  78              	USBH_Disconnected:
+  79              	.LFB111:
+ 123:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** 
+ 124:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** /**
+ 125:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** * @brief  USBH_Disconnected
+ 126:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** *         USB Disconnect callback function from the Interrupt. 
+ 127:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** * @param  selected device
+ 128:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** * @retval Status
+ 129:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** */
+ 130:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** 
+ 131:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** uint8_t USBH_Disconnected (USB_OTG_CORE_HANDLE *pdev)
+ 132:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** {
+  80              		.loc 1 132 0
+  81              		.cfi_startproc
+  82              		@ args = 0, pretend = 0, frame = 8
+  83              		@ frame_needed = 1, uses_anonymous_args = 0
+  84              		@ link register save eliminated.
+  85 0024 80B4     		push	{r7}
+  86              	.LCFI3:
+  87              		.cfi_def_cfa_offset 4
+  88              		.cfi_offset 7, -4
+  89 0026 83B0     		sub	sp, sp, #12
+  90              	.LCFI4:
+  91              		.cfi_def_cfa_offset 16
+  92 0028 00AF     		add	r7, sp, #0
+  93              	.LCFI5:
+  94              		.cfi_def_cfa_register 7
+  95 002a 7860     		str	r0, [r7, #4]
+ 133:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   pdev->host.ConnSts = 0;
+  96              		.loc 1 133 0
+  97 002c 7B68     		ldr	r3, [r7, #4]
+  98 002e 4FF00002 		mov	r2, #0
+  99 0032 C3F81023 		str	r2, [r3, #784]
+ 134:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   return 0;  
+ 100              		.loc 1 134 0
+ 101 0036 4FF00003 		mov	r3, #0
+ 135:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** }
+ 102              		.loc 1 135 0
+ 103 003a 1846     		mov	r0, r3
+ 104 003c 07F10C07 		add	r7, r7, #12
+ 105 0040 BD46     		mov	sp, r7
+ 106 0042 80BC     		pop	{r7}
+ 107 0044 7047     		bx	lr
+ 108              		.cfi_endproc
+ 109              	.LFE111:
+ 111 0046 00BF     		.align	2
+ 112              		.global	USBH_SOF
+ 113              		.thumb
+ 114              		.thumb_func
+ 116              	USBH_SOF:
+ 117              	.LFB112:
+ 136:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** 
+ 137:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** /**
+ 138:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   * @brief  USBH_SOF
+ 139:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   *         USB SOF callback function from the Interrupt. 
+ 140:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   * @param  selected device
+ 141:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   * @retval Status
+ 142:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   */
+ 143:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** 
+ 144:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** uint8_t USBH_SOF (USB_OTG_CORE_HANDLE *pdev)
+ 145:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** {
+ 118              		.loc 1 145 0
+ 119              		.cfi_startproc
+ 120              		@ args = 0, pretend = 0, frame = 8
+ 121              		@ frame_needed = 1, uses_anonymous_args = 0
+ 122              		@ link register save eliminated.
+ 123 0048 80B4     		push	{r7}
+ 124              	.LCFI6:
+ 125              		.cfi_def_cfa_offset 4
+ 126              		.cfi_offset 7, -4
+ 127 004a 83B0     		sub	sp, sp, #12
+ 128              	.LCFI7:
+ 129              		.cfi_def_cfa_offset 16
+ 130 004c 00AF     		add	r7, sp, #0
+ 131              	.LCFI8:
+ 132              		.cfi_def_cfa_register 7
+ 133 004e 7860     		str	r0, [r7, #4]
+ 146:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   /* This callback could be used to implement a scheduler process */
+ 147:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   return 0;  
+ 134              		.loc 1 147 0
+ 135 0050 4FF00003 		mov	r3, #0
+ 148:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** }
+ 136              		.loc 1 148 0
+ 137 0054 1846     		mov	r0, r3
+ 138 0056 07F10C07 		add	r7, r7, #12
+ 139 005a BD46     		mov	sp, r7
+ 140 005c 80BC     		pop	{r7}
+ 141 005e 7047     		bx	lr
+ 142              		.cfi_endproc
+ 143              	.LFE112:
+ 145              		.align	2
+ 146              		.global	USBH_Init
+ 147              		.thumb
+ 148              		.thumb_func
+ 150              	USBH_Init:
+ 151              	.LFB113:
+ 149:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** /**
+ 150:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   * @brief  USBH_Init
+ 151:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   *         Host hardware and stack initializations 
+ 152:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   * @param  class_cb: Class callback structure address
+ 153:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   * @param  usr_cb: User callback structure address
+ 154:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   * @retval None
+ 155:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   */
+ 156:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** void USBH_Init(USB_OTG_CORE_HANDLE *pdev,
+ 157:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****                USB_OTG_CORE_ID_TypeDef coreID,
+ 158:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****                USBH_HOST *phost,               
+ 159:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****                USBH_Class_cb_TypeDef *class_cb, 
+ 160:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****                USBH_Usr_cb_TypeDef *usr_cb)
+ 161:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** {
+ 152              		.loc 1 161 0
+ 153              		.cfi_startproc
+ 154              		@ args = 4, pretend = 0, frame = 16
+ 155              		@ frame_needed = 1, uses_anonymous_args = 0
+ 156 0060 80B5     		push	{r7, lr}
+ 157              	.LCFI9:
+ 158              		.cfi_def_cfa_offset 8
+ 159              		.cfi_offset 7, -8
+ 160              		.cfi_offset 14, -4
+ 161 0062 84B0     		sub	sp, sp, #16
+ 162              	.LCFI10:
+ 163              		.cfi_def_cfa_offset 24
+ 164 0064 00AF     		add	r7, sp, #0
+ 165              	.LCFI11:
+ 166              		.cfi_def_cfa_register 7
+ 167 0066 F860     		str	r0, [r7, #12]
+ 168 0068 7A60     		str	r2, [r7, #4]
+ 169 006a 3B60     		str	r3, [r7, #0]
+ 170 006c 0B46     		mov	r3, r1
+ 171 006e FB72     		strb	r3, [r7, #11]
+ 162:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****      
+ 163:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   /* Hardware Init */
+ 164:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   USB_OTG_BSP_Init(pdev);  
+ 172              		.loc 1 164 0
+ 173 0070 F868     		ldr	r0, [r7, #12]
+ 174 0072 FFF7FEFF 		bl	USB_OTG_BSP_Init
+ 165:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   
+ 166:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   /* configure GPIO pin used for switching VBUS power */
+ 167:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   USB_OTG_BSP_ConfigVBUS(0);  
+ 175              		.loc 1 167 0
+ 176 0076 4FF00000 		mov	r0, #0
+ 177 007a FFF7FEFF 		bl	USB_OTG_BSP_ConfigVBUS
+ 168:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   
+ 169:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   
+ 170:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   /* Host de-initializations */
+ 171:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   USBH_DeInit(pdev, phost);
+ 178              		.loc 1 171 0
+ 179 007e F868     		ldr	r0, [r7, #12]
+ 180 0080 7968     		ldr	r1, [r7, #4]
+ 181 0082 FFF7FEFF 		bl	USBH_DeInit
+ 172:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   
+ 173:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   /*Register class and user callbacks */
+ 174:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   phost->class_cb = class_cb;
+ 182              		.loc 1 174 0
+ 183 0086 7B68     		ldr	r3, [r7, #4]
+ 184 0088 3A68     		ldr	r2, [r7, #0]
+ 185 008a DA67     		str	r2, [r3, #124]
+ 175:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   phost->usr_cb = usr_cb;  
+ 186              		.loc 1 175 0
+ 187 008c 7B68     		ldr	r3, [r7, #4]
+ 188 008e BA69     		ldr	r2, [r7, #24]
+ 189 0090 C3F88020 		str	r2, [r3, #128]
+ 176:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     
+ 177:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   /* Start the USB OTG core */     
+ 178:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****    HCD_Init(pdev , coreID);
+ 190              		.loc 1 178 0
+ 191 0094 FB7A     		ldrb	r3, [r7, #11]	@ zero_extendqisi2
+ 192 0096 F868     		ldr	r0, [r7, #12]
+ 193 0098 1946     		mov	r1, r3
+ 194 009a FFF7FEFF 		bl	HCD_Init
+ 179:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****    
+ 180:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   /* Upon Init call usr call back */
+ 181:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   phost->usr_cb->Init();
+ 195              		.loc 1 181 0
+ 196 009e 7B68     		ldr	r3, [r7, #4]
+ 197 00a0 D3F88030 		ldr	r3, [r3, #128]
+ 198 00a4 1B68     		ldr	r3, [r3, #0]
+ 199 00a6 9847     		blx	r3
+ 182:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   
+ 183:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   /* Enable Interrupts */
+ 184:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   USB_OTG_BSP_EnableInterrupt(pdev);
+ 200              		.loc 1 184 0
+ 201 00a8 F868     		ldr	r0, [r7, #12]
+ 202 00aa FFF7FEFF 		bl	USB_OTG_BSP_EnableInterrupt
+ 185:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** }
+ 203              		.loc 1 185 0
+ 204 00ae 07F11007 		add	r7, r7, #16
+ 205 00b2 BD46     		mov	sp, r7
+ 206 00b4 80BD     		pop	{r7, pc}
+ 207              		.cfi_endproc
+ 208              	.LFE113:
+ 210 00b6 00BF     		.align	2
+ 211              		.global	USBH_DeInit
+ 212              		.thumb
+ 213              		.thumb_func
+ 215              	USBH_DeInit:
+ 216              	.LFB114:
+ 186:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** 
+ 187:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** /**
+ 188:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   * @brief  USBH_DeInit 
+ 189:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   *         Re-Initialize Host
+ 190:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   * @param  None 
+ 191:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   * @retval status: USBH_Status
+ 192:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   */
+ 193:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** USBH_Status USBH_DeInit(USB_OTG_CORE_HANDLE *pdev, USBH_HOST *phost)
+ 194:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** {
+ 217              		.loc 1 194 0
+ 218              		.cfi_startproc
+ 219              		@ args = 0, pretend = 0, frame = 8
+ 220              		@ frame_needed = 1, uses_anonymous_args = 0
+ 221 00b8 80B5     		push	{r7, lr}
+ 222              	.LCFI12:
+ 223              		.cfi_def_cfa_offset 8
+ 224              		.cfi_offset 7, -8
+ 225              		.cfi_offset 14, -4
+ 226 00ba 82B0     		sub	sp, sp, #8
+ 227              	.LCFI13:
+ 228              		.cfi_def_cfa_offset 16
+ 229 00bc 00AF     		add	r7, sp, #0
+ 230              	.LCFI14:
+ 231              		.cfi_def_cfa_register 7
+ 232 00be 7860     		str	r0, [r7, #4]
+ 233 00c0 3960     		str	r1, [r7, #0]
+ 195:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   /* Software Init */
+ 196:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   
+ 197:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   phost->gState = HOST_IDLE;
+ 234              		.loc 1 197 0
+ 235 00c2 3B68     		ldr	r3, [r7, #0]
+ 236 00c4 4FF00002 		mov	r2, #0
+ 237 00c8 1A70     		strb	r2, [r3, #0]
+ 198:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   phost->gStateBkp = HOST_IDLE; 
+ 238              		.loc 1 198 0
+ 239 00ca 3B68     		ldr	r3, [r7, #0]
+ 240 00cc 4FF00002 		mov	r2, #0
+ 241 00d0 5A70     		strb	r2, [r3, #1]
+ 199:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   phost->EnumState = ENUM_IDLE;
+ 242              		.loc 1 199 0
+ 243 00d2 3B68     		ldr	r3, [r7, #0]
+ 244 00d4 4FF00002 		mov	r2, #0
+ 245 00d8 9A70     		strb	r2, [r3, #2]
+ 200:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   phost->RequestState = CMD_SEND;  
+ 246              		.loc 1 200 0
+ 247 00da 3B68     		ldr	r3, [r7, #0]
+ 248 00dc 4FF00102 		mov	r2, #1
+ 249 00e0 DA70     		strb	r2, [r3, #3]
+ 201:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   
+ 202:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   phost->Control.state = CTRL_SETUP;
+ 250              		.loc 1 202 0
+ 251 00e2 3B68     		ldr	r3, [r7, #0]
+ 252 00e4 4FF00102 		mov	r2, #1
+ 253 00e8 1A77     		strb	r2, [r3, #28]
+ 203:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   phost->Control.ep0size = USB_OTG_MAX_EP0_SIZE;  
+ 254              		.loc 1 203 0
+ 255 00ea 3B68     		ldr	r3, [r7, #0]
+ 256 00ec 4FF04002 		mov	r2, #64
+ 257 00f0 9A71     		strb	r2, [r3, #6]
+ 204:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   
+ 205:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   phost->device_prop.address = USBH_DEVICE_ADDRESS_DEFAULT;
+ 258              		.loc 1 205 0
+ 259 00f2 3B68     		ldr	r3, [r7, #0]
+ 260 00f4 4FF00002 		mov	r2, #0
+ 261 00f8 83F82020 		strb	r2, [r3, #32]
+ 206:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   phost->device_prop.speed = HPRT0_PRTSPD_FULL_SPEED;
+ 262              		.loc 1 206 0
+ 263 00fc 3B68     		ldr	r3, [r7, #0]
+ 264 00fe 4FF00102 		mov	r2, #1
+ 265 0102 83F82120 		strb	r2, [r3, #33]
+ 207:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   
+ 208:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   USBH_Free_Channel  (pdev, phost->Control.hc_num_in);
+ 266              		.loc 1 208 0
+ 267 0106 3B68     		ldr	r3, [r7, #0]
+ 268 0108 1B79     		ldrb	r3, [r3, #4]	@ zero_extendqisi2
+ 269 010a 7868     		ldr	r0, [r7, #4]
+ 270 010c 1946     		mov	r1, r3
+ 271 010e FFF7FEFF 		bl	USBH_Free_Channel
+ 209:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   USBH_Free_Channel  (pdev, phost->Control.hc_num_out);  
+ 272              		.loc 1 209 0
+ 273 0112 3B68     		ldr	r3, [r7, #0]
+ 274 0114 5B79     		ldrb	r3, [r3, #5]	@ zero_extendqisi2
+ 275 0116 7868     		ldr	r0, [r7, #4]
+ 276 0118 1946     		mov	r1, r3
+ 277 011a FFF7FEFF 		bl	USBH_Free_Channel
+ 210:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   return USBH_OK;
+ 278              		.loc 1 210 0
+ 279 011e 4FF00003 		mov	r3, #0
+ 211:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** }
+ 280              		.loc 1 211 0
+ 281 0122 1846     		mov	r0, r3
+ 282 0124 07F10807 		add	r7, r7, #8
+ 283 0128 BD46     		mov	sp, r7
+ 284 012a 80BD     		pop	{r7, pc}
+ 285              		.cfi_endproc
+ 286              	.LFE114:
+ 288              		.align	2
+ 289              		.global	USBH_Process
+ 290              		.thumb
+ 291              		.thumb_func
+ 293              	USBH_Process:
+ 294              	.LFB115:
+ 212:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** 
+ 213:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** /**
+ 214:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** * @brief  USBH_Process
+ 215:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** *         USB Host core main state machine process
+ 216:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** * @param  None 
+ 217:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** * @retval None
+ 218:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** */
+ 219:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** void USBH_Process(USB_OTG_CORE_HANDLE *pdev , USBH_HOST *phost)
+ 220:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** {
+ 295              		.loc 1 220 0
+ 296              		.cfi_startproc
+ 297              		@ args = 0, pretend = 0, frame = 16
+ 298              		@ frame_needed = 1, uses_anonymous_args = 0
+ 299 012c 90B5     		push	{r4, r7, lr}
+ 300              	.LCFI15:
+ 301              		.cfi_def_cfa_offset 12
+ 302              		.cfi_offset 4, -12
+ 303              		.cfi_offset 7, -8
+ 304              		.cfi_offset 14, -4
+ 305 012e 87B0     		sub	sp, sp, #28
+ 306              	.LCFI16:
+ 307              		.cfi_def_cfa_offset 40
+ 308 0130 02AF     		add	r7, sp, #8
+ 309              	.LCFI17:
+ 310              		.cfi_def_cfa 7, 32
+ 311 0132 7860     		str	r0, [r7, #4]
+ 312 0134 3960     		str	r1, [r7, #0]
+ 221:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   volatile USBH_Status status = USBH_FAIL;
+ 313              		.loc 1 221 0
+ 314 0136 4FF00203 		mov	r3, #2
+ 315 013a FB73     		strb	r3, [r7, #15]
+ 222:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   
+ 223:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   
+ 224:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   /* check for Host port events */
+ 225:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   if ((HCD_IsDeviceConnected(pdev) == 0)&& (phost->gState != HOST_IDLE)) 
+ 316              		.loc 1 225 0
+ 317 013c 7868     		ldr	r0, [r7, #4]
+ 318 013e FFF7FEFF 		bl	HCD_IsDeviceConnected
+ 319 0142 0346     		mov	r3, r0
+ 320 0144 002B     		cmp	r3, #0
+ 321 0146 0BD1     		bne	.L11
+ 322              		.loc 1 225 0 is_stmt 0 discriminator 1
+ 323 0148 3B68     		ldr	r3, [r7, #0]
+ 324 014a 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 325 014c 002B     		cmp	r3, #0
+ 326 014e 07D0     		beq	.L11
+ 226:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   {
+ 227:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     if(phost->gState != HOST_DEV_DISCONNECTED) 
+ 327              		.loc 1 227 0 is_stmt 1
+ 328 0150 3B68     		ldr	r3, [r7, #0]
+ 329 0152 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 330 0154 022B     		cmp	r3, #2
+ 331 0156 03D0     		beq	.L11
+ 228:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     {
+ 229:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       phost->gState = HOST_DEV_DISCONNECTED;
+ 332              		.loc 1 229 0
+ 333 0158 3B68     		ldr	r3, [r7, #0]
+ 334 015a 4FF00202 		mov	r2, #2
+ 335 015e 1A70     		strb	r2, [r3, #0]
+ 336              	.L11:
+ 230:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     }
+ 231:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   }
+ 232:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     
+ 233:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   switch (phost->gState)
+ 337              		.loc 1 233 0
+ 338 0160 3B68     		ldr	r3, [r7, #0]
+ 339 0162 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 340 0164 0A2B     		cmp	r3, #10
+ 341 0166 00F20A81 		bhi	.L31
+ 342 016a 01A2     		adr	r2, .L23
+ 343 016c 52F823F0 		ldr	pc, [r2, r3, lsl #2]
+ 344              		.align	2
+ 345              	.L23:
+ 346 0170 9D010000 		.word	.L13+1
+ 347 0174 BD010000 		.word	.L14+1
+ 348 0178 41030000 		.word	.L15+1
+ 349 017c 7F030000 		.word	.L31+1
+ 350 0180 73020000 		.word	.L16+1
+ 351 0184 C3020000 		.word	.L17+1
+ 352 0188 F3020000 		.word	.L18+1
+ 353 018c 11030000 		.word	.L19+1
+ 354 0190 97020000 		.word	.L20+1
+ 355 0194 7F030000 		.word	.L31+1
+ 356 0198 1B030000 		.word	.L22+1
+ 357              	.L13:
+ 234:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   {
+ 235:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   
+ 236:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   case HOST_IDLE :
+ 237:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     
+ 238:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     if (HCD_IsDeviceConnected(pdev))  
+ 358              		.loc 1 238 0
+ 359 019c 7868     		ldr	r0, [r7, #4]
+ 360 019e FFF7FEFF 		bl	HCD_IsDeviceConnected
+ 361 01a2 0346     		mov	r3, r0
+ 362 01a4 002B     		cmp	r3, #0
+ 363 01a6 00F0EC80 		beq	.L32
+ 239:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     {
+ 240:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       phost->gState = HOST_DEV_ATTACHED;
+ 364              		.loc 1 240 0
+ 365 01aa 3B68     		ldr	r3, [r7, #0]
+ 366 01ac 4FF00102 		mov	r2, #1
+ 367 01b0 1A70     		strb	r2, [r3, #0]
+ 241:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       USB_OTG_BSP_mDelay(100);
+ 368              		.loc 1 241 0
+ 369 01b2 4FF06400 		mov	r0, #100
+ 370 01b6 FFF7FEFF 		bl	USB_OTG_BSP_mDelay
+ 242:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     }
+ 243:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     break;
+ 371              		.loc 1 243 0
+ 372 01ba E2E0     		b	.L32
+ 373              	.L14:
+ 244:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****    
+ 245:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   case HOST_DEV_ATTACHED :
+ 246:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     
+ 247:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     phost->usr_cb->DeviceAttached();
+ 374              		.loc 1 247 0
+ 375 01bc 3B68     		ldr	r3, [r7, #0]
+ 376 01be D3F88030 		ldr	r3, [r3, #128]
+ 377 01c2 9B68     		ldr	r3, [r3, #8]
+ 378 01c4 9847     		blx	r3
+ 248:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     phost->Control.hc_num_out = USBH_Alloc_Channel(pdev, 0x00);
+ 379              		.loc 1 248 0
+ 380 01c6 7868     		ldr	r0, [r7, #4]
+ 381 01c8 4FF00001 		mov	r1, #0
+ 382 01cc FFF7FEFF 		bl	USBH_Alloc_Channel
+ 383 01d0 0346     		mov	r3, r0
+ 384 01d2 1A46     		mov	r2, r3
+ 385 01d4 3B68     		ldr	r3, [r7, #0]
+ 386 01d6 5A71     		strb	r2, [r3, #5]
+ 249:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     phost->Control.hc_num_in = USBH_Alloc_Channel(pdev, 0x80);  
+ 387              		.loc 1 249 0
+ 388 01d8 7868     		ldr	r0, [r7, #4]
+ 389 01da 4FF08001 		mov	r1, #128
+ 390 01de FFF7FEFF 		bl	USBH_Alloc_Channel
+ 391 01e2 0346     		mov	r3, r0
+ 392 01e4 1A46     		mov	r2, r3
+ 393 01e6 3B68     		ldr	r3, [r7, #0]
+ 394 01e8 1A71     		strb	r2, [r3, #4]
+ 250:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   
+ 251:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     /* Reset USB Device */
+ 252:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     if ( HCD_ResetPort(pdev) == 0)
+ 395              		.loc 1 252 0
+ 396 01ea 7868     		ldr	r0, [r7, #4]
+ 397 01ec FFF7FEFF 		bl	HCD_ResetPort
+ 398 01f0 0346     		mov	r3, r0
+ 399 01f2 002B     		cmp	r3, #0
+ 400 01f4 40F0C780 		bne	.L33
+ 253:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     {
+ 254:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       phost->usr_cb->ResetDevice();
+ 401              		.loc 1 254 0
+ 402 01f8 3B68     		ldr	r3, [r7, #0]
+ 403 01fa D3F88030 		ldr	r3, [r3, #128]
+ 404 01fe DB68     		ldr	r3, [r3, #12]
+ 405 0200 9847     		blx	r3
+ 255:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       /*  Wait for USB USBH_ISR_PrtEnDisableChange()  
+ 256:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       Host is Now ready to start the Enumeration 
+ 257:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       */
+ 258:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       
+ 259:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       phost->device_prop.speed = HCD_GetCurrentSpeed(pdev);
+ 406              		.loc 1 259 0
+ 407 0202 7868     		ldr	r0, [r7, #4]
+ 408 0204 FFF7FEFF 		bl	HCD_GetCurrentSpeed
+ 409 0208 0346     		mov	r3, r0
+ 410 020a DAB2     		uxtb	r2, r3
+ 411 020c 3B68     		ldr	r3, [r7, #0]
+ 412 020e 83F82120 		strb	r2, [r3, #33]
+ 260:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       
+ 261:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       phost->gState = HOST_ENUMERATION;
+ 413              		.loc 1 261 0
+ 414 0212 3B68     		ldr	r3, [r7, #0]
+ 415 0214 4FF00402 		mov	r2, #4
+ 416 0218 1A70     		strb	r2, [r3, #0]
+ 262:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       phost->usr_cb->DeviceSpeedDetected(phost->device_prop.speed);
+ 417              		.loc 1 262 0
+ 418 021a 3B68     		ldr	r3, [r7, #0]
+ 419 021c D3F88030 		ldr	r3, [r3, #128]
+ 420 0220 9B69     		ldr	r3, [r3, #24]
+ 421 0222 3A68     		ldr	r2, [r7, #0]
+ 422 0224 92F82120 		ldrb	r2, [r2, #33]	@ zero_extendqisi2
+ 423 0228 1046     		mov	r0, r2
+ 424 022a 9847     		blx	r3
+ 263:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****         
+ 264:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       /* Open Control pipes */
+ 265:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       USBH_Open_Channel (pdev,
+ 266:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****                            phost->Control.hc_num_in,
+ 425              		.loc 1 266 0
+ 426 022c 3B68     		ldr	r3, [r7, #0]
+ 265:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       USBH_Open_Channel (pdev,
+ 427              		.loc 1 265 0
+ 428 022e 1979     		ldrb	r1, [r3, #4]	@ zero_extendqisi2
+ 267:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****                            phost->device_prop.address,
+ 429              		.loc 1 267 0
+ 430 0230 3B68     		ldr	r3, [r7, #0]
+ 265:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       USBH_Open_Channel (pdev,
+ 431              		.loc 1 265 0
+ 432 0232 93F82020 		ldrb	r2, [r3, #32]	@ zero_extendqisi2
+ 268:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****                            phost->device_prop.speed,
+ 433              		.loc 1 268 0
+ 434 0236 3B68     		ldr	r3, [r7, #0]
+ 265:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       USBH_Open_Channel (pdev,
+ 435              		.loc 1 265 0
+ 436 0238 93F82130 		ldrb	r3, [r3, #33]	@ zero_extendqisi2
+ 269:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****                            EP_TYPE_CTRL,
+ 270:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****                            phost->Control.ep0size); 
+ 437              		.loc 1 270 0
+ 438 023c 3868     		ldr	r0, [r7, #0]
+ 439 023e 8079     		ldrb	r0, [r0, #6]	@ zero_extendqisi2
+ 265:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       USBH_Open_Channel (pdev,
+ 440              		.loc 1 265 0
+ 441 0240 4FF00004 		mov	r4, #0
+ 442 0244 0094     		str	r4, [sp, #0]
+ 443 0246 0190     		str	r0, [sp, #4]
+ 444 0248 7868     		ldr	r0, [r7, #4]
+ 445 024a FFF7FEFF 		bl	USBH_Open_Channel
+ 271:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       
+ 272:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       /* Open Control pipes */
+ 273:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       USBH_Open_Channel (pdev,
+ 274:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****                            phost->Control.hc_num_out,
+ 446              		.loc 1 274 0
+ 447 024e 3B68     		ldr	r3, [r7, #0]
+ 273:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       USBH_Open_Channel (pdev,
+ 448              		.loc 1 273 0
+ 449 0250 5979     		ldrb	r1, [r3, #5]	@ zero_extendqisi2
+ 275:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****                            phost->device_prop.address,
+ 450              		.loc 1 275 0
+ 451 0252 3B68     		ldr	r3, [r7, #0]
+ 273:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       USBH_Open_Channel (pdev,
+ 452              		.loc 1 273 0
+ 453 0254 93F82020 		ldrb	r2, [r3, #32]	@ zero_extendqisi2
+ 276:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****                            phost->device_prop.speed,
+ 454              		.loc 1 276 0
+ 455 0258 3B68     		ldr	r3, [r7, #0]
+ 273:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       USBH_Open_Channel (pdev,
+ 456              		.loc 1 273 0
+ 457 025a 93F82130 		ldrb	r3, [r3, #33]	@ zero_extendqisi2
+ 277:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****                            EP_TYPE_CTRL,
+ 278:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****                            phost->Control.ep0size);          
+ 458              		.loc 1 278 0
+ 459 025e 3868     		ldr	r0, [r7, #0]
+ 460 0260 8079     		ldrb	r0, [r0, #6]	@ zero_extendqisi2
+ 273:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       USBH_Open_Channel (pdev,
+ 461              		.loc 1 273 0
+ 462 0262 4FF00004 		mov	r4, #0
+ 463 0266 0094     		str	r4, [sp, #0]
+ 464 0268 0190     		str	r0, [sp, #4]
+ 465 026a 7868     		ldr	r0, [r7, #4]
+ 466 026c FFF7FEFF 		bl	USBH_Open_Channel
+ 279:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****    }
+ 280:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     break;
+ 467              		.loc 1 280 0
+ 468 0270 89E0     		b	.L33
+ 469              	.L16:
+ 281:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     
+ 282:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   case HOST_ENUMERATION:     
+ 283:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     /* Check for enumeration status */  
+ 284:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     if ( USBH_HandleEnum(pdev , phost) == USBH_OK)
+ 470              		.loc 1 284 0
+ 471 0272 7868     		ldr	r0, [r7, #4]
+ 472 0274 3968     		ldr	r1, [r7, #0]
+ 473 0276 00F0B5F8 		bl	USBH_HandleEnum
+ 474 027a 0346     		mov	r3, r0
+ 475 027c 002B     		cmp	r3, #0
+ 476 027e 40F08480 		bne	.L34
+ 285:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     { 
+ 286:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       /* The function shall return USBH_OK when full enumeration is complete */
+ 287:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       
+ 288:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       /* user callback for end of device basic enumeration */
+ 289:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       phost->usr_cb->EnumerationDone();
+ 477              		.loc 1 289 0
+ 478 0282 3B68     		ldr	r3, [r7, #0]
+ 479 0284 D3F88030 		ldr	r3, [r3, #128]
+ 480 0288 5B6B     		ldr	r3, [r3, #52]
+ 481 028a 9847     		blx	r3
+ 290:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       
+ 291:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       phost->gState  = HOST_USR_INPUT;    
+ 482              		.loc 1 291 0
+ 483 028c 3B68     		ldr	r3, [r7, #0]
+ 484 028e 4FF00802 		mov	r2, #8
+ 485 0292 1A70     		strb	r2, [r3, #0]
+ 292:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     }
+ 293:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     break;
+ 486              		.loc 1 293 0
+ 487 0294 79E0     		b	.L34
+ 488              	.L20:
+ 294:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     
+ 295:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   case HOST_USR_INPUT:    
+ 296:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     /*The function should return user response true to move to class state */
+ 297:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     if ( phost->usr_cb->UserInput() == USBH_USR_RESP_OK)
+ 489              		.loc 1 297 0
+ 490 0296 3B68     		ldr	r3, [r7, #0]
+ 491 0298 D3F88030 		ldr	r3, [r3, #128]
+ 492 029c 9B6B     		ldr	r3, [r3, #56]
+ 493 029e 9847     		blx	r3
+ 494 02a0 0346     		mov	r3, r0
+ 495 02a2 012B     		cmp	r3, #1
+ 496 02a4 73D1     		bne	.L35
+ 298:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     {
+ 299:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       if((phost->class_cb->Init(pdev, phost))\
+ 497              		.loc 1 299 0
+ 498 02a6 3B68     		ldr	r3, [r7, #0]
+ 499 02a8 DB6F     		ldr	r3, [r3, #124]
+ 500 02aa 1B68     		ldr	r3, [r3, #0]
+ 501 02ac 7868     		ldr	r0, [r7, #4]
+ 502 02ae 3968     		ldr	r1, [r7, #0]
+ 503 02b0 9847     		blx	r3
+ 504 02b2 0346     		mov	r3, r0
+ 505 02b4 002B     		cmp	r3, #0
+ 506 02b6 6AD1     		bne	.L35
+ 300:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****         == USBH_OK)
+ 301:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       {
+ 302:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****         phost->gState  = HOST_CLASS_REQUEST;     
+ 507              		.loc 1 302 0
+ 508 02b8 3B68     		ldr	r3, [r7, #0]
+ 509 02ba 4FF00502 		mov	r2, #5
+ 510 02be 1A70     		strb	r2, [r3, #0]
+ 303:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       }     
+ 304:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     }   
+ 305:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     break;
+ 511              		.loc 1 305 0
+ 512 02c0 65E0     		b	.L35
+ 513              	.L17:
+ 306:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     
+ 307:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   case HOST_CLASS_REQUEST:  
+ 308:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     /* process class standard contol requests state machine */ 
+ 309:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     status = phost->class_cb->Requests(pdev, phost);
+ 514              		.loc 1 309 0
+ 515 02c2 3B68     		ldr	r3, [r7, #0]
+ 516 02c4 DB6F     		ldr	r3, [r3, #124]
+ 517 02c6 9B68     		ldr	r3, [r3, #8]
+ 518 02c8 7868     		ldr	r0, [r7, #4]
+ 519 02ca 3968     		ldr	r1, [r7, #0]
+ 520 02cc 9847     		blx	r3
+ 521 02ce 0346     		mov	r3, r0
+ 522 02d0 FB73     		strb	r3, [r7, #15]
+ 310:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     
+ 311:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****      if(status == USBH_OK)
+ 523              		.loc 1 311 0
+ 524 02d2 FB7B     		ldrb	r3, [r7, #15]
+ 525 02d4 DBB2     		uxtb	r3, r3
+ 526 02d6 002B     		cmp	r3, #0
+ 527 02d8 04D1     		bne	.L29
+ 312:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****      {
+ 313:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****        phost->gState  = HOST_CLASS;
+ 528              		.loc 1 313 0
+ 529 02da 3B68     		ldr	r3, [r7, #0]
+ 530 02dc 4FF00602 		mov	r2, #6
+ 531 02e0 1A70     		strb	r2, [r3, #0]
+ 314:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****      }  
+ 315:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****      
+ 316:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****      else
+ 317:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****      {
+ 318:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****        USBH_ErrorHandle(phost, status);
+ 319:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****      }
+ 320:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****  
+ 321:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     
+ 322:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     break;    
+ 532              		.loc 1 322 0
+ 533 02e2 55E0     		b	.L10
+ 534              	.L29:
+ 318:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****        USBH_ErrorHandle(phost, status);
+ 535              		.loc 1 318 0
+ 536 02e4 FB7B     		ldrb	r3, [r7, #15]
+ 537 02e6 DBB2     		uxtb	r3, r3
+ 538 02e8 3868     		ldr	r0, [r7, #0]
+ 539 02ea 1946     		mov	r1, r3
+ 540 02ec FFF7FEFF 		bl	USBH_ErrorHandle
+ 541              		.loc 1 322 0
+ 542 02f0 4EE0     		b	.L10
+ 543              	.L18:
+ 323:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   case HOST_CLASS:   
+ 324:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     /* process class state machine */
+ 325:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     status = phost->class_cb->Machine(pdev, phost);
+ 544              		.loc 1 325 0
+ 545 02f2 3B68     		ldr	r3, [r7, #0]
+ 546 02f4 DB6F     		ldr	r3, [r3, #124]
+ 547 02f6 DB68     		ldr	r3, [r3, #12]
+ 548 02f8 7868     		ldr	r0, [r7, #4]
+ 549 02fa 3968     		ldr	r1, [r7, #0]
+ 550 02fc 9847     		blx	r3
+ 551 02fe 0346     		mov	r3, r0
+ 552 0300 FB73     		strb	r3, [r7, #15]
+ 326:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     USBH_ErrorHandle(phost, status);
+ 553              		.loc 1 326 0
+ 554 0302 FB7B     		ldrb	r3, [r7, #15]
+ 555 0304 DBB2     		uxtb	r3, r3
+ 556 0306 3868     		ldr	r0, [r7, #0]
+ 557 0308 1946     		mov	r1, r3
+ 558 030a FFF7FEFF 		bl	USBH_ErrorHandle
+ 327:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     break;       
+ 559              		.loc 1 327 0
+ 560 030e 3FE0     		b	.L10
+ 561              	.L19:
+ 328:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     
+ 329:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   case HOST_CTRL_XFER:
+ 330:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     /* process control transfer state machine */
+ 331:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     USBH_HandleControl(pdev, phost);    
+ 562              		.loc 1 331 0
+ 563 0310 7868     		ldr	r0, [r7, #4]
+ 564 0312 3968     		ldr	r1, [r7, #0]
+ 565 0314 FFF7FEFF 		bl	USBH_HandleControl
+ 332:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     break;
+ 566              		.loc 1 332 0
+ 567 0318 3AE0     		b	.L10
+ 568              	.L22:
+ 333:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     
+ 334:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   case HOST_SUSPENDED:
+ 335:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     break;
+ 336:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   
+ 337:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   case HOST_ERROR_STATE:
+ 338:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     /* Re-Initilaize Host for new Enumeration */
+ 339:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     USBH_DeInit(pdev, phost);
+ 569              		.loc 1 339 0
+ 570 031a 7868     		ldr	r0, [r7, #4]
+ 571 031c 3968     		ldr	r1, [r7, #0]
+ 572 031e FFF7FEFF 		bl	USBH_DeInit
+ 340:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     phost->usr_cb->DeInit();
+ 573              		.loc 1 340 0
+ 574 0322 3B68     		ldr	r3, [r7, #0]
+ 575 0324 D3F88030 		ldr	r3, [r3, #128]
+ 576 0328 5B68     		ldr	r3, [r3, #4]
+ 577 032a 9847     		blx	r3
+ 341:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     phost->class_cb->DeInit(pdev, &phost->device_prop);
+ 578              		.loc 1 341 0
+ 579 032c 3B68     		ldr	r3, [r7, #0]
+ 580 032e DB6F     		ldr	r3, [r3, #124]
+ 581 0330 5B68     		ldr	r3, [r3, #4]
+ 582 0332 3A68     		ldr	r2, [r7, #0]
+ 583 0334 02F12002 		add	r2, r2, #32
+ 584 0338 7868     		ldr	r0, [r7, #4]
+ 585 033a 1146     		mov	r1, r2
+ 586 033c 9847     		blx	r3
+ 342:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     break;
+ 587              		.loc 1 342 0
+ 588 033e 27E0     		b	.L10
+ 589              	.L15:
+ 343:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     
+ 344:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   case HOST_DEV_DISCONNECTED :
+ 345:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     
+ 346:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     /* Manage User disconnect operations*/
+ 347:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     phost->usr_cb->DeviceDisconnected();
+ 590              		.loc 1 347 0
+ 591 0340 3B68     		ldr	r3, [r7, #0]
+ 592 0342 D3F88030 		ldr	r3, [r3, #128]
+ 593 0346 1B69     		ldr	r3, [r3, #16]
+ 594 0348 9847     		blx	r3
+ 348:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     
+ 349:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     /* Re-Initilaize Host for new Enumeration */
+ 350:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     USBH_DeInit(pdev, phost);
+ 595              		.loc 1 350 0
+ 596 034a 7868     		ldr	r0, [r7, #4]
+ 597 034c 3968     		ldr	r1, [r7, #0]
+ 598 034e FFF7FEFF 		bl	USBH_DeInit
+ 351:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     phost->usr_cb->DeInit();
+ 599              		.loc 1 351 0
+ 600 0352 3B68     		ldr	r3, [r7, #0]
+ 601 0354 D3F88030 		ldr	r3, [r3, #128]
+ 602 0358 5B68     		ldr	r3, [r3, #4]
+ 603 035a 9847     		blx	r3
+ 352:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     phost->class_cb->DeInit(pdev, &phost->device_prop); 
+ 604              		.loc 1 352 0
+ 605 035c 3B68     		ldr	r3, [r7, #0]
+ 606 035e DB6F     		ldr	r3, [r3, #124]
+ 607 0360 5B68     		ldr	r3, [r3, #4]
+ 608 0362 3A68     		ldr	r2, [r7, #0]
+ 609 0364 02F12002 		add	r2, r2, #32
+ 610 0368 7868     		ldr	r0, [r7, #4]
+ 611 036a 1146     		mov	r1, r2
+ 612 036c 9847     		blx	r3
+ 353:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     USBH_DeAllocate_AllChannel(pdev);  
+ 613              		.loc 1 353 0
+ 614 036e 7868     		ldr	r0, [r7, #4]
+ 615 0370 FFF7FEFF 		bl	USBH_DeAllocate_AllChannel
+ 354:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     phost->gState = HOST_IDLE;
+ 616              		.loc 1 354 0
+ 617 0374 3B68     		ldr	r3, [r7, #0]
+ 618 0376 4FF00002 		mov	r2, #0
+ 619 037a 1A70     		strb	r2, [r3, #0]
+ 355:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     
+ 356:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     break;
+ 620              		.loc 1 356 0
+ 621 037c 08E0     		b	.L10
+ 622              	.L31:
+ 357:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     
+ 358:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   default :
+ 359:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     break;
+ 623              		.loc 1 359 0
+ 624 037e 00BF     		nop
+ 625 0380 06E0     		b	.L10
+ 626              	.L32:
+ 243:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     break;
+ 627              		.loc 1 243 0
+ 628 0382 00BF     		nop
+ 629 0384 04E0     		b	.L10
+ 630              	.L33:
+ 280:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     break;
+ 631              		.loc 1 280 0
+ 632 0386 00BF     		nop
+ 633 0388 02E0     		b	.L10
+ 634              	.L34:
+ 293:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     break;
+ 635              		.loc 1 293 0
+ 636 038a 00BF     		nop
+ 637 038c 00E0     		b	.L10
+ 638              	.L35:
+ 305:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     break;
+ 639              		.loc 1 305 0
+ 640 038e 00BF     		nop
+ 641              	.L10:
+ 360:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   }
+ 361:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** 
+ 362:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** }
+ 642              		.loc 1 362 0
+ 643 0390 07F11407 		add	r7, r7, #20
+ 644 0394 BD46     		mov	sp, r7
+ 645 0396 90BD     		pop	{r4, r7, pc}
+ 646              		.cfi_endproc
+ 647              	.LFE115:
+ 649              		.align	2
+ 650              		.global	USBH_ErrorHandle
+ 651              		.thumb
+ 652              		.thumb_func
+ 654              	USBH_ErrorHandle:
+ 655              	.LFB116:
+ 363:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** 
+ 364:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** 
+ 365:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** /**
+ 366:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   * @brief  USBH_ErrorHandle 
+ 367:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   *         This function handles the Error on Host side.
+ 368:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   * @param  errType : Type of Error or Busy/OK state
+ 369:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   * @retval None
+ 370:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   */
+ 371:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** void USBH_ErrorHandle(USBH_HOST *phost, USBH_Status errType)
+ 372:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** {
+ 656              		.loc 1 372 0
+ 657              		.cfi_startproc
+ 658              		@ args = 0, pretend = 0, frame = 8
+ 659              		@ frame_needed = 1, uses_anonymous_args = 0
+ 660 0398 80B5     		push	{r7, lr}
+ 661              	.LCFI18:
+ 662              		.cfi_def_cfa_offset 8
+ 663              		.cfi_offset 7, -8
+ 664              		.cfi_offset 14, -4
+ 665 039a 82B0     		sub	sp, sp, #8
+ 666              	.LCFI19:
+ 667              		.cfi_def_cfa_offset 16
+ 668 039c 00AF     		add	r7, sp, #0
+ 669              	.LCFI20:
+ 670              		.cfi_def_cfa_register 7
+ 671 039e 7860     		str	r0, [r7, #4]
+ 672 03a0 0B46     		mov	r3, r1
+ 673 03a2 FB70     		strb	r3, [r7, #3]
+ 373:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   /* Error unrecovered or not supported device speed */
+ 374:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   if ( (errType == USBH_ERROR_SPEED_UNKNOWN) ||
+ 674              		.loc 1 374 0
+ 675 03a4 FB78     		ldrb	r3, [r7, #3]	@ zero_extendqisi2
+ 676 03a6 052B     		cmp	r3, #5
+ 677 03a8 02D0     		beq	.L37
+ 678              		.loc 1 374 0 is_stmt 0 discriminator 1
+ 679 03aa FB78     		ldrb	r3, [r7, #3]	@ zero_extendqisi2
+ 680 03ac 042B     		cmp	r3, #4
+ 681 03ae 09D1     		bne	.L38
+ 682              	.L37:
+ 375:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****        (errType == USBH_UNRECOVERED_ERROR) )
+ 376:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   {
+ 377:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     phost->usr_cb->UnrecoveredError(); 
+ 683              		.loc 1 377 0 is_stmt 1
+ 684 03b0 7B68     		ldr	r3, [r7, #4]
+ 685 03b2 D3F88030 		ldr	r3, [r3, #128]
+ 686 03b6 5B6C     		ldr	r3, [r3, #68]
+ 687 03b8 9847     		blx	r3
+ 378:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     phost->gState = HOST_ERROR_STATE;   
+ 688              		.loc 1 378 0
+ 689 03ba 7B68     		ldr	r3, [r7, #4]
+ 690 03bc 4FF00A02 		mov	r2, #10
+ 691 03c0 1A70     		strb	r2, [r3, #0]
+ 692 03c2 0BE0     		b	.L36
+ 693              	.L38:
+ 379:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   }  
+ 380:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   /* USB host restart requested from application layer */
+ 381:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   else if(errType == USBH_APPLY_DEINIT)
+ 694              		.loc 1 381 0
+ 695 03c4 FB78     		ldrb	r3, [r7, #3]	@ zero_extendqisi2
+ 696 03c6 062B     		cmp	r3, #6
+ 697 03c8 08D1     		bne	.L36
+ 382:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   {
+ 383:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     phost->gState = HOST_ERROR_STATE;  
+ 698              		.loc 1 383 0
+ 699 03ca 7B68     		ldr	r3, [r7, #4]
+ 700 03cc 4FF00A02 		mov	r2, #10
+ 701 03d0 1A70     		strb	r2, [r3, #0]
+ 384:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     /* user callback for initalization */
+ 385:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     phost->usr_cb->Init();
+ 702              		.loc 1 385 0
+ 703 03d2 7B68     		ldr	r3, [r7, #4]
+ 704 03d4 D3F88030 		ldr	r3, [r3, #128]
+ 705 03d8 1B68     		ldr	r3, [r3, #0]
+ 706 03da 9847     		blx	r3
+ 707              	.L36:
+ 386:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   } 
+ 387:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** }
+ 708              		.loc 1 387 0
+ 709 03dc 07F10807 		add	r7, r7, #8
+ 710 03e0 BD46     		mov	sp, r7
+ 711 03e2 80BD     		pop	{r7, pc}
+ 712              		.cfi_endproc
+ 713              	.LFE116:
+ 715              		.section	.rodata
+ 716              		.align	2
+ 717              	.LC0:
+ 718 0000 4E2F4100 		.ascii	"N/A\000"
+ 719              		.text
+ 720              		.align	2
+ 721              		.thumb
+ 722              		.thumb_func
+ 724              	USBH_HandleEnum:
+ 725              	.LFB117:
+ 388:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** 
+ 389:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** 
+ 390:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** /**
+ 391:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   * @brief  USBH_HandleEnum 
+ 392:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   *         This function includes the complete enumeration process
+ 393:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   * @param  pdev: Selected device
+ 394:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   * @retval USBH_Status
+ 395:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   */
+ 396:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** static USBH_Status USBH_HandleEnum(USB_OTG_CORE_HANDLE *pdev, USBH_HOST *phost)
+ 397:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** {
+ 726              		.loc 1 397 0
+ 727              		.cfi_startproc
+ 728              		@ args = 0, pretend = 0, frame = 80
+ 729              		@ frame_needed = 1, uses_anonymous_args = 0
+ 730 03e4 80B5     		push	{r7, lr}
+ 731              	.LCFI21:
+ 732              		.cfi_def_cfa_offset 8
+ 733              		.cfi_offset 7, -8
+ 734              		.cfi_offset 14, -4
+ 735 03e6 96B0     		sub	sp, sp, #88
+ 736              	.LCFI22:
+ 737              		.cfi_def_cfa_offset 96
+ 738 03e8 02AF     		add	r7, sp, #8
+ 739              	.LCFI23:
+ 740              		.cfi_def_cfa 7, 88
+ 741 03ea 7860     		str	r0, [r7, #4]
+ 742 03ec 3960     		str	r1, [r7, #0]
+ 398:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   USBH_Status Status = USBH_BUSY;  
+ 743              		.loc 1 398 0
+ 744 03ee 4FF00103 		mov	r3, #1
+ 745 03f2 87F84F30 		strb	r3, [r7, #79]
+ 399:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   uint8_t Local_Buffer[64];
+ 400:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   
+ 401:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   switch (phost->EnumState)
+ 746              		.loc 1 401 0
+ 747 03f6 3B68     		ldr	r3, [r7, #0]
+ 748 03f8 9B78     		ldrb	r3, [r3, #2]	@ zero_extendqisi2
+ 749 03fa 092B     		cmp	r3, #9
+ 750 03fc 00F26F81 		bhi	.L67
+ 751 0400 01A2     		adr	r2, .L52
+ 752 0402 52F823F0 		ldr	pc, [r2, r3, lsl #2]
+ 753 0406 00BF     		.align	2
+ 754              	.L52:
+ 755 0408 31040000 		.word	.L42+1
+ 756 040c 9F040000 		.word	.L43+1
+ 757 0410 CF040000 		.word	.L44+1
+ 758 0414 51050000 		.word	.L45+1
+ 759 0418 6F050000 		.word	.L46+1
+ 760 041c AB050000 		.word	.L47+1
+ 761 0420 05060000 		.word	.L48+1
+ 762 0424 5D060000 		.word	.L49+1
+ 763 0428 B5060000 		.word	.L50+1
+ 764 042c D5060000 		.word	.L51+1
+ 765              	.L42:
+ 402:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   {
+ 403:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   case ENUM_IDLE:  
+ 404:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     /* Get Device Desc for only 1st 8 bytes : To get EP0 MaxPacketSize */
+ 405:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     if ( USBH_Get_DevDesc(pdev , phost, 8) == USBH_OK)
+ 766              		.loc 1 405 0
+ 767 0430 7868     		ldr	r0, [r7, #4]
+ 768 0432 3968     		ldr	r1, [r7, #0]
+ 769 0434 4FF00802 		mov	r2, #8
+ 770 0438 FFF7FEFF 		bl	USBH_Get_DevDesc
+ 771 043c 0346     		mov	r3, r0
+ 772 043e 002B     		cmp	r3, #0
+ 773 0440 40F04F81 		bne	.L68
+ 406:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     {
+ 407:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       phost->Control.ep0size = phost->device_prop.Dev_Desc.bMaxPacketSize;
+ 774              		.loc 1 407 0
+ 775 0444 3B68     		ldr	r3, [r7, #0]
+ 776 0446 93F82920 		ldrb	r2, [r3, #41]	@ zero_extendqisi2
+ 777 044a 3B68     		ldr	r3, [r7, #0]
+ 778 044c 9A71     		strb	r2, [r3, #6]
+ 408:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       
+ 409:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       /* Issue Reset  */
+ 410:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       HCD_ResetPort(pdev);
+ 779              		.loc 1 410 0
+ 780 044e 7868     		ldr	r0, [r7, #4]
+ 781 0450 FFF7FEFF 		bl	HCD_ResetPort
+ 411:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       phost->EnumState = ENUM_GET_FULL_DEV_DESC;
+ 782              		.loc 1 411 0
+ 783 0454 3B68     		ldr	r3, [r7, #0]
+ 784 0456 4FF00102 		mov	r2, #1
+ 785 045a 9A70     		strb	r2, [r3, #2]
+ 412:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       
+ 413:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       /* modify control channels configuration for MaxPacket size */
+ 414:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       USBH_Modify_Channel (pdev,
+ 415:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****                            phost->Control.hc_num_out,
+ 786              		.loc 1 415 0
+ 787 045c 3B68     		ldr	r3, [r7, #0]
+ 414:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       USBH_Modify_Channel (pdev,
+ 788              		.loc 1 414 0
+ 789 045e 5B79     		ldrb	r3, [r3, #5]	@ zero_extendqisi2
+ 416:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****                            0,
+ 417:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****                            0,
+ 418:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****                            0,
+ 419:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****                            phost->Control.ep0size);
+ 790              		.loc 1 419 0
+ 791 0460 3A68     		ldr	r2, [r7, #0]
+ 792 0462 9279     		ldrb	r2, [r2, #6]	@ zero_extendqisi2
+ 414:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       USBH_Modify_Channel (pdev,
+ 793              		.loc 1 414 0
+ 794 0464 4FF00001 		mov	r1, #0
+ 795 0468 0091     		str	r1, [sp, #0]
+ 796 046a 0192     		str	r2, [sp, #4]
+ 797 046c 7868     		ldr	r0, [r7, #4]
+ 798 046e 1946     		mov	r1, r3
+ 799 0470 4FF00002 		mov	r2, #0
+ 800 0474 4FF00003 		mov	r3, #0
+ 801 0478 FFF7FEFF 		bl	USBH_Modify_Channel
+ 420:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       
+ 421:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       USBH_Modify_Channel (pdev,
+ 422:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****                            phost->Control.hc_num_in,
+ 802              		.loc 1 422 0
+ 803 047c 3B68     		ldr	r3, [r7, #0]
+ 421:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       USBH_Modify_Channel (pdev,
+ 804              		.loc 1 421 0
+ 805 047e 1B79     		ldrb	r3, [r3, #4]	@ zero_extendqisi2
+ 423:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****                            0,
+ 424:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****                            0,
+ 425:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****                            0,
+ 426:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****                            phost->Control.ep0size);      
+ 806              		.loc 1 426 0
+ 807 0480 3A68     		ldr	r2, [r7, #0]
+ 808 0482 9279     		ldrb	r2, [r2, #6]	@ zero_extendqisi2
+ 421:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       USBH_Modify_Channel (pdev,
+ 809              		.loc 1 421 0
+ 810 0484 4FF00001 		mov	r1, #0
+ 811 0488 0091     		str	r1, [sp, #0]
+ 812 048a 0192     		str	r2, [sp, #4]
+ 813 048c 7868     		ldr	r0, [r7, #4]
+ 814 048e 1946     		mov	r1, r3
+ 815 0490 4FF00002 		mov	r2, #0
+ 816 0494 4FF00003 		mov	r3, #0
+ 817 0498 FFF7FEFF 		bl	USBH_Modify_Channel
+ 427:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     }
+ 428:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     break;
+ 818              		.loc 1 428 0
+ 819 049c 21E1     		b	.L68
+ 820              	.L43:
+ 429:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     
+ 430:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   case ENUM_GET_FULL_DEV_DESC:  
+ 431:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     /* Get FULL Device Desc  */
+ 432:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     if ( USBH_Get_DevDesc(pdev, phost, USB_DEVICE_DESC_SIZE)\
+ 821              		.loc 1 432 0
+ 822 049e 7868     		ldr	r0, [r7, #4]
+ 823 04a0 3968     		ldr	r1, [r7, #0]
+ 824 04a2 4FF01202 		mov	r2, #18
+ 825 04a6 FFF7FEFF 		bl	USBH_Get_DevDesc
+ 826 04aa 0346     		mov	r3, r0
+ 827 04ac 002B     		cmp	r3, #0
+ 828 04ae 40F01A81 		bne	.L69
+ 433:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       == USBH_OK)
+ 434:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     {
+ 435:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       /* user callback for device descriptor available */
+ 436:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       phost->usr_cb->DeviceDescAvailable(&phost->device_prop.Dev_Desc);      
+ 829              		.loc 1 436 0
+ 830 04b2 3B68     		ldr	r3, [r7, #0]
+ 831 04b4 D3F88030 		ldr	r3, [r3, #128]
+ 832 04b8 DB69     		ldr	r3, [r3, #28]
+ 833 04ba 3A68     		ldr	r2, [r7, #0]
+ 834 04bc 02F12202 		add	r2, r2, #34
+ 835 04c0 1046     		mov	r0, r2
+ 836 04c2 9847     		blx	r3
+ 437:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       phost->EnumState = ENUM_SET_ADDR;
+ 837              		.loc 1 437 0
+ 838 04c4 3B68     		ldr	r3, [r7, #0]
+ 839 04c6 4FF00202 		mov	r2, #2
+ 840 04ca 9A70     		strb	r2, [r3, #2]
+ 438:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     }
+ 439:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     break;
+ 841              		.loc 1 439 0
+ 842 04cc 0BE1     		b	.L69
+ 843              	.L44:
+ 440:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****    
+ 441:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   case ENUM_SET_ADDR: 
+ 442:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     /* set address */
+ 443:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     if ( USBH_SetAddress(pdev, phost, USBH_DEVICE_ADDRESS) == USBH_OK)
+ 844              		.loc 1 443 0
+ 845 04ce 7868     		ldr	r0, [r7, #4]
+ 846 04d0 3968     		ldr	r1, [r7, #0]
+ 847 04d2 4FF00102 		mov	r2, #1
+ 848 04d6 FFF7FEFF 		bl	USBH_SetAddress
+ 849 04da 0346     		mov	r3, r0
+ 850 04dc 002B     		cmp	r3, #0
+ 851 04de 40F00481 		bne	.L70
+ 444:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     {
+ 445:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       USB_OTG_BSP_mDelay(2);
+ 852              		.loc 1 445 0
+ 853 04e2 4FF00200 		mov	r0, #2
+ 854 04e6 FFF7FEFF 		bl	USB_OTG_BSP_mDelay
+ 446:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       phost->device_prop.address = USBH_DEVICE_ADDRESS;
+ 855              		.loc 1 446 0
+ 856 04ea 3B68     		ldr	r3, [r7, #0]
+ 857 04ec 4FF00102 		mov	r2, #1
+ 858 04f0 83F82020 		strb	r2, [r3, #32]
+ 447:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       
+ 448:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       /* user callback for device address assigned */
+ 449:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       phost->usr_cb->DeviceAddressAssigned();
+ 859              		.loc 1 449 0
+ 860 04f4 3B68     		ldr	r3, [r7, #0]
+ 861 04f6 D3F88030 		ldr	r3, [r3, #128]
+ 862 04fa 1B6A     		ldr	r3, [r3, #32]
+ 863 04fc 9847     		blx	r3
+ 450:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       phost->EnumState = ENUM_GET_CFG_DESC;
+ 864              		.loc 1 450 0
+ 865 04fe 3B68     		ldr	r3, [r7, #0]
+ 866 0500 4FF00302 		mov	r2, #3
+ 867 0504 9A70     		strb	r2, [r3, #2]
+ 451:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       
+ 452:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       /* modify control channels to update device address */
+ 453:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       USBH_Modify_Channel (pdev,
+ 454:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****                            phost->Control.hc_num_in,
+ 868              		.loc 1 454 0
+ 869 0506 3B68     		ldr	r3, [r7, #0]
+ 453:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       USBH_Modify_Channel (pdev,
+ 870              		.loc 1 453 0
+ 871 0508 1A79     		ldrb	r2, [r3, #4]	@ zero_extendqisi2
+ 455:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****                            phost->device_prop.address,
+ 872              		.loc 1 455 0
+ 873 050a 3B68     		ldr	r3, [r7, #0]
+ 453:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       USBH_Modify_Channel (pdev,
+ 874              		.loc 1 453 0
+ 875 050c 93F82030 		ldrb	r3, [r3, #32]	@ zero_extendqisi2
+ 876 0510 4FF00001 		mov	r1, #0
+ 877 0514 0091     		str	r1, [sp, #0]
+ 878 0516 4FF00001 		mov	r1, #0
+ 879 051a 0191     		str	r1, [sp, #4]
+ 880 051c 7868     		ldr	r0, [r7, #4]
+ 881 051e 1146     		mov	r1, r2
+ 882 0520 1A46     		mov	r2, r3
+ 883 0522 4FF00003 		mov	r3, #0
+ 884 0526 FFF7FEFF 		bl	USBH_Modify_Channel
+ 456:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****                            0,
+ 457:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****                            0,
+ 458:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****                            0);
+ 459:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       
+ 460:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       USBH_Modify_Channel (pdev,
+ 461:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****                            phost->Control.hc_num_out,
+ 885              		.loc 1 461 0
+ 886 052a 3B68     		ldr	r3, [r7, #0]
+ 460:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       USBH_Modify_Channel (pdev,
+ 887              		.loc 1 460 0
+ 888 052c 5A79     		ldrb	r2, [r3, #5]	@ zero_extendqisi2
+ 462:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****                            phost->device_prop.address,
+ 889              		.loc 1 462 0
+ 890 052e 3B68     		ldr	r3, [r7, #0]
+ 460:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       USBH_Modify_Channel (pdev,
+ 891              		.loc 1 460 0
+ 892 0530 93F82030 		ldrb	r3, [r3, #32]	@ zero_extendqisi2
+ 893 0534 4FF00001 		mov	r1, #0
+ 894 0538 0091     		str	r1, [sp, #0]
+ 895 053a 4FF00001 		mov	r1, #0
+ 896 053e 0191     		str	r1, [sp, #4]
+ 897 0540 7868     		ldr	r0, [r7, #4]
+ 898 0542 1146     		mov	r1, r2
+ 899 0544 1A46     		mov	r2, r3
+ 900 0546 4FF00003 		mov	r3, #0
+ 901 054a FFF7FEFF 		bl	USBH_Modify_Channel
+ 463:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****                            0,
+ 464:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****                            0,
+ 465:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****                            0);         
+ 466:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     }
+ 467:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     break;
+ 902              		.loc 1 467 0
+ 903 054e CCE0     		b	.L70
+ 904              	.L45:
+ 468:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     
+ 469:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   case ENUM_GET_CFG_DESC:  
+ 470:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     /* get standard configuration descriptor */
+ 471:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     if ( USBH_Get_CfgDesc(pdev, 
+ 905              		.loc 1 471 0
+ 906 0550 7868     		ldr	r0, [r7, #4]
+ 907 0552 3968     		ldr	r1, [r7, #0]
+ 908 0554 4FF00902 		mov	r2, #9
+ 909 0558 FFF7FEFF 		bl	USBH_Get_CfgDesc
+ 910 055c 0346     		mov	r3, r0
+ 911 055e 002B     		cmp	r3, #0
+ 912 0560 40F0C580 		bne	.L71
+ 472:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****                           phost,
+ 473:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****                           USB_CONFIGURATION_DESC_SIZE) == USBH_OK)
+ 474:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     {
+ 475:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       phost->EnumState = ENUM_GET_FULL_CFG_DESC;
+ 913              		.loc 1 475 0
+ 914 0564 3B68     		ldr	r3, [r7, #0]
+ 915 0566 4FF00402 		mov	r2, #4
+ 916 056a 9A70     		strb	r2, [r3, #2]
+ 476:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     }
+ 477:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     break;
+ 917              		.loc 1 477 0
+ 918 056c BFE0     		b	.L71
+ 919              	.L46:
+ 478:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     
+ 479:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   case ENUM_GET_FULL_CFG_DESC:  
+ 480:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     /* get FULL config descriptor (config, interface, endpoints) */
+ 481:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     if (USBH_Get_CfgDesc(pdev, 
+ 482:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****                          phost,
+ 483:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****                          phost->device_prop.Cfg_Desc.wTotalLength) == USBH_OK)
+ 920              		.loc 1 483 0
+ 921 056e 3B68     		ldr	r3, [r7, #0]
+ 481:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     if (USBH_Get_CfgDesc(pdev, 
+ 922              		.loc 1 481 0
+ 923 0570 DB8E     		ldrh	r3, [r3, #54]
+ 924 0572 7868     		ldr	r0, [r7, #4]
+ 925 0574 3968     		ldr	r1, [r7, #0]
+ 926 0576 1A46     		mov	r2, r3
+ 927 0578 FFF7FEFF 		bl	USBH_Get_CfgDesc
+ 928 057c 0346     		mov	r3, r0
+ 929 057e 002B     		cmp	r3, #0
+ 930 0580 40F0B780 		bne	.L72
+ 484:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     {
+ 485:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       /* User callback for configuration descriptors available */
+ 486:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       phost->usr_cb->ConfigurationDescAvailable(&phost->device_prop.Cfg_Desc,
+ 931              		.loc 1 486 0
+ 932 0584 3B68     		ldr	r3, [r7, #0]
+ 933 0586 D3F88030 		ldr	r3, [r3, #128]
+ 934 058a 5B6A     		ldr	r3, [r3, #36]
+ 935 058c 3A68     		ldr	r2, [r7, #0]
+ 936 058e 02F13400 		add	r0, r2, #52
+ 487:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****                                                       phost->device_prop.Itf_Desc,
+ 937              		.loc 1 487 0
+ 938 0592 3A68     		ldr	r2, [r7, #0]
+ 939 0594 02F13E01 		add	r1, r2, #62
+ 488:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****                                                       phost->device_prop.Ep_Desc[0]);
+ 940              		.loc 1 488 0
+ 941 0598 3A68     		ldr	r2, [r7, #0]
+ 942 059a 02F15002 		add	r2, r2, #80
+ 486:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       phost->usr_cb->ConfigurationDescAvailable(&phost->device_prop.Cfg_Desc,
+ 943              		.loc 1 486 0
+ 944 059e 9847     		blx	r3
+ 489:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       
+ 490:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       phost->EnumState = ENUM_GET_MFC_STRING_DESC;
+ 945              		.loc 1 490 0
+ 946 05a0 3B68     		ldr	r3, [r7, #0]
+ 947 05a2 4FF00502 		mov	r2, #5
+ 948 05a6 9A70     		strb	r2, [r3, #2]
+ 491:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     }
+ 492:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     break;
+ 949              		.loc 1 492 0
+ 950 05a8 A3E0     		b	.L72
+ 951              	.L47:
+ 493:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     
+ 494:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   case ENUM_GET_MFC_STRING_DESC:  
+ 495:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     if (phost->device_prop.Dev_Desc.iManufacturer != 0)
+ 952              		.loc 1 495 0
+ 953 05aa 3B68     		ldr	r3, [r7, #0]
+ 954 05ac 93F83030 		ldrb	r3, [r3, #48]	@ zero_extendqisi2
+ 955 05b0 002B     		cmp	r3, #0
+ 956 05b2 1CD0     		beq	.L59
+ 496:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     { /* Check that Manufacturer String is available */
+ 497:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       
+ 498:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       if ( USBH_Get_StringDesc(pdev,
+ 499:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****                                phost,
+ 500:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****                                phost->device_prop.Dev_Desc.iManufacturer, 
+ 957              		.loc 1 500 0
+ 958 05b4 3B68     		ldr	r3, [r7, #0]
+ 498:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       if ( USBH_Get_StringDesc(pdev,
+ 959              		.loc 1 498 0
+ 960 05b6 93F83020 		ldrb	r2, [r3, #48]	@ zero_extendqisi2
+ 961 05ba 07F10C03 		add	r3, r7, #12
+ 962 05be 4FF0FF01 		mov	r1, #255
+ 963 05c2 0091     		str	r1, [sp, #0]
+ 964 05c4 7868     		ldr	r0, [r7, #4]
+ 965 05c6 3968     		ldr	r1, [r7, #0]
+ 966 05c8 FFF7FEFF 		bl	USBH_Get_StringDesc
+ 967 05cc 0346     		mov	r3, r0
+ 968 05ce 002B     		cmp	r3, #0
+ 969 05d0 40F09180 		bne	.L73
+ 501:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****                                Local_Buffer , 
+ 502:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****                                0xff) == USBH_OK)
+ 503:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       {
+ 504:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****         /* User callback for Manufacturing string */
+ 505:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****         phost->usr_cb->ManufacturerString(Local_Buffer);
+ 970              		.loc 1 505 0
+ 971 05d4 3B68     		ldr	r3, [r7, #0]
+ 972 05d6 D3F88030 		ldr	r3, [r3, #128]
+ 973 05da 9B6A     		ldr	r3, [r3, #40]
+ 974 05dc 07F10C02 		add	r2, r7, #12
+ 975 05e0 1046     		mov	r0, r2
+ 976 05e2 9847     		blx	r3
+ 506:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****         phost->EnumState = ENUM_GET_PRODUCT_STRING_DESC;
+ 977              		.loc 1 506 0
+ 978 05e4 3B68     		ldr	r3, [r7, #0]
+ 979 05e6 4FF00602 		mov	r2, #6
+ 980 05ea 9A70     		strb	r2, [r3, #2]
+ 507:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       }
+ 508:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     }
+ 509:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     else
+ 510:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     {
+ 511:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       phost->usr_cb->ManufacturerString("N/A");      
+ 512:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       phost->EnumState = ENUM_GET_PRODUCT_STRING_DESC;
+ 513:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     }
+ 514:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     break;
+ 981              		.loc 1 514 0
+ 982 05ec 83E0     		b	.L73
+ 983              	.L59:
+ 511:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       phost->usr_cb->ManufacturerString("N/A");      
+ 984              		.loc 1 511 0
+ 985 05ee 3B68     		ldr	r3, [r7, #0]
+ 986 05f0 D3F88030 		ldr	r3, [r3, #128]
+ 987 05f4 9B6A     		ldr	r3, [r3, #40]
+ 988 05f6 4748     		ldr	r0, .L77
+ 989 05f8 9847     		blx	r3
+ 512:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       phost->EnumState = ENUM_GET_PRODUCT_STRING_DESC;
+ 990              		.loc 1 512 0
+ 991 05fa 3B68     		ldr	r3, [r7, #0]
+ 992 05fc 4FF00602 		mov	r2, #6
+ 993 0600 9A70     		strb	r2, [r3, #2]
+ 994              		.loc 1 514 0
+ 995 0602 78E0     		b	.L73
+ 996              	.L48:
+ 515:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     
+ 516:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   case ENUM_GET_PRODUCT_STRING_DESC:   
+ 517:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     if (phost->device_prop.Dev_Desc.iProduct != 0)
+ 997              		.loc 1 517 0
+ 998 0604 3B68     		ldr	r3, [r7, #0]
+ 999 0606 93F83130 		ldrb	r3, [r3, #49]	@ zero_extendqisi2
+ 1000 060a 002B     		cmp	r3, #0
+ 1001 060c 1BD0     		beq	.L61
+ 518:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     { /* Check that Product string is available */
+ 519:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       if ( USBH_Get_StringDesc(pdev,
+ 520:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****                                phost,
+ 521:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****                                phost->device_prop.Dev_Desc.iProduct, 
+ 1002              		.loc 1 521 0
+ 1003 060e 3B68     		ldr	r3, [r7, #0]
+ 519:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       if ( USBH_Get_StringDesc(pdev,
+ 1004              		.loc 1 519 0
+ 1005 0610 93F83120 		ldrb	r2, [r3, #49]	@ zero_extendqisi2
+ 1006 0614 07F10C03 		add	r3, r7, #12
+ 1007 0618 4FF0FF01 		mov	r1, #255
+ 1008 061c 0091     		str	r1, [sp, #0]
+ 1009 061e 7868     		ldr	r0, [r7, #4]
+ 1010 0620 3968     		ldr	r1, [r7, #0]
+ 1011 0622 FFF7FEFF 		bl	USBH_Get_StringDesc
+ 1012 0626 0346     		mov	r3, r0
+ 1013 0628 002B     		cmp	r3, #0
+ 1014 062a 66D1     		bne	.L74
+ 522:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****                                Local_Buffer, 
+ 523:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****                                0xff) == USBH_OK)
+ 524:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       {
+ 525:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****         /* User callback for Product string */
+ 526:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****         phost->usr_cb->ProductString(Local_Buffer);
+ 1015              		.loc 1 526 0
+ 1016 062c 3B68     		ldr	r3, [r7, #0]
+ 1017 062e D3F88030 		ldr	r3, [r3, #128]
+ 1018 0632 DB6A     		ldr	r3, [r3, #44]
+ 1019 0634 07F10C02 		add	r2, r7, #12
+ 1020 0638 1046     		mov	r0, r2
+ 1021 063a 9847     		blx	r3
+ 527:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****         phost->EnumState = ENUM_GET_SERIALNUM_STRING_DESC;
+ 1022              		.loc 1 527 0
+ 1023 063c 3B68     		ldr	r3, [r7, #0]
+ 1024 063e 4FF00702 		mov	r2, #7
+ 1025 0642 9A70     		strb	r2, [r3, #2]
+ 528:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       }
+ 529:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     }
+ 530:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     else
+ 531:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     {
+ 532:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       phost->usr_cb->ProductString("N/A");
+ 533:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       phost->EnumState = ENUM_GET_SERIALNUM_STRING_DESC;
+ 534:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     } 
+ 535:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     break;
+ 1026              		.loc 1 535 0
+ 1027 0644 59E0     		b	.L74
+ 1028              	.L61:
+ 532:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       phost->usr_cb->ProductString("N/A");
+ 1029              		.loc 1 532 0
+ 1030 0646 3B68     		ldr	r3, [r7, #0]
+ 1031 0648 D3F88030 		ldr	r3, [r3, #128]
+ 1032 064c DB6A     		ldr	r3, [r3, #44]
+ 1033 064e 3148     		ldr	r0, .L77
+ 1034 0650 9847     		blx	r3
+ 533:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       phost->EnumState = ENUM_GET_SERIALNUM_STRING_DESC;
+ 1035              		.loc 1 533 0
+ 1036 0652 3B68     		ldr	r3, [r7, #0]
+ 1037 0654 4FF00702 		mov	r2, #7
+ 1038 0658 9A70     		strb	r2, [r3, #2]
+ 1039              		.loc 1 535 0
+ 1040 065a 4EE0     		b	.L74
+ 1041              	.L49:
+ 536:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     
+ 537:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   case ENUM_GET_SERIALNUM_STRING_DESC:   
+ 538:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     if (phost->device_prop.Dev_Desc.iSerialNumber != 0)
+ 1042              		.loc 1 538 0
+ 1043 065c 3B68     		ldr	r3, [r7, #0]
+ 1044 065e 93F83230 		ldrb	r3, [r3, #50]	@ zero_extendqisi2
+ 1045 0662 002B     		cmp	r3, #0
+ 1046 0664 1BD0     		beq	.L63
+ 539:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     { /* Check that Serial number string is available */    
+ 540:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       if ( USBH_Get_StringDesc(pdev, 
+ 541:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****                                phost,
+ 542:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****                                phost->device_prop.Dev_Desc.iSerialNumber, 
+ 1047              		.loc 1 542 0
+ 1048 0666 3B68     		ldr	r3, [r7, #0]
+ 540:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       if ( USBH_Get_StringDesc(pdev, 
+ 1049              		.loc 1 540 0
+ 1050 0668 93F83220 		ldrb	r2, [r3, #50]	@ zero_extendqisi2
+ 1051 066c 07F10C03 		add	r3, r7, #12
+ 1052 0670 4FF0FF01 		mov	r1, #255
+ 1053 0674 0091     		str	r1, [sp, #0]
+ 1054 0676 7868     		ldr	r0, [r7, #4]
+ 1055 0678 3968     		ldr	r1, [r7, #0]
+ 1056 067a FFF7FEFF 		bl	USBH_Get_StringDesc
+ 1057 067e 0346     		mov	r3, r0
+ 1058 0680 002B     		cmp	r3, #0
+ 1059 0682 3CD1     		bne	.L75
+ 543:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****                                Local_Buffer, 
+ 544:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****                                0xff) == USBH_OK)
+ 545:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       {
+ 546:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****         /* User callback for Serial number string */
+ 547:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****         phost->usr_cb->SerialNumString(Local_Buffer);
+ 1060              		.loc 1 547 0
+ 1061 0684 3B68     		ldr	r3, [r7, #0]
+ 1062 0686 D3F88030 		ldr	r3, [r3, #128]
+ 1063 068a 1B6B     		ldr	r3, [r3, #48]
+ 1064 068c 07F10C02 		add	r2, r7, #12
+ 1065 0690 1046     		mov	r0, r2
+ 1066 0692 9847     		blx	r3
+ 548:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****         phost->EnumState = ENUM_SET_CONFIGURATION;
+ 1067              		.loc 1 548 0
+ 1068 0694 3B68     		ldr	r3, [r7, #0]
+ 1069 0696 4FF00802 		mov	r2, #8
+ 1070 069a 9A70     		strb	r2, [r3, #2]
+ 549:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       }
+ 550:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     }
+ 551:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     else
+ 552:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     {
+ 553:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       phost->usr_cb->SerialNumString("N/A");      
+ 554:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       phost->EnumState = ENUM_SET_CONFIGURATION;
+ 555:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     }  
+ 556:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     break;
+ 1071              		.loc 1 556 0
+ 1072 069c 2FE0     		b	.L75
+ 1073              	.L63:
+ 553:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       phost->usr_cb->SerialNumString("N/A");      
+ 1074              		.loc 1 553 0
+ 1075 069e 3B68     		ldr	r3, [r7, #0]
+ 1076 06a0 D3F88030 		ldr	r3, [r3, #128]
+ 1077 06a4 1B6B     		ldr	r3, [r3, #48]
+ 1078 06a6 1B48     		ldr	r0, .L77
+ 1079 06a8 9847     		blx	r3
+ 554:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       phost->EnumState = ENUM_SET_CONFIGURATION;
+ 1080              		.loc 1 554 0
+ 1081 06aa 3B68     		ldr	r3, [r7, #0]
+ 1082 06ac 4FF00802 		mov	r2, #8
+ 1083 06b0 9A70     		strb	r2, [r3, #2]
+ 1084              		.loc 1 556 0
+ 1085 06b2 24E0     		b	.L75
+ 1086              	.L50:
+ 557:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       
+ 558:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   case ENUM_SET_CONFIGURATION:
+ 559:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     /* set configuration  (default config) */
+ 560:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     if (USBH_SetCfg(pdev, 
+ 561:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****                     phost,
+ 562:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****                     phost->device_prop.Cfg_Desc.bConfigurationValue) == USBH_OK)
+ 1087              		.loc 1 562 0
+ 1088 06b4 3B68     		ldr	r3, [r7, #0]
+ 1089 06b6 93F83930 		ldrb	r3, [r3, #57]	@ zero_extendqisi2
+ 560:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     if (USBH_SetCfg(pdev, 
+ 1090              		.loc 1 560 0
+ 1091 06ba 7868     		ldr	r0, [r7, #4]
+ 1092 06bc 3968     		ldr	r1, [r7, #0]
+ 1093 06be 1A46     		mov	r2, r3
+ 1094 06c0 FFF7FEFF 		bl	USBH_SetCfg
+ 1095 06c4 0346     		mov	r3, r0
+ 1096 06c6 002B     		cmp	r3, #0
+ 1097 06c8 1BD1     		bne	.L76
+ 563:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     {
+ 564:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       phost->EnumState = ENUM_DEV_CONFIGURED;
+ 1098              		.loc 1 564 0
+ 1099 06ca 3B68     		ldr	r3, [r7, #0]
+ 1100 06cc 4FF00902 		mov	r2, #9
+ 1101 06d0 9A70     		strb	r2, [r3, #2]
+ 565:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     }
+ 566:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     break;
+ 1102              		.loc 1 566 0
+ 1103 06d2 16E0     		b	.L76
+ 1104              	.L51:
+ 567:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** 
+ 568:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     
+ 569:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   case ENUM_DEV_CONFIGURED:
+ 570:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     /* user callback for enumeration done */
+ 571:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     Status = USBH_OK;
+ 1105              		.loc 1 571 0
+ 1106 06d4 4FF00003 		mov	r3, #0
+ 1107 06d8 87F84F30 		strb	r3, [r7, #79]
+ 572:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     break;
+ 1108              		.loc 1 572 0
+ 1109 06dc 12E0     		b	.L54
+ 1110              	.L67:
+ 573:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     
+ 574:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   default:
+ 575:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     break;
+ 1111              		.loc 1 575 0
+ 1112 06de 00BF     		nop
+ 1113 06e0 10E0     		b	.L54
+ 1114              	.L68:
+ 428:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     break;
+ 1115              		.loc 1 428 0
+ 1116 06e2 00BF     		nop
+ 1117 06e4 0EE0     		b	.L54
+ 1118              	.L69:
+ 439:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     break;
+ 1119              		.loc 1 439 0
+ 1120 06e6 00BF     		nop
+ 1121 06e8 0CE0     		b	.L54
+ 1122              	.L70:
+ 467:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     break;
+ 1123              		.loc 1 467 0
+ 1124 06ea 00BF     		nop
+ 1125 06ec 0AE0     		b	.L54
+ 1126              	.L71:
+ 477:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     break;
+ 1127              		.loc 1 477 0
+ 1128 06ee 00BF     		nop
+ 1129 06f0 08E0     		b	.L54
+ 1130              	.L72:
+ 492:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     break;
+ 1131              		.loc 1 492 0
+ 1132 06f2 00BF     		nop
+ 1133 06f4 06E0     		b	.L54
+ 1134              	.L73:
+ 514:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     break;
+ 1135              		.loc 1 514 0
+ 1136 06f6 00BF     		nop
+ 1137 06f8 04E0     		b	.L54
+ 1138              	.L74:
+ 535:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     break;
+ 1139              		.loc 1 535 0
+ 1140 06fa 00BF     		nop
+ 1141 06fc 02E0     		b	.L54
+ 1142              	.L75:
+ 556:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     break;
+ 1143              		.loc 1 556 0
+ 1144 06fe 00BF     		nop
+ 1145 0700 00E0     		b	.L54
+ 1146              	.L76:
+ 566:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     break;
+ 1147              		.loc 1 566 0
+ 1148 0702 00BF     		nop
+ 1149              	.L54:
+ 576:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   }  
+ 577:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   return Status;
+ 1150              		.loc 1 577 0
+ 1151 0704 97F84F30 		ldrb	r3, [r7, #79]	@ zero_extendqisi2
+ 578:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** }
+ 1152              		.loc 1 578 0
+ 1153 0708 1846     		mov	r0, r3
+ 1154 070a 07F15007 		add	r7, r7, #80
+ 1155 070e BD46     		mov	sp, r7
+ 1156 0710 80BD     		pop	{r7, pc}
+ 1157              	.L78:
+ 1158 0712 00BF     		.align	2
+ 1159              	.L77:
+ 1160 0714 00000000 		.word	.LC0
+ 1161              		.cfi_endproc
+ 1162              	.LFE117:
+ 1164              		.align	2
+ 1165              		.global	USBH_HandleControl
+ 1166              		.thumb
+ 1167              		.thumb_func
+ 1169              	USBH_HandleControl:
+ 1170              	.LFB118:
+ 579:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** 
+ 580:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** 
+ 581:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** /**
+ 582:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   * @brief  USBH_HandleControl
+ 583:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   *         Handles the USB control transfer state machine
+ 584:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   * @param  pdev: Selected device
+ 585:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   * @retval Status
+ 586:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   */
+ 587:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** USBH_Status USBH_HandleControl (USB_OTG_CORE_HANDLE *pdev, USBH_HOST *phost)
+ 588:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** {
+ 1171              		.loc 1 588 0
+ 1172              		.cfi_startproc
+ 1173              		@ args = 0, pretend = 0, frame = 16
+ 1174              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1175 0718 80B5     		push	{r7, lr}
+ 1176              	.LCFI24:
+ 1177              		.cfi_def_cfa_offset 8
+ 1178              		.cfi_offset 7, -8
+ 1179              		.cfi_offset 14, -4
+ 1180 071a 84B0     		sub	sp, sp, #16
+ 1181              	.LCFI25:
+ 1182              		.cfi_def_cfa_offset 24
+ 1183 071c 00AF     		add	r7, sp, #0
+ 1184              	.LCFI26:
+ 1185              		.cfi_def_cfa_register 7
+ 1186 071e 7860     		str	r0, [r7, #4]
+ 1187 0720 3960     		str	r1, [r7, #0]
+ 589:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   uint8_t direction;  
+ 590:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   static uint16_t timeout = 0;
+ 591:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   USBH_Status status = USBH_OK;
+ 1188              		.loc 1 591 0
+ 1189 0722 4FF00003 		mov	r3, #0
+ 1190 0726 FB73     		strb	r3, [r7, #15]
+ 592:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   URB_STATE URB_Status = URB_IDLE;
+ 1191              		.loc 1 592 0
+ 1192 0728 4FF00003 		mov	r3, #0
+ 1193 072c BB73     		strb	r3, [r7, #14]
+ 593:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   
+ 594:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   phost->Control.status = CTRL_START;
+ 1194              		.loc 1 594 0
+ 1195 072e 3B68     		ldr	r3, [r7, #0]
+ 1196 0730 4FF00002 		mov	r2, #0
+ 1197 0734 9A74     		strb	r2, [r3, #18]
+ 595:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** 
+ 596:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   
+ 597:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   switch (phost->Control.state)
+ 1198              		.loc 1 597 0
+ 1199 0736 3B68     		ldr	r3, [r7, #0]
+ 1200 0738 1B7F     		ldrb	r3, [r3, #28]	@ zero_extendqisi2
+ 1201 073a 03F1FF33 		add	r3, r3, #-1
+ 1202 073e 0A2B     		cmp	r3, #10
+ 1203 0740 00F2A681 		bhi	.L118
+ 1204 0744 01A2     		adr	r2, .L92
+ 1205 0746 52F823F0 		ldr	pc, [r2, r3, lsl #2]
+ 1206 074a 00BF     		.align	2
+ 1207              	.L92:
+ 1208 074c 79070000 		.word	.L81+1
+ 1209 0750 97070000 		.word	.L82+1
+ 1210 0754 2B080000 		.word	.L83+1
+ 1211 0758 47080000 		.word	.L84+1
+ 1212 075c A7080000 		.word	.L85+1
+ 1213 0760 D9080000 		.word	.L86+1
+ 1214 0764 33090000 		.word	.L87+1
+ 1215 0768 4F090000 		.word	.L88+1
+ 1216 076c C5090000 		.word	.L89+1
+ 1217 0770 110A0000 		.word	.L90+1
+ 1218 0774 590A0000 		.word	.L91+1
+ 1219              	.L81:
+ 598:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   {
+ 599:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   case CTRL_SETUP:
+ 600:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     /* send a SETUP packet */
+ 601:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     USBH_CtlSendSetup     (pdev, 
+ 602:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** 	                   phost->Control.setup.d8 , 
+ 1220              		.loc 1 602 0
+ 1221 0778 3B68     		ldr	r3, [r7, #0]
+ 1222 077a 03F11402 		add	r2, r3, #20
+ 603:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** 	                   phost->Control.hc_num_out);  
+ 1223              		.loc 1 603 0
+ 1224 077e 3B68     		ldr	r3, [r7, #0]
+ 601:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     USBH_CtlSendSetup     (pdev, 
+ 1225              		.loc 1 601 0
+ 1226 0780 5B79     		ldrb	r3, [r3, #5]	@ zero_extendqisi2
+ 1227 0782 7868     		ldr	r0, [r7, #4]
+ 1228 0784 1146     		mov	r1, r2
+ 1229 0786 1A46     		mov	r2, r3
+ 1230 0788 FFF7FEFF 		bl	USBH_CtlSendSetup
+ 604:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     phost->Control.state = CTRL_SETUP_WAIT;  
+ 1231              		.loc 1 604 0
+ 1232 078c 3B68     		ldr	r3, [r7, #0]
+ 1233 078e 4FF00202 		mov	r2, #2
+ 1234 0792 1A77     		strb	r2, [r3, #28]
+ 605:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     break; 
+ 1235              		.loc 1 605 0
+ 1236 0794 87E1     		b	.L93
+ 1237              	.L82:
+ 606:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     
+ 607:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   case CTRL_SETUP_WAIT:
+ 608:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     
+ 609:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     URB_Status = HCD_GetURB_State(pdev , phost->Control.hc_num_out); 
+ 1238              		.loc 1 609 0
+ 1239 0796 3B68     		ldr	r3, [r7, #0]
+ 1240 0798 5B79     		ldrb	r3, [r3, #5]	@ zero_extendqisi2
+ 1241 079a 7868     		ldr	r0, [r7, #4]
+ 1242 079c 1946     		mov	r1, r3
+ 1243 079e FFF7FEFF 		bl	HCD_GetURB_State
+ 1244 07a2 0346     		mov	r3, r0
+ 1245 07a4 BB73     		strb	r3, [r7, #14]
+ 610:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     /* case SETUP packet sent successfully */
+ 611:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     if(URB_Status == URB_DONE)
+ 1246              		.loc 1 611 0
+ 1247 07a6 BB7B     		ldrb	r3, [r7, #14]	@ zero_extendqisi2
+ 1248 07a8 012B     		cmp	r3, #1
+ 1249 07aa 31D1     		bne	.L94
+ 612:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     { 
+ 613:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       direction = (phost->Control.setup.b.bmRequestType & USB_REQ_DIR_MASK);
+ 1250              		.loc 1 613 0
+ 1251 07ac 3B68     		ldr	r3, [r7, #0]
+ 1252 07ae 1B7D     		ldrb	r3, [r3, #20]	@ zero_extendqisi2
+ 1253 07b0 23F07F03 		bic	r3, r3, #127
+ 1254 07b4 7B73     		strb	r3, [r7, #13]
+ 614:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       
+ 615:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       /* check if there is a data stage */
+ 616:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       if (phost->Control.setup.b.wLength.w != 0 )
+ 1255              		.loc 1 616 0
+ 1256 07b6 3B68     		ldr	r3, [r7, #0]
+ 1257 07b8 5B8B     		ldrh	r3, [r3, #26]
+ 1258 07ba 002B     		cmp	r3, #0
+ 1259 07bc 10D0     		beq	.L95
+ 617:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       {        
+ 618:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****         timeout = DATA_STAGE_TIMEOUT;
+ 1260              		.loc 1 618 0
+ 1261 07be 934B     		ldr	r3, .L124
+ 1262 07c0 41F28832 		movw	r2, #5000
+ 1263 07c4 1A80     		strh	r2, [r3, #0]	@ movhi
+ 619:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****         if (direction == USB_D2H)
+ 1264              		.loc 1 619 0
+ 1265 07c6 7B7B     		ldrb	r3, [r7, #13]	@ zero_extendqisi2
+ 1266 07c8 802B     		cmp	r3, #128
+ 1267 07ca 04D1     		bne	.L96
+ 620:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****         {
+ 621:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****           /* Data Direction is IN */
+ 622:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****           phost->Control.state = CTRL_DATA_IN;
+ 1268              		.loc 1 622 0
+ 1269 07cc 3B68     		ldr	r3, [r7, #0]
+ 1270 07ce 4FF00302 		mov	r2, #3
+ 1271 07d2 1A77     		strb	r2, [r3, #28]
+ 1272 07d4 14E0     		b	.L97
+ 1273              	.L96:
+ 623:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****         }
+ 624:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****         else
+ 625:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****         {
+ 626:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****           /* Data Direction is OUT */
+ 627:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****           phost->Control.state = CTRL_DATA_OUT;
+ 1274              		.loc 1 627 0
+ 1275 07d6 3B68     		ldr	r3, [r7, #0]
+ 1276 07d8 4FF00502 		mov	r2, #5
+ 1277 07dc 1A77     		strb	r2, [r3, #28]
+ 1278 07de 0FE0     		b	.L97
+ 1279              	.L95:
+ 628:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****         } 
+ 629:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       }
+ 630:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       /* No DATA stage */
+ 631:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       else
+ 632:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       {
+ 633:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****         timeout = NODATA_STAGE_TIMEOUT;
+ 1280              		.loc 1 633 0
+ 1281 07e0 8A4B     		ldr	r3, .L124
+ 1282 07e2 4FF03202 		mov	r2, #50
+ 1283 07e6 1A80     		strh	r2, [r3, #0]	@ movhi
+ 634:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****         
+ 635:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****         /* If there is No Data Transfer Stage */
+ 636:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****         if (direction == USB_D2H)
+ 1284              		.loc 1 636 0
+ 1285 07e8 7B7B     		ldrb	r3, [r7, #13]	@ zero_extendqisi2
+ 1286 07ea 802B     		cmp	r3, #128
+ 1287 07ec 04D1     		bne	.L98
+ 637:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****         {
+ 638:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****           /* Data Direction is IN */
+ 639:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****           phost->Control.state = CTRL_STATUS_OUT;
+ 1288              		.loc 1 639 0
+ 1289 07ee 3B68     		ldr	r3, [r7, #0]
+ 1290 07f0 4FF00902 		mov	r2, #9
+ 1291 07f4 1A77     		strb	r2, [r3, #28]
+ 1292 07f6 03E0     		b	.L97
+ 1293              	.L98:
+ 640:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****         }
+ 641:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****         else
+ 642:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****         {
+ 643:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****           /* Data Direction is OUT */
+ 644:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****           phost->Control.state = CTRL_STATUS_IN;
+ 1294              		.loc 1 644 0
+ 1295 07f8 3B68     		ldr	r3, [r7, #0]
+ 1296 07fa 4FF00702 		mov	r2, #7
+ 1297 07fe 1A77     		strb	r2, [r3, #28]
+ 1298              	.L97:
+ 645:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****         } 
+ 646:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       }          
+ 647:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       /* Set the delay timer to enable timeout for data stage completion */
+ 648:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       phost->Control.timer = HCD_GetCurrentFrame(pdev);
+ 1299              		.loc 1 648 0
+ 1300 0800 7868     		ldr	r0, [r7, #4]
+ 1301 0802 FFF7FEFF 		bl	HCD_GetCurrentFrame
+ 1302 0806 0346     		mov	r3, r0
+ 1303 0808 9AB2     		uxth	r2, r3
+ 1304 080a 3B68     		ldr	r3, [r7, #0]
+ 1305 080c 1A82     		strh	r2, [r3, #16]	@ movhi
+ 649:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     }
+ 650:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     else if(URB_Status == URB_ERROR)
+ 651:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     {
+ 652:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       phost->Control.state = CTRL_ERROR;     
+ 653:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       phost->Control.status = CTRL_XACTERR;
+ 654:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     }    
+ 655:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     break;
+ 1306              		.loc 1 655 0
+ 1307 080e 41E1     		b	.L119
+ 1308              	.L94:
+ 650:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     else if(URB_Status == URB_ERROR)
+ 1309              		.loc 1 650 0
+ 1310 0810 BB7B     		ldrb	r3, [r7, #14]	@ zero_extendqisi2
+ 1311 0812 032B     		cmp	r3, #3
+ 1312 0814 40F03E81 		bne	.L119
+ 652:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       phost->Control.state = CTRL_ERROR;     
+ 1313              		.loc 1 652 0
+ 1314 0818 3B68     		ldr	r3, [r7, #0]
+ 1315 081a 4FF00B02 		mov	r2, #11
+ 1316 081e 1A77     		strb	r2, [r3, #28]
+ 653:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       phost->Control.status = CTRL_XACTERR;
+ 1317              		.loc 1 653 0
+ 1318 0820 3B68     		ldr	r3, [r7, #0]
+ 1319 0822 4FF00502 		mov	r2, #5
+ 1320 0826 9A74     		strb	r2, [r3, #18]
+ 1321              		.loc 1 655 0
+ 1322 0828 34E1     		b	.L119
+ 1323              	.L83:
+ 656:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     
+ 657:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   case CTRL_DATA_IN:  
+ 658:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     /* Issue an IN token */ 
+ 659:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     USBH_CtlReceiveData(pdev,
+ 660:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****                         phost->Control.buff, 
+ 1324              		.loc 1 660 0
+ 1325 082a 3B68     		ldr	r3, [r7, #0]
+ 659:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     USBH_CtlReceiveData(pdev,
+ 1326              		.loc 1 659 0
+ 1327 082c 9968     		ldr	r1, [r3, #8]
+ 661:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****                         phost->Control.length,
+ 1328              		.loc 1 661 0
+ 1329 082e 3B68     		ldr	r3, [r7, #0]
+ 659:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     USBH_CtlReceiveData(pdev,
+ 1330              		.loc 1 659 0
+ 1331 0830 9A89     		ldrh	r2, [r3, #12]
+ 662:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****                         phost->Control.hc_num_in);
+ 1332              		.loc 1 662 0
+ 1333 0832 3B68     		ldr	r3, [r7, #0]
+ 659:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     USBH_CtlReceiveData(pdev,
+ 1334              		.loc 1 659 0
+ 1335 0834 1B79     		ldrb	r3, [r3, #4]	@ zero_extendqisi2
+ 1336 0836 7868     		ldr	r0, [r7, #4]
+ 1337 0838 FFF7FEFF 		bl	USBH_CtlReceiveData
+ 663:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****  
+ 664:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     phost->Control.state = CTRL_DATA_IN_WAIT;
+ 1338              		.loc 1 664 0
+ 1339 083c 3B68     		ldr	r3, [r7, #0]
+ 1340 083e 4FF00402 		mov	r2, #4
+ 1341 0842 1A77     		strb	r2, [r3, #28]
+ 665:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     break;    
+ 1342              		.loc 1 665 0
+ 1343 0844 2FE1     		b	.L93
+ 1344              	.L84:
+ 666:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     
+ 667:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   case CTRL_DATA_IN_WAIT:
+ 668:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     
+ 669:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     URB_Status = HCD_GetURB_State(pdev , phost->Control.hc_num_in); 
+ 1345              		.loc 1 669 0
+ 1346 0846 3B68     		ldr	r3, [r7, #0]
+ 1347 0848 1B79     		ldrb	r3, [r3, #4]	@ zero_extendqisi2
+ 1348 084a 7868     		ldr	r0, [r7, #4]
+ 1349 084c 1946     		mov	r1, r3
+ 1350 084e FFF7FEFF 		bl	HCD_GetURB_State
+ 1351 0852 0346     		mov	r3, r0
+ 1352 0854 BB73     		strb	r3, [r7, #14]
+ 670:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     
+ 671:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     /* check is DATA packet transfered successfully */
+ 672:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     if  (URB_Status == URB_DONE)
+ 1353              		.loc 1 672 0
+ 1354 0856 BB7B     		ldrb	r3, [r7, #14]	@ zero_extendqisi2
+ 1355 0858 012B     		cmp	r3, #1
+ 1356 085a 03D1     		bne	.L100
+ 673:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     { 
+ 674:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       phost->Control.state = CTRL_STATUS_OUT;
+ 1357              		.loc 1 674 0
+ 1358 085c 3B68     		ldr	r3, [r7, #0]
+ 1359 085e 4FF00902 		mov	r2, #9
+ 1360 0862 1A77     		strb	r2, [r3, #28]
+ 1361              	.L100:
+ 675:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     }
+ 676:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****    
+ 677:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     /* manage error cases*/
+ 678:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     if  (URB_Status == URB_STALL) 
+ 1362              		.loc 1 678 0
+ 1363 0864 BB7B     		ldrb	r3, [r7, #14]	@ zero_extendqisi2
+ 1364 0866 042B     		cmp	r3, #4
+ 1365 0868 04D1     		bne	.L101
+ 679:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     { 
+ 680:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       /* In stall case, return to previous machine state*/
+ 681:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       phost->gState =   phost->gStateBkp;
+ 1366              		.loc 1 681 0
+ 1367 086a 3B68     		ldr	r3, [r7, #0]
+ 1368 086c 5A78     		ldrb	r2, [r3, #1]	@ zero_extendqisi2
+ 1369 086e 3B68     		ldr	r3, [r7, #0]
+ 1370 0870 1A70     		strb	r2, [r3, #0]
+ 682:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     }   
+ 683:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     else if (URB_Status == URB_ERROR)
+ 684:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     {
+ 685:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       /* Device error */
+ 686:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       phost->Control.state = CTRL_ERROR;    
+ 687:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     }
+ 688:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     else if ((HCD_GetCurrentFrame(pdev)- phost->Control.timer) > timeout)
+ 689:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     {
+ 690:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       /* timeout for IN transfer */
+ 691:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       phost->Control.state = CTRL_ERROR; 
+ 692:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     }   
+ 693:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     break;
+ 1371              		.loc 1 693 0
+ 1372 0872 11E1     		b	.L120
+ 1373              	.L101:
+ 683:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     else if (URB_Status == URB_ERROR)
+ 1374              		.loc 1 683 0
+ 1375 0874 BB7B     		ldrb	r3, [r7, #14]	@ zero_extendqisi2
+ 1376 0876 032B     		cmp	r3, #3
+ 1377 0878 04D1     		bne	.L103
+ 686:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       phost->Control.state = CTRL_ERROR;    
+ 1378              		.loc 1 686 0
+ 1379 087a 3B68     		ldr	r3, [r7, #0]
+ 1380 087c 4FF00B02 		mov	r2, #11
+ 1381 0880 1A77     		strb	r2, [r3, #28]
+ 1382              		.loc 1 693 0
+ 1383 0882 09E1     		b	.L120
+ 1384              	.L103:
+ 688:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     else if ((HCD_GetCurrentFrame(pdev)- phost->Control.timer) > timeout)
+ 1385              		.loc 1 688 0
+ 1386 0884 7868     		ldr	r0, [r7, #4]
+ 1387 0886 FFF7FEFF 		bl	HCD_GetCurrentFrame
+ 1388 088a 0246     		mov	r2, r0
+ 1389 088c 3B68     		ldr	r3, [r7, #0]
+ 1390 088e 1B8A     		ldrh	r3, [r3, #16]
+ 1391 0890 D21A     		subs	r2, r2, r3
+ 1392 0892 5E4B     		ldr	r3, .L124
+ 1393 0894 1B88     		ldrh	r3, [r3, #0]
+ 1394 0896 9A42     		cmp	r2, r3
+ 1395 0898 40F2FE80 		bls	.L120
+ 691:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       phost->Control.state = CTRL_ERROR; 
+ 1396              		.loc 1 691 0
+ 1397 089c 3B68     		ldr	r3, [r7, #0]
+ 1398 089e 4FF00B02 		mov	r2, #11
+ 1399 08a2 1A77     		strb	r2, [r3, #28]
+ 1400              		.loc 1 693 0
+ 1401 08a4 F8E0     		b	.L120
+ 1402              	.L85:
+ 694:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     
+ 695:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   case CTRL_DATA_OUT:
+ 696:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     /* Start DATA out transfer (only one DATA packet)*/
+ 697:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     pdev->host.hc[phost->Control.hc_num_out].toggle_out = 1; 
+ 1403              		.loc 1 697 0
+ 1404 08a6 3B68     		ldr	r3, [r7, #0]
+ 1405 08a8 5B79     		ldrb	r3, [r3, #5]	@ zero_extendqisi2
+ 1406 08aa 7A68     		ldr	r2, [r7, #4]
+ 1407 08ac 03F11E03 		add	r3, r3, #30
+ 1408 08b0 4FEA4313 		lsl	r3, r3, #5
+ 1409 08b4 D318     		adds	r3, r2, r3
+ 1410 08b6 4FF00102 		mov	r2, #1
+ 1411 08ba 5A71     		strb	r2, [r3, #5]
+ 698:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****         
+ 699:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     USBH_CtlSendData (pdev,
+ 700:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****                       phost->Control.buff, 
+ 1412              		.loc 1 700 0
+ 1413 08bc 3B68     		ldr	r3, [r7, #0]
+ 699:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     USBH_CtlSendData (pdev,
+ 1414              		.loc 1 699 0
+ 1415 08be 9968     		ldr	r1, [r3, #8]
+ 701:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****                       phost->Control.length , 
+ 1416              		.loc 1 701 0
+ 1417 08c0 3B68     		ldr	r3, [r7, #0]
+ 699:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     USBH_CtlSendData (pdev,
+ 1418              		.loc 1 699 0
+ 1419 08c2 9A89     		ldrh	r2, [r3, #12]
+ 702:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****                       phost->Control.hc_num_out);
+ 1420              		.loc 1 702 0
+ 1421 08c4 3B68     		ldr	r3, [r7, #0]
+ 699:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     USBH_CtlSendData (pdev,
+ 1422              		.loc 1 699 0
+ 1423 08c6 5B79     		ldrb	r3, [r3, #5]	@ zero_extendqisi2
+ 1424 08c8 7868     		ldr	r0, [r7, #4]
+ 1425 08ca FFF7FEFF 		bl	USBH_CtlSendData
+ 703:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     
+ 704:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** 
+ 705:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** 
+ 706:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** 
+ 707:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     
+ 708:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     phost->Control.state = CTRL_DATA_OUT_WAIT;
+ 1426              		.loc 1 708 0
+ 1427 08ce 3B68     		ldr	r3, [r7, #0]
+ 1428 08d0 4FF00602 		mov	r2, #6
+ 1429 08d4 1A77     		strb	r2, [r3, #28]
+ 709:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     break;
+ 1430              		.loc 1 709 0
+ 1431 08d6 E6E0     		b	.L93
+ 1432              	.L86:
+ 710:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     
+ 711:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   case CTRL_DATA_OUT_WAIT:
+ 712:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     
+ 713:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     URB_Status = HCD_GetURB_State(pdev , phost->Control.hc_num_out);     
+ 1433              		.loc 1 713 0
+ 1434 08d8 3B68     		ldr	r3, [r7, #0]
+ 1435 08da 5B79     		ldrb	r3, [r3, #5]	@ zero_extendqisi2
+ 1436 08dc 7868     		ldr	r0, [r7, #4]
+ 1437 08de 1946     		mov	r1, r3
+ 1438 08e0 FFF7FEFF 		bl	HCD_GetURB_State
+ 1439 08e4 0346     		mov	r3, r0
+ 1440 08e6 BB73     		strb	r3, [r7, #14]
+ 714:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     if  (URB_Status == URB_DONE)
+ 1441              		.loc 1 714 0
+ 1442 08e8 BB7B     		ldrb	r3, [r7, #14]	@ zero_extendqisi2
+ 1443 08ea 012B     		cmp	r3, #1
+ 1444 08ec 04D1     		bne	.L104
+ 715:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     { /* If the Setup Pkt is sent successful, then change the state */
+ 716:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       phost->Control.state = CTRL_STATUS_IN;
+ 1445              		.loc 1 716 0
+ 1446 08ee 3B68     		ldr	r3, [r7, #0]
+ 1447 08f0 4FF00702 		mov	r2, #7
+ 1448 08f4 1A77     		strb	r2, [r3, #28]
+ 717:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     }
+ 718:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     
+ 719:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     /* handle error cases */
+ 720:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     else if  (URB_Status == URB_STALL) 
+ 721:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     { 
+ 722:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       /* In stall case, return to previous machine state*/
+ 723:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       phost->gState =   phost->gStateBkp;
+ 724:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       phost->Control.state = CTRL_STALLED;  
+ 725:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     } 
+ 726:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     else if  (URB_Status == URB_NOTREADY)
+ 727:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     { 
+ 728:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       /* Nack received from device */
+ 729:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       phost->Control.state = CTRL_DATA_OUT;
+ 730:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     }    
+ 731:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     else if (URB_Status == URB_ERROR)
+ 732:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     {
+ 733:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       /* device error */
+ 734:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       phost->Control.state = CTRL_ERROR;      
+ 735:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     } 
+ 736:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     break;
+ 1449              		.loc 1 736 0
+ 1450 08f6 D1E0     		b	.L121
+ 1451              	.L104:
+ 720:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     else if  (URB_Status == URB_STALL) 
+ 1452              		.loc 1 720 0
+ 1453 08f8 BB7B     		ldrb	r3, [r7, #14]	@ zero_extendqisi2
+ 1454 08fa 042B     		cmp	r3, #4
+ 1455 08fc 08D1     		bne	.L106
+ 723:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       phost->gState =   phost->gStateBkp;
+ 1456              		.loc 1 723 0
+ 1457 08fe 3B68     		ldr	r3, [r7, #0]
+ 1458 0900 5A78     		ldrb	r2, [r3, #1]	@ zero_extendqisi2
+ 1459 0902 3B68     		ldr	r3, [r7, #0]
+ 1460 0904 1A70     		strb	r2, [r3, #0]
+ 724:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       phost->Control.state = CTRL_STALLED;  
+ 1461              		.loc 1 724 0
+ 1462 0906 3B68     		ldr	r3, [r7, #0]
+ 1463 0908 4FF00C02 		mov	r2, #12
+ 1464 090c 1A77     		strb	r2, [r3, #28]
+ 1465              		.loc 1 736 0
+ 1466 090e C5E0     		b	.L121
+ 1467              	.L106:
+ 726:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     else if  (URB_Status == URB_NOTREADY)
+ 1468              		.loc 1 726 0
+ 1469 0910 BB7B     		ldrb	r3, [r7, #14]	@ zero_extendqisi2
+ 1470 0912 022B     		cmp	r3, #2
+ 1471 0914 04D1     		bne	.L107
+ 729:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       phost->Control.state = CTRL_DATA_OUT;
+ 1472              		.loc 1 729 0
+ 1473 0916 3B68     		ldr	r3, [r7, #0]
+ 1474 0918 4FF00502 		mov	r2, #5
+ 1475 091c 1A77     		strb	r2, [r3, #28]
+ 1476              		.loc 1 736 0
+ 1477 091e BDE0     		b	.L121
+ 1478              	.L107:
+ 731:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     else if (URB_Status == URB_ERROR)
+ 1479              		.loc 1 731 0
+ 1480 0920 BB7B     		ldrb	r3, [r7, #14]	@ zero_extendqisi2
+ 1481 0922 032B     		cmp	r3, #3
+ 1482 0924 40F0BA80 		bne	.L121
+ 734:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       phost->Control.state = CTRL_ERROR;      
+ 1483              		.loc 1 734 0
+ 1484 0928 3B68     		ldr	r3, [r7, #0]
+ 1485 092a 4FF00B02 		mov	r2, #11
+ 1486 092e 1A77     		strb	r2, [r3, #28]
+ 1487              		.loc 1 736 0
+ 1488 0930 B4E0     		b	.L121
+ 1489              	.L87:
+ 737:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     
+ 738:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     
+ 739:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   case CTRL_STATUS_IN:
+ 740:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     /* Send 0 bytes out packet */
+ 741:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     USBH_CtlReceiveData (pdev,
+ 742:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****                          0,
+ 743:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****                          0,
+ 744:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****                          phost->Control.hc_num_in);
+ 1490              		.loc 1 744 0
+ 1491 0932 3B68     		ldr	r3, [r7, #0]
+ 741:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     USBH_CtlReceiveData (pdev,
+ 1492              		.loc 1 741 0
+ 1493 0934 1B79     		ldrb	r3, [r3, #4]	@ zero_extendqisi2
+ 1494 0936 7868     		ldr	r0, [r7, #4]
+ 1495 0938 4FF00001 		mov	r1, #0
+ 1496 093c 4FF00002 		mov	r2, #0
+ 1497 0940 FFF7FEFF 		bl	USBH_CtlReceiveData
+ 745:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     
+ 746:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     phost->Control.state = CTRL_STATUS_IN_WAIT;
+ 1498              		.loc 1 746 0
+ 1499 0944 3B68     		ldr	r3, [r7, #0]
+ 1500 0946 4FF00802 		mov	r2, #8
+ 1501 094a 1A77     		strb	r2, [r3, #28]
+ 747:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     
+ 748:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     break;
+ 1502              		.loc 1 748 0
+ 1503 094c ABE0     		b	.L93
+ 1504              	.L88:
+ 749:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     
+ 750:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   case CTRL_STATUS_IN_WAIT:
+ 751:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     
+ 752:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     URB_Status = HCD_GetURB_State(pdev , phost->Control.hc_num_in); 
+ 1505              		.loc 1 752 0
+ 1506 094e 3B68     		ldr	r3, [r7, #0]
+ 1507 0950 1B79     		ldrb	r3, [r3, #4]	@ zero_extendqisi2
+ 1508 0952 7868     		ldr	r0, [r7, #4]
+ 1509 0954 1946     		mov	r1, r3
+ 1510 0956 FFF7FEFF 		bl	HCD_GetURB_State
+ 1511 095a 0346     		mov	r3, r0
+ 1512 095c BB73     		strb	r3, [r7, #14]
+ 753:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     
+ 754:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     if  ( URB_Status == URB_DONE)
+ 1513              		.loc 1 754 0
+ 1514 095e BB7B     		ldrb	r3, [r7, #14]	@ zero_extendqisi2
+ 1515 0960 012B     		cmp	r3, #1
+ 1516 0962 08D1     		bne	.L108
+ 755:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     { /* Control transfers completed, Exit the State Machine */
+ 756:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       phost->gState =   phost->gStateBkp;
+ 1517              		.loc 1 756 0
+ 1518 0964 3B68     		ldr	r3, [r7, #0]
+ 1519 0966 5A78     		ldrb	r2, [r3, #1]	@ zero_extendqisi2
+ 1520 0968 3B68     		ldr	r3, [r7, #0]
+ 1521 096a 1A70     		strb	r2, [r3, #0]
+ 757:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       phost->Control.state = CTRL_COMPLETE;
+ 1522              		.loc 1 757 0
+ 1523 096c 3B68     		ldr	r3, [r7, #0]
+ 1524 096e 4FF00D02 		mov	r2, #13
+ 1525 0972 1A77     		strb	r2, [r3, #28]
+ 758:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     }
+ 759:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     
+ 760:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     else if (URB_Status == URB_ERROR)
+ 761:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     {
+ 762:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       phost->Control.state = CTRL_ERROR;  
+ 763:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     }
+ 764:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     
+ 765:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     else if((HCD_GetCurrentFrame(pdev)\
+ 766:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       - phost->Control.timer) > timeout)
+ 767:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     {
+ 768:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       phost->Control.state = CTRL_ERROR; 
+ 769:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     }
+ 770:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****      else if(URB_Status == URB_STALL)
+ 771:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     {
+ 772:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       /* Control transfers completed, Exit the State Machine */
+ 773:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       phost->gState =   phost->gStateBkp;
+ 774:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       phost->Control.status = CTRL_STALL;
+ 775:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       status = USBH_NOT_SUPPORTED;
+ 776:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     }
+ 777:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     break;
+ 1526              		.loc 1 777 0
+ 1527 0974 94E0     		b	.L122
+ 1528              	.L108:
+ 760:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     else if (URB_Status == URB_ERROR)
+ 1529              		.loc 1 760 0
+ 1530 0976 BB7B     		ldrb	r3, [r7, #14]	@ zero_extendqisi2
+ 1531 0978 032B     		cmp	r3, #3
+ 1532 097a 04D1     		bne	.L110
+ 762:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       phost->Control.state = CTRL_ERROR;  
+ 1533              		.loc 1 762 0
+ 1534 097c 3B68     		ldr	r3, [r7, #0]
+ 1535 097e 4FF00B02 		mov	r2, #11
+ 1536 0982 1A77     		strb	r2, [r3, #28]
+ 1537              		.loc 1 777 0
+ 1538 0984 8CE0     		b	.L122
+ 1539              	.L110:
+ 765:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     else if((HCD_GetCurrentFrame(pdev)\
+ 1540              		.loc 1 765 0
+ 1541 0986 7868     		ldr	r0, [r7, #4]
+ 1542 0988 FFF7FEFF 		bl	HCD_GetCurrentFrame
+ 1543 098c 0246     		mov	r2, r0
+ 766:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       - phost->Control.timer) > timeout)
+ 1544              		.loc 1 766 0
+ 1545 098e 3B68     		ldr	r3, [r7, #0]
+ 1546 0990 1B8A     		ldrh	r3, [r3, #16]
+ 1547 0992 D21A     		subs	r2, r2, r3
+ 1548 0994 1D4B     		ldr	r3, .L124
+ 1549 0996 1B88     		ldrh	r3, [r3, #0]
+ 765:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     else if((HCD_GetCurrentFrame(pdev)\
+ 1550              		.loc 1 765 0
+ 1551 0998 9A42     		cmp	r2, r3
+ 1552 099a 04D9     		bls	.L111
+ 768:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       phost->Control.state = CTRL_ERROR; 
+ 1553              		.loc 1 768 0
+ 1554 099c 3B68     		ldr	r3, [r7, #0]
+ 1555 099e 4FF00B02 		mov	r2, #11
+ 1556 09a2 1A77     		strb	r2, [r3, #28]
+ 1557              		.loc 1 777 0
+ 1558 09a4 7CE0     		b	.L122
+ 1559              	.L111:
+ 770:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****      else if(URB_Status == URB_STALL)
+ 1560              		.loc 1 770 0
+ 1561 09a6 BB7B     		ldrb	r3, [r7, #14]	@ zero_extendqisi2
+ 1562 09a8 042B     		cmp	r3, #4
+ 1563 09aa 79D1     		bne	.L122
+ 773:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       phost->gState =   phost->gStateBkp;
+ 1564              		.loc 1 773 0
+ 1565 09ac 3B68     		ldr	r3, [r7, #0]
+ 1566 09ae 5A78     		ldrb	r2, [r3, #1]	@ zero_extendqisi2
+ 1567 09b0 3B68     		ldr	r3, [r7, #0]
+ 1568 09b2 1A70     		strb	r2, [r3, #0]
+ 774:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       phost->Control.status = CTRL_STALL;
+ 1569              		.loc 1 774 0
+ 1570 09b4 3B68     		ldr	r3, [r7, #0]
+ 1571 09b6 4FF00402 		mov	r2, #4
+ 1572 09ba 9A74     		strb	r2, [r3, #18]
+ 775:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       status = USBH_NOT_SUPPORTED;
+ 1573              		.loc 1 775 0
+ 1574 09bc 4FF00303 		mov	r3, #3
+ 1575 09c0 FB73     		strb	r3, [r7, #15]
+ 1576              		.loc 1 777 0
+ 1577 09c2 6DE0     		b	.L122
+ 1578              	.L89:
+ 778:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     
+ 779:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   case CTRL_STATUS_OUT:
+ 780:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     pdev->host.hc[phost->Control.hc_num_out].toggle_out ^= 1; 
+ 1579              		.loc 1 780 0
+ 1580 09c4 3B68     		ldr	r3, [r7, #0]
+ 1581 09c6 5B79     		ldrb	r3, [r3, #5]	@ zero_extendqisi2
+ 1582 09c8 3A68     		ldr	r2, [r7, #0]
+ 1583 09ca 5279     		ldrb	r2, [r2, #5]	@ zero_extendqisi2
+ 1584 09cc 7968     		ldr	r1, [r7, #4]
+ 1585 09ce 02F11E02 		add	r2, r2, #30
+ 1586 09d2 4FEA4212 		lsl	r2, r2, #5
+ 1587 09d6 8A18     		adds	r2, r1, r2
+ 1588 09d8 5279     		ldrb	r2, [r2, #5]	@ zero_extendqisi2
+ 1589 09da 82F00102 		eor	r2, r2, #1
+ 1590 09de D2B2     		uxtb	r2, r2
+ 1591 09e0 7968     		ldr	r1, [r7, #4]
+ 1592 09e2 03F11E03 		add	r3, r3, #30
+ 1593 09e6 4FEA4313 		lsl	r3, r3, #5
+ 1594 09ea CB18     		adds	r3, r1, r3
+ 1595 09ec 5A71     		strb	r2, [r3, #5]
+ 781:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     USBH_CtlSendData (pdev,
+ 782:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****                       0,
+ 783:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****                       0,
+ 784:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****                       phost->Control.hc_num_out);
+ 1596              		.loc 1 784 0
+ 1597 09ee 3B68     		ldr	r3, [r7, #0]
+ 781:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     USBH_CtlSendData (pdev,
+ 1598              		.loc 1 781 0
+ 1599 09f0 5B79     		ldrb	r3, [r3, #5]	@ zero_extendqisi2
+ 1600 09f2 7868     		ldr	r0, [r7, #4]
+ 1601 09f4 4FF00001 		mov	r1, #0
+ 1602 09f8 4FF00002 		mov	r2, #0
+ 1603 09fc FFF7FEFF 		bl	USBH_CtlSendData
+ 785:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     
+ 786:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     phost->Control.state = CTRL_STATUS_OUT_WAIT;
+ 1604              		.loc 1 786 0
+ 1605 0a00 3B68     		ldr	r3, [r7, #0]
+ 1606 0a02 4FF00A02 		mov	r2, #10
+ 1607 0a06 1A77     		strb	r2, [r3, #28]
+ 787:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     break;
+ 1608              		.loc 1 787 0
+ 1609 0a08 4DE0     		b	.L93
+ 1610              	.L125:
+ 1611 0a0a 00BF     		.align	2
+ 1612              	.L124:
+ 1613 0a0c 00000000 		.word	timeout.8684
+ 1614              	.L90:
+ 788:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     
+ 789:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   case CTRL_STATUS_OUT_WAIT: 
+ 790:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     
+ 791:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     URB_Status = HCD_GetURB_State(pdev , phost->Control.hc_num_out);  
+ 1615              		.loc 1 791 0
+ 1616 0a10 3B68     		ldr	r3, [r7, #0]
+ 1617 0a12 5B79     		ldrb	r3, [r3, #5]	@ zero_extendqisi2
+ 1618 0a14 7868     		ldr	r0, [r7, #4]
+ 1619 0a16 1946     		mov	r1, r3
+ 1620 0a18 FFF7FEFF 		bl	HCD_GetURB_State
+ 1621 0a1c 0346     		mov	r3, r0
+ 1622 0a1e BB73     		strb	r3, [r7, #14]
+ 792:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     if  (URB_Status == URB_DONE)
+ 1623              		.loc 1 792 0
+ 1624 0a20 BB7B     		ldrb	r3, [r7, #14]	@ zero_extendqisi2
+ 1625 0a22 012B     		cmp	r3, #1
+ 1626 0a24 08D1     		bne	.L112
+ 793:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     { 
+ 794:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       phost->gState =   phost->gStateBkp; 
+ 1627              		.loc 1 794 0
+ 1628 0a26 3B68     		ldr	r3, [r7, #0]
+ 1629 0a28 5A78     		ldrb	r2, [r3, #1]	@ zero_extendqisi2
+ 1630 0a2a 3B68     		ldr	r3, [r7, #0]
+ 1631 0a2c 1A70     		strb	r2, [r3, #0]
+ 795:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       phost->Control.state = CTRL_COMPLETE; 
+ 1632              		.loc 1 795 0
+ 1633 0a2e 3B68     		ldr	r3, [r7, #0]
+ 1634 0a30 4FF00D02 		mov	r2, #13
+ 1635 0a34 1A77     		strb	r2, [r3, #28]
+ 796:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     }
+ 797:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     else if  (URB_Status == URB_NOTREADY)
+ 798:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     { 
+ 799:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       phost->Control.state = CTRL_STATUS_OUT;
+ 800:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     }      
+ 801:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     else if (URB_Status == URB_ERROR)
+ 802:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     {
+ 803:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       phost->Control.state = CTRL_ERROR;      
+ 804:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     }
+ 805:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     break;
+ 1636              		.loc 1 805 0
+ 1637 0a36 35E0     		b	.L123
+ 1638              	.L112:
+ 797:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     else if  (URB_Status == URB_NOTREADY)
+ 1639              		.loc 1 797 0
+ 1640 0a38 BB7B     		ldrb	r3, [r7, #14]	@ zero_extendqisi2
+ 1641 0a3a 022B     		cmp	r3, #2
+ 1642 0a3c 04D1     		bne	.L114
+ 799:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       phost->Control.state = CTRL_STATUS_OUT;
+ 1643              		.loc 1 799 0
+ 1644 0a3e 3B68     		ldr	r3, [r7, #0]
+ 1645 0a40 4FF00902 		mov	r2, #9
+ 1646 0a44 1A77     		strb	r2, [r3, #28]
+ 1647              		.loc 1 805 0
+ 1648 0a46 2DE0     		b	.L123
+ 1649              	.L114:
+ 801:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     else if (URB_Status == URB_ERROR)
+ 1650              		.loc 1 801 0
+ 1651 0a48 BB7B     		ldrb	r3, [r7, #14]	@ zero_extendqisi2
+ 1652 0a4a 032B     		cmp	r3, #3
+ 1653 0a4c 2AD1     		bne	.L123
+ 803:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       phost->Control.state = CTRL_ERROR;      
+ 1654              		.loc 1 803 0
+ 1655 0a4e 3B68     		ldr	r3, [r7, #0]
+ 1656 0a50 4FF00B02 		mov	r2, #11
+ 1657 0a54 1A77     		strb	r2, [r3, #28]
+ 1658              		.loc 1 805 0
+ 1659 0a56 25E0     		b	.L123
+ 1660              	.L91:
+ 806:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     
+ 807:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   case CTRL_ERROR:
+ 808:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     /* 
+ 809:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     After a halt condition is encountered or an error is detected by the 
+ 810:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     host, a control endpoint is allowed to recover by accepting the next Setup 
+ 811:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     PID; i.e., recovery actions via some other pipe are not required for control
+ 812:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     endpoints. For the Default Control Pipe, a device reset will ultimately be 
+ 813:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     required to clear the halt or error condition if the next Setup PID is not 
+ 814:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     accepted.
+ 815:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     */
+ 816:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     if (++ phost->Control.errorcount <= USBH_MAX_ERROR_COUNT)
+ 1661              		.loc 1 816 0
+ 1662 0a58 3B68     		ldr	r3, [r7, #0]
+ 1663 0a5a 9B7B     		ldrb	r3, [r3, #14]	@ zero_extendqisi2
+ 1664 0a5c 03F10103 		add	r3, r3, #1
+ 1665 0a60 DAB2     		uxtb	r2, r3
+ 1666 0a62 3B68     		ldr	r3, [r7, #0]
+ 1667 0a64 9A73     		strb	r2, [r3, #14]
+ 1668 0a66 3B68     		ldr	r3, [r7, #0]
+ 1669 0a68 9B7B     		ldrb	r3, [r3, #14]	@ zero_extendqisi2
+ 1670 0a6a 022B     		cmp	r3, #2
+ 1671 0a6c 04D8     		bhi	.L115
+ 817:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     {
+ 818:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       /* Do the transmission again, starting from SETUP Packet */
+ 819:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       phost->Control.state = CTRL_SETUP; 
+ 1672              		.loc 1 819 0
+ 1673 0a6e 3B68     		ldr	r3, [r7, #0]
+ 1674 0a70 4FF00102 		mov	r2, #1
+ 1675 0a74 1A77     		strb	r2, [r3, #28]
+ 820:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     }
+ 821:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     else
+ 822:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     {
+ 823:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       phost->Control.status = CTRL_FAIL;
+ 824:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       phost->gState =   phost->gStateBkp;
+ 825:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       
+ 826:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       status = USBH_FAIL;
+ 827:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     }
+ 828:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     break;
+ 1676              		.loc 1 828 0
+ 1677 0a76 16E0     		b	.L93
+ 1678              	.L115:
+ 823:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       phost->Control.status = CTRL_FAIL;
+ 1679              		.loc 1 823 0
+ 1680 0a78 3B68     		ldr	r3, [r7, #0]
+ 1681 0a7a 4FF00802 		mov	r2, #8
+ 1682 0a7e 9A74     		strb	r2, [r3, #18]
+ 824:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       phost->gState =   phost->gStateBkp;
+ 1683              		.loc 1 824 0
+ 1684 0a80 3B68     		ldr	r3, [r7, #0]
+ 1685 0a82 5A78     		ldrb	r2, [r3, #1]	@ zero_extendqisi2
+ 1686 0a84 3B68     		ldr	r3, [r7, #0]
+ 1687 0a86 1A70     		strb	r2, [r3, #0]
+ 826:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****       status = USBH_FAIL;
+ 1688              		.loc 1 826 0
+ 1689 0a88 4FF00203 		mov	r3, #2
+ 1690 0a8c FB73     		strb	r3, [r7, #15]
+ 1691              		.loc 1 828 0
+ 1692 0a8e 0AE0     		b	.L93
+ 1693              	.L118:
+ 829:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     
+ 830:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   default:
+ 831:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     break;
+ 1694              		.loc 1 831 0
+ 1695 0a90 00BF     		nop
+ 1696 0a92 08E0     		b	.L93
+ 1697              	.L119:
+ 655:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     break;
+ 1698              		.loc 1 655 0
+ 1699 0a94 00BF     		nop
+ 1700 0a96 06E0     		b	.L93
+ 1701              	.L120:
+ 693:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     break;
+ 1702              		.loc 1 693 0
+ 1703 0a98 00BF     		nop
+ 1704 0a9a 04E0     		b	.L93
+ 1705              	.L121:
+ 736:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     break;
+ 1706              		.loc 1 736 0
+ 1707 0a9c 00BF     		nop
+ 1708 0a9e 02E0     		b	.L93
+ 1709              	.L122:
+ 777:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     break;
+ 1710              		.loc 1 777 0
+ 1711 0aa0 00BF     		nop
+ 1712 0aa2 00E0     		b	.L93
+ 1713              	.L123:
+ 805:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****     break;
+ 1714              		.loc 1 805 0
+ 1715 0aa4 00BF     		nop
+ 1716              	.L93:
+ 832:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   }
+ 833:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c ****   return status;
+ 1717              		.loc 1 833 0
+ 1718 0aa6 FB7B     		ldrb	r3, [r7, #15]	@ zero_extendqisi2
+ 834:../Libraries/STM32_USB_HOST_Library/Core/src/usbh_core.c **** }
+ 1719              		.loc 1 834 0
+ 1720 0aa8 1846     		mov	r0, r3
+ 1721 0aaa 07F11007 		add	r7, r7, #16
+ 1722 0aae BD46     		mov	sp, r7
+ 1723 0ab0 80BD     		pop	{r7, pc}
+ 1724              		.cfi_endproc
+ 1725              	.LFE118:
+ 1727              		.bss
+ 1728              		.align	1
+ 1729              	timeout.8684:
+ 1730 0000 0000     		.space	2
+ 1731              		.text
+ 1732              	.Letext0:
+ 1733              		.file 2 "/opt/CodeSourcery/bin/../lib/gcc/arm-none-eabi/4.7.2/../../../../arm-none-eabi/include/st
+ 1734              		.file 3 "/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/STM32_USB_OTG_Drive
+ 1735              		.file 4 "/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/STM32_USB_OTG_Drive
+ 1736              		.file 5 "/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/STM32_USB_OTG_Drive
+ 1737              		.file 6 "/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/STM32_USB_HOST_Libr
+ 1738              		.file 7 "/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/STM32_USB_HOST_Libr
+ 1739              		.file 8 "/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/STM32_USB_OTG_Drive
+ 1740              		.file 9 "/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_
+DEFINED SYMBOLS
+                            *ABS*:00000000 usbh_core.c
+     /tmp/ccWt9Ft6.s:23     .data:00000000 USBH_HCD_INT_cb
+     /tmp/ccWt9Ft6.s:20     .data:00000000 $d
+     /tmp/ccWt9Ft6.s:116    .text:00000048 USBH_SOF
+     /tmp/ccWt9Ft6.s:39     .text:00000000 USBH_Connected
+     /tmp/ccWt9Ft6.s:78     .text:00000024 USBH_Disconnected
+     /tmp/ccWt9Ft6.s:31     .data:0000000c USBH_HCD_INT_fops
+     /tmp/ccWt9Ft6.s:34     .text:00000000 $t
+     /tmp/ccWt9Ft6.s:150    .text:00000060 USBH_Init
+     /tmp/ccWt9Ft6.s:215    .text:000000b8 USBH_DeInit
+     /tmp/ccWt9Ft6.s:293    .text:0000012c USBH_Process
+     /tmp/ccWt9Ft6.s:346    .text:00000170 $d
+     /tmp/ccWt9Ft6.s:359    .text:0000019c $t
+     /tmp/ccWt9Ft6.s:724    .text:000003e4 USBH_HandleEnum
+     /tmp/ccWt9Ft6.s:654    .text:00000398 USBH_ErrorHandle
+     /tmp/ccWt9Ft6.s:1169   .text:00000718 USBH_HandleControl
+     /tmp/ccWt9Ft6.s:716    .rodata:00000000 $d
+     /tmp/ccWt9Ft6.s:755    .text:00000408 $d
+     /tmp/ccWt9Ft6.s:767    .text:00000430 $t
+     /tmp/ccWt9Ft6.s:1160   .text:00000714 $d
+     /tmp/ccWt9Ft6.s:1164   .text:00000718 $t
+     /tmp/ccWt9Ft6.s:1208   .text:0000074c $d
+     /tmp/ccWt9Ft6.s:1221   .text:00000778 $t
+     /tmp/ccWt9Ft6.s:1613   .text:00000a0c $d
+     /tmp/ccWt9Ft6.s:1729   .bss:00000000 timeout.8684
+     /tmp/ccWt9Ft6.s:1616   .text:00000a10 $t
+     /tmp/ccWt9Ft6.s:1728   .bss:00000000 $d
+                     .debug_frame:00000010 $d
+                           .group:00000000 wm4.1.ee386580922180e5cad1057f989de60d
+                           .group:00000000 wm4.stm32f4xx.h.54.6e1f0ee5c76cc1e53c8ea6d18297b5fd
+                           .group:00000000 wm4.core_cm4.h.32.f824aba4d431a5bb4a51726bd5b62834
+                           .group:00000000 wm4.stdint.h.10.90b695f550ca6cc3fb08fa83baf01e05
+                           .group:00000000 wm4.core_cmInstr.h.25.f50f886f2edf670cf199b35fd96f5c91
+                           .group:00000000 wm4.core_cm4_simd.h.29.b4a3fdfb606cb3b26119424324d4b963
+                           .group:00000000 wm4.core_cm4.h.153.5393ef7e6cebf34dd51ca528f9218ab3
+                           .group:00000000 wm4.stm32f4xx.h.289.fa68dcae75666a037ce29b5a1b57e3b3
+                           .group:00000000 wm4.stm32f4xx_adc.h.108.1710484bf41297b93f825b3b15cbdff8
+                           .group:00000000 wm4.stm32f4xx_can.h.31.3bb56c6436c7a6e6af1611046e81f48c
+                           .group:00000000 wm4.stm32f4xx_cryp.h.31.94bbbb19b99df10306f31e78c333a77b
+                           .group:00000000 wm4.stm32f4xx_dac.h.31.b8d45e7eaf71ee4bf01c1317dbc06f77
+                           .group:00000000 wm4.stm32f4xx_dbgmcu.h.30.70a81ec54c2707baa9fca77391eeeaaa
+                           .group:00000000 wm4.stm32f4xx_dcmi.h.30.9d0942d58c357d2eed15e044bf9b4a77
+                           .group:00000000 wm4.stm32f4xx_dma.h.31.815bb924b30b1c776b3cd51113fdfe60
+                           .group:00000000 wm4.stm32f4xx_exti.h.31.86bd18e979f97217bb1d3b80fde0231e
+                           .group:00000000 wm4.stm32f4xx_flash.h.31.74f2ed42d890f144ca7eb5ae8172f0d0
+                           .group:00000000 wm4.stm32f4xx_fsmc.h.31.ff58629e0c603fb2f9b3f00c0657fdfa
+                           .group:00000000 wm4.stm32f4xx_hash.h.31.5c109425d30f0b9cc0a26ad38182d91f
+                           .group:00000000 wm4.stm32f4xx_gpio.h.31.d9aeae10cfa353d85d475c0d4900c452
+                           .group:00000000 wm4.stm32f4xx_i2c.h.31.edf5baa611075c49ae13f56be9040be3
+                           .group:00000000 wm4.stm32f4xx_iwdg.h.31.30e376e6d8d424aab7fddd66cf691c7b
+                           .group:00000000 wm4.stm32f4xx_pwr.h.31.bb774fc1b632cb8d2ecaec8c6524d2c0
+                           .group:00000000 wm4.stm32f4xx_rcc.h.30.820e94551583d2b835c8cf3ad722e16c
+                           .group:00000000 wm4.stm32f4xx_rng.h.31.1ec493d56b7a8e5a71238519cae6dea7
+                           .group:00000000 wm4.stm32f4xx_rtc.h.31.bddeb98c63c8fa06fac80b5dd8296471
+                           .group:00000000 wm4.stm32f4xx_sdio.h.31.8c6dff42ffa718b444c3420717601ff2
+                           .group:00000000 wm4.stm32f4xx_spi.h.31.fb1b2c8214b87a47d4457633b7c31c3c
+                           .group:00000000 wm4.stm32f4xx_syscfg.h.31.5a680f88d55b7816ae613c20f199cbd9
+                           .group:00000000 wm4.stm32f4xx_tim.h.31.b1d608fbde729347e4ccf70799e654d2
+                           .group:00000000 wm4.stm32f4xx_usart.h.31.f8d29b14aa4d39de5495adcc92749d3c
+                           .group:00000000 wm4.stm32f4xx_wwdg.h.31.b45a80fa1ec64984adf786f7e489f31b
+                           .group:00000000 wm4.misc.h.31.041217492a6cb86f2fb26099f373a465
+                           .group:00000000 wm4.stm32f4xx.h.6975.cdbdae9d5de06f1ba6b770f59cbe4d6c
+                           .group:00000000 wm4.usb_conf.h.69.07474af79ba33c49defd0cb9b2ee7820
+                           .group:00000000 wm4.usb_regs.h.30.8e11da7f9e8ef80e8c3ede3dea040a2e
+                           .group:00000000 wm4.usb_defines.h.30.25e1682f38ca1ccb768b1b48e673a175
+                           .group:00000000 wm4.usb_core.h.52.b8138d1f1482be33e5028c0dc9d2a5d3
+                           .group:00000000 wm4.usbh_def.h.42.eb4a6bc03c1613f622529e01c7f1c051
+                           .group:00000000 wm4.usbh_conf.h.24.1e4ade5fba437d91fca18dcf5f2907c4
+                           .group:00000000 wm4.usbh_core.h.55.3283e920dd206a3762220f568a9515d1
+                           .group:00000000 wm4.usbh_ioreq.h.54.c7adef33fe445a495777937496caca1c
+                           .group:00000000 wm4.usbh_hcs.h.30.10149d241036be3b1683c6645dc3088f
+                           .group:00000000 wm4.usbh_stdreq.h.30.b3a519a52d62508eec848dea4363d387
+                           .group:00000000 wm4.usb_hcd_int.h.76.d785d7c131989334b8d8802b32605ee4
+
+UNDEFINED SYMBOLS
+USB_OTG_BSP_Init
+USB_OTG_BSP_ConfigVBUS
+HCD_Init
+USB_OTG_BSP_EnableInterrupt
+USBH_Free_Channel
+HCD_IsDeviceConnected
+USB_OTG_BSP_mDelay
+USBH_Alloc_Channel
+HCD_ResetPort
+HCD_GetCurrentSpeed
+USBH_Open_Channel
+USBH_DeAllocate_AllChannel
+USBH_Get_DevDesc
+USBH_Modify_Channel
+USBH_SetAddress
+USBH_Get_CfgDesc
+USBH_Get_StringDesc
+USBH_SetCfg
+USBH_CtlSendSetup
+HCD_GetURB_State
+HCD_GetCurrentFrame
+USBH_CtlReceiveData
+USBH_CtlSendData

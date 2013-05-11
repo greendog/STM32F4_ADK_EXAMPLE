@@ -1,0 +1,1507 @@
+   1              		.syntax unified
+   2              		.cpu cortex-m4
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 6
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.file	"usbh_usr.c"
+  15              		.text
+  16              	.Ltext0:
+  17              		.cfi_sections	.debug_frame
+  18              		.global	USR_Callbacks
+  19              		.data
+  20              		.align	2
+  23              	USR_Callbacks:
+  24 0000 00000000 		.word	USBH_USR_Init
+  25 0004 00000000 		.word	USBH_USR_DeInit
+  26 0008 00000000 		.word	USBH_USR_DeviceAttached
+  27 000c 00000000 		.word	USBH_USR_ResetDevice
+  28 0010 00000000 		.word	USBH_USR_DeviceDisconnected
+  29 0014 00000000 		.word	USBH_USR_OverCurrentDetected
+  30 0018 00000000 		.word	USBH_USR_DeviceSpeedDetected
+  31 001c 00000000 		.word	USBH_USR_Device_DescAvailable
+  32 0020 00000000 		.word	USBH_USR_DeviceAddressAssigned
+  33 0024 00000000 		.word	USBH_USR_Configuration_DescAvailable
+  34 0028 00000000 		.word	USBH_USR_Manufacturer_String
+  35 002c 00000000 		.word	USBH_USR_Product_String
+  36 0030 00000000 		.word	USBH_USR_SerialNum_String
+  37 0034 00000000 		.word	USBH_USR_EnumerationDone
+  38 0038 00000000 		.word	USBH_USR_UserInput
+  39 003c 00000000 		.word	USBH_USR_ADK_Application
+  40 0040 00000000 		.word	USBH_USR_DeviceNotSupported
+  41 0044 00000000 		.word	USBH_USR_UnrecoveredError
+  42              		.section	.rodata
+  43              		.align	2
+  44              	.LC0:
+  45 0000 3E20486F 		.ascii	"> Host Library Initialized\012\000"
+  45      7374204C 
+  45      69627261 
+  45      72792049 
+  45      6E697469 
+  46              		.text
+  47              		.align	2
+  48              		.global	USBH_USR_Init
+  49              		.thumb
+  50              		.thumb_func
+  52              	USBH_USR_Init:
+  53              	.LFB110:
+  54              		.file 1 "../src/usbh_usr.c"
+   1:../src/usbh_usr.c **** /**
+   2:../src/usbh_usr.c ****   ******************************************************************************
+   3:../src/usbh_usr.c ****   * @file    usbh_usr.c
+   4:../src/usbh_usr.c ****   * @author  MCD Application Team and modified by Yuuichi Akagawa
+   5:../src/usbh_usr.c ****   * @version V2.0.0
+   6:../src/usbh_usr.c ****   * @date    22-July-2011, 2012/03/05
+   7:../src/usbh_usr.c ****   * @brief   This file includes the user application layer
+   8:../src/usbh_usr.c ****   ******************************************************************************
+   9:../src/usbh_usr.c ****   * @attention
+  10:../src/usbh_usr.c ****   *
+  11:../src/usbh_usr.c ****   * THE PRESENT FIRMWARE WHICH IS FOR GUIDANCE ONLY AIMS AT PROVIDING CUSTOMERS
+  12:../src/usbh_usr.c ****   * WITH CODING INFORMATION REGARDING THEIR PRODUCTS IN ORDER FOR THEM TO SAVE
+  13:../src/usbh_usr.c ****   * TIME. AS A RESULT, STMICROELECTRONICS SHALL NOT BE HELD LIABLE FOR ANY
+  14:../src/usbh_usr.c ****   * DIRECT, INDIRECT OR CONSEQUENTIAL DAMAGES WITH RESPECT TO ANY CLAIMS ARISING
+  15:../src/usbh_usr.c ****   * FROM THE CONTENT OF SUCH FIRMWARE AND/OR THE USE MADE BY CUSTOMERS OF THE
+  16:../src/usbh_usr.c ****   * CODING INFORMATION CONTAINED HEREIN IN CONNECTION WITH THEIR PRODUCTS.
+  17:../src/usbh_usr.c ****   *
+  18:../src/usbh_usr.c ****   * <h2><center>&copy; COPYRIGHT 2011 STMicroelectronics</center></h2>
+  19:../src/usbh_usr.c ****   ******************************************************************************
+  20:../src/usbh_usr.c ****   */ 
+  21:../src/usbh_usr.c **** 
+  22:../src/usbh_usr.c **** /* Includes ------------------------------------------------------------------*/
+  23:../src/usbh_usr.c **** //#include "lcd_log.h"
+  24:../src/usbh_usr.c **** #include "usbh_usr.h"
+  25:../src/usbh_usr.c **** 
+  26:../src/usbh_usr.c **** #include "stm32f4xx.h"
+  27:../src/usbh_usr.c **** #include "stm32f4_discovery.h"
+  28:../src/usbh_usr.c **** 
+  29:../src/usbh_usr.c **** #include "xprintf.h"
+  30:../src/usbh_usr.c **** /** @addtogroup USBH_USER
+  31:../src/usbh_usr.c **** * @{
+  32:../src/usbh_usr.c **** */
+  33:../src/usbh_usr.c **** 
+  34:../src/usbh_usr.c **** /** @addtogroup USBH_HID_DEMO_USER_CALLBACKS
+  35:../src/usbh_usr.c **** * @{
+  36:../src/usbh_usr.c **** */
+  37:../src/usbh_usr.c **** 
+  38:../src/usbh_usr.c **** /** @defgroup USBH_USR
+  39:../src/usbh_usr.c **** * @brief This file is the Header file for usbh_usr.c
+  40:../src/usbh_usr.c **** * @{
+  41:../src/usbh_usr.c **** */ 
+  42:../src/usbh_usr.c **** 
+  43:../src/usbh_usr.c **** 
+  44:../src/usbh_usr.c **** /** @defgroup USBH_CORE_Exported_TypesDefinitions
+  45:../src/usbh_usr.c **** * @{
+  46:../src/usbh_usr.c **** */ 
+  47:../src/usbh_usr.c **** 
+  48:../src/usbh_usr.c **** /**
+  49:../src/usbh_usr.c **** * @}
+  50:../src/usbh_usr.c **** */ 
+  51:../src/usbh_usr.c **** /** @addtogroup USER
+  52:../src/usbh_usr.c **** * @{
+  53:../src/usbh_usr.c **** */
+  54:../src/usbh_usr.c **** 
+  55:../src/usbh_usr.c **** /** @defgroup USBH_USR 
+  56:../src/usbh_usr.c **** * @brief    This file includes the user application layer
+  57:../src/usbh_usr.c **** * @{
+  58:../src/usbh_usr.c **** */ 
+  59:../src/usbh_usr.c **** 
+  60:../src/usbh_usr.c **** /** @defgroup USBH_CORE_Exported_Types
+  61:../src/usbh_usr.c **** * @{
+  62:../src/usbh_usr.c **** */ 
+  63:../src/usbh_usr.c **** 
+  64:../src/usbh_usr.c **** 
+  65:../src/usbh_usr.c **** 
+  66:../src/usbh_usr.c **** /** @defgroup USBH_USR_Private_Defines
+  67:../src/usbh_usr.c **** * @{
+  68:../src/usbh_usr.c **** */ 
+  69:../src/usbh_usr.c **** /**
+  70:../src/usbh_usr.c **** * @}
+  71:../src/usbh_usr.c **** */ 
+  72:../src/usbh_usr.c **** 
+  73:../src/usbh_usr.c **** 
+  74:../src/usbh_usr.c **** /** @defgroup USBH_USR_Private_Macros
+  75:../src/usbh_usr.c **** * @{
+  76:../src/usbh_usr.c **** */ 
+  77:../src/usbh_usr.c **** /**
+  78:../src/usbh_usr.c **** * @}
+  79:../src/usbh_usr.c **** */ 
+  80:../src/usbh_usr.c **** 
+  81:../src/usbh_usr.c **** /** @defgroup USBH_USR_Private_Variables
+  82:../src/usbh_usr.c **** * @{
+  83:../src/usbh_usr.c **** */
+  84:../src/usbh_usr.c **** extern USB_OTG_CORE_HANDLE           USB_OTG_Core_dev;
+  85:../src/usbh_usr.c **** /*  Points to the DEVICE_PROP structure of current device */
+  86:../src/usbh_usr.c **** /*  The purpose of this register is to speed up the execution */
+  87:../src/usbh_usr.c **** 
+  88:../src/usbh_usr.c **** USBH_Usr_cb_TypeDef USR_Callbacks =
+  89:../src/usbh_usr.c **** {
+  90:../src/usbh_usr.c ****   USBH_USR_Init,							/* HostLibInitialized */
+  91:../src/usbh_usr.c ****   USBH_USR_DeInit,							/* HostLibInitialized */  
+  92:../src/usbh_usr.c ****   USBH_USR_DeviceAttached,					/* DeviceAttached */
+  93:../src/usbh_usr.c ****   USBH_USR_ResetDevice,	
+  94:../src/usbh_usr.c ****   USBH_USR_DeviceDisconnected,
+  95:../src/usbh_usr.c ****   USBH_USR_OverCurrentDetected,
+  96:../src/usbh_usr.c ****   USBH_USR_DeviceSpeedDetected,				/* DeviceSpeed */
+  97:../src/usbh_usr.c ****   USBH_USR_Device_DescAvailable,			/* DeviceDescriptor is available */
+  98:../src/usbh_usr.c ****   USBH_USR_DeviceAddressAssigned,			/* Address is assigned to USB Device */
+  99:../src/usbh_usr.c ****   USBH_USR_Configuration_DescAvailable,		/* Configuration Descriptor available */
+ 100:../src/usbh_usr.c ****   USBH_USR_Manufacturer_String,				/* ManufacturerString*/
+ 101:../src/usbh_usr.c ****   USBH_USR_Product_String,					/* ProductString*/
+ 102:../src/usbh_usr.c ****   USBH_USR_SerialNum_String,				/* SerialNubString*/
+ 103:../src/usbh_usr.c ****   USBH_USR_EnumerationDone,					/* Enumeration finished */
+ 104:../src/usbh_usr.c ****   USBH_USR_UserInput,
+ 105:../src/usbh_usr.c ****   USBH_USR_ADK_Application,
+ 106:../src/usbh_usr.c ****   USBH_USR_DeviceNotSupported,				/* Device is not supported*/
+ 107:../src/usbh_usr.c ****   USBH_USR_UnrecoveredError
+ 108:../src/usbh_usr.c **** };
+ 109:../src/usbh_usr.c **** 
+ 110:../src/usbh_usr.c **** /**
+ 111:../src/usbh_usr.c **** * @}
+ 112:../src/usbh_usr.c **** */
+ 113:../src/usbh_usr.c **** 
+ 114:../src/usbh_usr.c **** /** @defgroup USBH_USR_Private_Constants
+ 115:../src/usbh_usr.c **** * @{
+ 116:../src/usbh_usr.c **** */ 
+ 117:../src/usbh_usr.c **** 
+ 118:../src/usbh_usr.c **** /**
+ 119:../src/usbh_usr.c **** * @}
+ 120:../src/usbh_usr.c **** */
+ 121:../src/usbh_usr.c **** 
+ 122:../src/usbh_usr.c **** 
+ 123:../src/usbh_usr.c **** 
+ 124:../src/usbh_usr.c **** /** @defgroup USBH_USR_Private_FunctionPrototypes
+ 125:../src/usbh_usr.c **** * @{
+ 126:../src/usbh_usr.c **** */ 
+ 127:../src/usbh_usr.c **** /**
+ 128:../src/usbh_usr.c **** * @}
+ 129:../src/usbh_usr.c **** */ 
+ 130:../src/usbh_usr.c **** 
+ 131:../src/usbh_usr.c **** 
+ 132:../src/usbh_usr.c **** /** @defgroup USBH_USR_Private_Functions
+ 133:../src/usbh_usr.c **** * @{
+ 134:../src/usbh_usr.c **** */ 
+ 135:../src/usbh_usr.c **** 
+ 136:../src/usbh_usr.c **** /**
+ 137:../src/usbh_usr.c **** * @brief  USBH_USR_Init 
+ 138:../src/usbh_usr.c **** * @param  None
+ 139:../src/usbh_usr.c **** * @retval None
+ 140:../src/usbh_usr.c **** */
+ 141:../src/usbh_usr.c **** void USBH_USR_Init(void)
+ 142:../src/usbh_usr.c **** {
+  55              		.loc 1 142 0
+  56              		.cfi_startproc
+  57              		@ args = 0, pretend = 0, frame = 0
+  58              		@ frame_needed = 1, uses_anonymous_args = 0
+  59 0000 80B5     		push	{r7, lr}
+  60              	.LCFI0:
+  61              		.cfi_def_cfa_offset 8
+  62              		.cfi_offset 7, -8
+  63              		.cfi_offset 14, -4
+  64 0002 00AF     		add	r7, sp, #0
+  65              	.LCFI1:
+  66              		.cfi_def_cfa_register 7
+ 143:../src/usbh_usr.c ****   static uint8_t startup = 0;  
+ 144:../src/usbh_usr.c ****   if(startup == 0 )
+  67              		.loc 1 144 0
+  68 0004 054B     		ldr	r3, .L3
+  69 0006 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+  70 0008 002B     		cmp	r3, #0
+  71 000a 06D1     		bne	.L1
+ 145:../src/usbh_usr.c ****   {
+ 146:../src/usbh_usr.c ****     startup = 1;
+  72              		.loc 1 146 0
+  73 000c 034B     		ldr	r3, .L3
+  74 000e 4FF00102 		mov	r2, #1
+  75 0012 1A70     		strb	r2, [r3, #0]
+ 147:../src/usbh_usr.c **** #ifdef DEBUG
+ 148:../src/usbh_usr.c **** 	xputs("> Host Library Initialized\n");
+  76              		.loc 1 148 0
+  77 0014 0248     		ldr	r0, .L3+4
+  78 0016 FFF7FEFF 		bl	xputs
+  79              	.L1:
+ 149:../src/usbh_usr.c **** #endif
+ 150:../src/usbh_usr.c ****   }
+ 151:../src/usbh_usr.c **** }
+  80              		.loc 1 151 0
+  81 001a 80BD     		pop	{r7, pc}
+  82              	.L4:
+  83              		.align	2
+  84              	.L3:
+  85 001c 00000000 		.word	startup.9463
+  86 0020 00000000 		.word	.LC0
+  87              		.cfi_endproc
+  88              	.LFE110:
+  90              		.section	.rodata
+  91              		.align	2
+  92              	.LC1:
+  93 001c 3E204465 		.ascii	"> Device Attached\012\000"
+  93      76696365 
+  93      20417474 
+  93      61636865 
+  93      640A00
+  94              		.text
+  95              		.align	2
+  96              		.global	USBH_USR_DeviceAttached
+  97              		.thumb
+  98              		.thumb_func
+ 100              	USBH_USR_DeviceAttached:
+ 101              	.LFB111:
+ 152:../src/usbh_usr.c **** 
+ 153:../src/usbh_usr.c **** /**
+ 154:../src/usbh_usr.c **** * @brief  USBH_USR_DeviceAttached 
+ 155:../src/usbh_usr.c **** * @param  None
+ 156:../src/usbh_usr.c **** * @retval None
+ 157:../src/usbh_usr.c **** */
+ 158:../src/usbh_usr.c **** void USBH_USR_DeviceAttached(void)
+ 159:../src/usbh_usr.c **** {
+ 102              		.loc 1 159 0
+ 103              		.cfi_startproc
+ 104              		@ args = 0, pretend = 0, frame = 0
+ 105              		@ frame_needed = 1, uses_anonymous_args = 0
+ 106 0024 80B5     		push	{r7, lr}
+ 107              	.LCFI2:
+ 108              		.cfi_def_cfa_offset 8
+ 109              		.cfi_offset 7, -8
+ 110              		.cfi_offset 14, -4
+ 111 0026 00AF     		add	r7, sp, #0
+ 112              	.LCFI3:
+ 113              		.cfi_def_cfa_register 7
+ 160:../src/usbh_usr.c **** #ifdef DEBUG
+ 161:../src/usbh_usr.c **** 	xputs("> Device Attached\n");
+ 114              		.loc 1 161 0
+ 115 0028 0148     		ldr	r0, .L6
+ 116 002a FFF7FEFF 		bl	xputs
+ 162:../src/usbh_usr.c **** #endif
+ 163:../src/usbh_usr.c **** }
+ 117              		.loc 1 163 0
+ 118 002e 80BD     		pop	{r7, pc}
+ 119              	.L7:
+ 120              		.align	2
+ 121              	.L6:
+ 122 0030 1C000000 		.word	.LC1
+ 123              		.cfi_endproc
+ 124              	.LFE111:
+ 126              		.section	.rodata
+ 127 002f 00       		.align	2
+ 128              	.LC2:
+ 129 0030 3E20554E 		.ascii	"> UNRECOVERED ERROR STATE\012\000"
+ 129      5245434F 
+ 129      56455245 
+ 129      44204552 
+ 129      524F5220 
+ 130              		.text
+ 131              		.align	2
+ 132              		.global	USBH_USR_UnrecoveredError
+ 133              		.thumb
+ 134              		.thumb_func
+ 136              	USBH_USR_UnrecoveredError:
+ 137              	.LFB112:
+ 164:../src/usbh_usr.c **** 
+ 165:../src/usbh_usr.c **** 
+ 166:../src/usbh_usr.c **** /**
+ 167:../src/usbh_usr.c **** * @brief  USBH_USR_UnrecoveredError
+ 168:../src/usbh_usr.c **** * @param  None
+ 169:../src/usbh_usr.c **** * @retval None
+ 170:../src/usbh_usr.c **** */
+ 171:../src/usbh_usr.c **** void USBH_USR_UnrecoveredError (void)
+ 172:../src/usbh_usr.c **** {
+ 138              		.loc 1 172 0
+ 139              		.cfi_startproc
+ 140              		@ args = 0, pretend = 0, frame = 0
+ 141              		@ frame_needed = 1, uses_anonymous_args = 0
+ 142 0034 80B5     		push	{r7, lr}
+ 143              	.LCFI4:
+ 144              		.cfi_def_cfa_offset 8
+ 145              		.cfi_offset 7, -8
+ 146              		.cfi_offset 14, -4
+ 147 0036 00AF     		add	r7, sp, #0
+ 148              	.LCFI5:
+ 149              		.cfi_def_cfa_register 7
+ 173:../src/usbh_usr.c **** #ifdef DEBUG
+ 174:../src/usbh_usr.c **** 	xputs("> UNRECOVERED ERROR STATE\n");
+ 150              		.loc 1 174 0
+ 151 0038 0148     		ldr	r0, .L9
+ 152 003a FFF7FEFF 		bl	xputs
+ 175:../src/usbh_usr.c **** #endif
+ 176:../src/usbh_usr.c **** }
+ 153              		.loc 1 176 0
+ 154 003e 80BD     		pop	{r7, pc}
+ 155              	.L10:
+ 156              		.align	2
+ 157              	.L9:
+ 158 0040 30000000 		.word	.LC2
+ 159              		.cfi_endproc
+ 160              	.LFE112:
+ 162              		.section	.rodata
+ 163 004b 00       		.align	2
+ 164              	.LC3:
+ 165 004c 3E204465 		.ascii	"> Device Disconnected\012\000"
+ 165      76696365 
+ 165      20446973 
+ 165      636F6E6E 
+ 165      65637465 
+ 166              		.text
+ 167              		.align	2
+ 168              		.global	USBH_USR_DeviceDisconnected
+ 169              		.thumb
+ 170              		.thumb_func
+ 172              	USBH_USR_DeviceDisconnected:
+ 173              	.LFB113:
+ 177:../src/usbh_usr.c **** 
+ 178:../src/usbh_usr.c **** 
+ 179:../src/usbh_usr.c **** /**
+ 180:../src/usbh_usr.c **** * @brief  USBH_DisconnectEvent
+ 181:../src/usbh_usr.c **** *         Device disconnect event
+ 182:../src/usbh_usr.c **** * @param  None
+ 183:../src/usbh_usr.c **** * @retval None
+ 184:../src/usbh_usr.c **** */
+ 185:../src/usbh_usr.c **** void USBH_USR_DeviceDisconnected (void)
+ 186:../src/usbh_usr.c **** {
+ 174              		.loc 1 186 0
+ 175              		.cfi_startproc
+ 176              		@ args = 0, pretend = 0, frame = 0
+ 177              		@ frame_needed = 1, uses_anonymous_args = 0
+ 178 0044 80B5     		push	{r7, lr}
+ 179              	.LCFI6:
+ 180              		.cfi_def_cfa_offset 8
+ 181              		.cfi_offset 7, -8
+ 182              		.cfi_offset 14, -4
+ 183 0046 00AF     		add	r7, sp, #0
+ 184              	.LCFI7:
+ 185              		.cfi_def_cfa_register 7
+ 187:../src/usbh_usr.c **** #ifdef DEBUG
+ 188:../src/usbh_usr.c **** 	xputs("> Device Disconnected\n");
+ 186              		.loc 1 188 0
+ 187 0048 0148     		ldr	r0, .L12
+ 188 004a FFF7FEFF 		bl	xputs
+ 189:../src/usbh_usr.c **** #endif
+ 190:../src/usbh_usr.c **** }
+ 189              		.loc 1 190 0
+ 190 004e 80BD     		pop	{r7, pc}
+ 191              	.L13:
+ 192              		.align	2
+ 193              	.L12:
+ 194 0050 4C000000 		.word	.LC3
+ 195              		.cfi_endproc
+ 196              	.LFE113:
+ 198              		.align	2
+ 199              		.global	USBH_USR_ResetDevice
+ 200              		.thumb
+ 201              		.thumb_func
+ 203              	USBH_USR_ResetDevice:
+ 204              	.LFB114:
+ 191:../src/usbh_usr.c **** 
+ 192:../src/usbh_usr.c **** /**
+ 193:../src/usbh_usr.c **** * @brief  USBH_USR_ResetUSBDevice 
+ 194:../src/usbh_usr.c **** *         Reset USB Device
+ 195:../src/usbh_usr.c **** * @param  None
+ 196:../src/usbh_usr.c **** * @retval None
+ 197:../src/usbh_usr.c **** */
+ 198:../src/usbh_usr.c **** void USBH_USR_ResetDevice(void)
+ 199:../src/usbh_usr.c **** {
+ 205              		.loc 1 199 0
+ 206              		.cfi_startproc
+ 207              		@ args = 0, pretend = 0, frame = 0
+ 208              		@ frame_needed = 1, uses_anonymous_args = 0
+ 209              		@ link register save eliminated.
+ 210 0054 80B4     		push	{r7}
+ 211              	.LCFI8:
+ 212              		.cfi_def_cfa_offset 4
+ 213              		.cfi_offset 7, -4
+ 214 0056 00AF     		add	r7, sp, #0
+ 215              	.LCFI9:
+ 216              		.cfi_def_cfa_register 7
+ 200:../src/usbh_usr.c ****   /* Users can do their application actions here for the USB-Reset */
+ 201:../src/usbh_usr.c **** }
+ 217              		.loc 1 201 0
+ 218 0058 BD46     		mov	sp, r7
+ 219 005a 80BC     		pop	{r7}
+ 220 005c 7047     		bx	lr
+ 221              		.cfi_endproc
+ 222              	.LFE114:
+ 224              		.section	.rodata
+ 225 0063 00       		.align	2
+ 226              	.LC4:
+ 227 0064 3E204869 		.ascii	"> High speed device detected\012\000"
+ 227      67682073 
+ 227      70656564 
+ 227      20646576 
+ 227      69636520 
+ 228 0082 0000     		.align	2
+ 229              	.LC5:
+ 230 0084 3E204675 		.ascii	"> Full speed device detected\012\000"
+ 230      6C6C2073 
+ 230      70656564 
+ 230      20646576 
+ 230      69636520 
+ 231 00a2 0000     		.align	2
+ 232              	.LC6:
+ 233 00a4 3E204C6F 		.ascii	"> Low speed device detected\012\000"
+ 233      77207370 
+ 233      65656420 
+ 233      64657669 
+ 233      63652064 
+ 234 00c1 000000   		.align	2
+ 235              	.LC7:
+ 236 00c4 3E204465 		.ascii	"> Device fault \012\000"
+ 236      76696365 
+ 236      20666175 
+ 236      6C74200A 
+ 236      00
+ 237              		.text
+ 238 005e 00BF     		.align	2
+ 239              		.global	USBH_USR_DeviceSpeedDetected
+ 240              		.thumb
+ 241              		.thumb_func
+ 243              	USBH_USR_DeviceSpeedDetected:
+ 244              	.LFB115:
+ 202:../src/usbh_usr.c **** 
+ 203:../src/usbh_usr.c **** 
+ 204:../src/usbh_usr.c **** /**
+ 205:../src/usbh_usr.c **** * @brief  USBH_USR_DeviceSpeedDetected 
+ 206:../src/usbh_usr.c **** *         Displays the message on LCD for device speed
+ 207:../src/usbh_usr.c **** * @param  Devicespeed : Device Speed
+ 208:../src/usbh_usr.c **** * @retval None
+ 209:../src/usbh_usr.c **** */
+ 210:../src/usbh_usr.c **** void USBH_USR_DeviceSpeedDetected(uint8_t DeviceSpeed)
+ 211:../src/usbh_usr.c **** {
+ 245              		.loc 1 211 0
+ 246              		.cfi_startproc
+ 247              		@ args = 0, pretend = 0, frame = 8
+ 248              		@ frame_needed = 1, uses_anonymous_args = 0
+ 249 0060 80B5     		push	{r7, lr}
+ 250              	.LCFI10:
+ 251              		.cfi_def_cfa_offset 8
+ 252              		.cfi_offset 7, -8
+ 253              		.cfi_offset 14, -4
+ 254 0062 82B0     		sub	sp, sp, #8
+ 255              	.LCFI11:
+ 256              		.cfi_def_cfa_offset 16
+ 257 0064 00AF     		add	r7, sp, #0
+ 258              	.LCFI12:
+ 259              		.cfi_def_cfa_register 7
+ 260 0066 0346     		mov	r3, r0
+ 261 0068 FB71     		strb	r3, [r7, #7]
+ 212:../src/usbh_usr.c ****   if(DeviceSpeed == HPRT0_PRTSPD_HIGH_SPEED)
+ 262              		.loc 1 212 0
+ 263 006a FB79     		ldrb	r3, [r7, #7]	@ zero_extendqisi2
+ 264 006c 002B     		cmp	r3, #0
+ 265 006e 03D1     		bne	.L16
+ 213:../src/usbh_usr.c ****   {
+ 214:../src/usbh_usr.c **** #ifdef DEBUG
+ 215:../src/usbh_usr.c **** 	  xputs("> High speed device detected\n");
+ 266              		.loc 1 215 0
+ 267 0070 0C48     		ldr	r0, .L20
+ 268 0072 FFF7FEFF 		bl	xputs
+ 269 0076 10E0     		b	.L15
+ 270              	.L16:
+ 216:../src/usbh_usr.c **** #endif
+ 217:../src/usbh_usr.c ****   }  
+ 218:../src/usbh_usr.c ****   else if(DeviceSpeed == HPRT0_PRTSPD_FULL_SPEED)
+ 271              		.loc 1 218 0
+ 272 0078 FB79     		ldrb	r3, [r7, #7]	@ zero_extendqisi2
+ 273 007a 012B     		cmp	r3, #1
+ 274 007c 03D1     		bne	.L18
+ 219:../src/usbh_usr.c ****   {
+ 220:../src/usbh_usr.c **** #ifdef DEBUG
+ 221:../src/usbh_usr.c **** 	  xputs("> Full speed device detected\n");
+ 275              		.loc 1 221 0
+ 276 007e 0A48     		ldr	r0, .L20+4
+ 277 0080 FFF7FEFF 		bl	xputs
+ 278 0084 09E0     		b	.L15
+ 279              	.L18:
+ 222:../src/usbh_usr.c **** #endif
+ 223:../src/usbh_usr.c ****   }
+ 224:../src/usbh_usr.c ****   else if(DeviceSpeed == HPRT0_PRTSPD_LOW_SPEED)
+ 280              		.loc 1 224 0
+ 281 0086 FB79     		ldrb	r3, [r7, #7]	@ zero_extendqisi2
+ 282 0088 022B     		cmp	r3, #2
+ 283 008a 03D1     		bne	.L19
+ 225:../src/usbh_usr.c ****   {
+ 226:../src/usbh_usr.c **** #ifdef DEBUG
+ 227:../src/usbh_usr.c **** 	  xputs("> Low speed device detected\n");
+ 284              		.loc 1 227 0
+ 285 008c 0748     		ldr	r0, .L20+8
+ 286 008e FFF7FEFF 		bl	xputs
+ 287 0092 02E0     		b	.L15
+ 288              	.L19:
+ 228:../src/usbh_usr.c **** #endif
+ 229:../src/usbh_usr.c ****   }
+ 230:../src/usbh_usr.c ****   else
+ 231:../src/usbh_usr.c ****   {
+ 232:../src/usbh_usr.c **** #ifdef DEBUG
+ 233:../src/usbh_usr.c **** 	  xputs("> Device fault \n");
+ 289              		.loc 1 233 0
+ 290 0094 0648     		ldr	r0, .L20+12
+ 291 0096 FFF7FEFF 		bl	xputs
+ 292              	.L15:
+ 234:../src/usbh_usr.c **** #endif
+ 235:../src/usbh_usr.c ****   }
+ 236:../src/usbh_usr.c **** }
+ 293              		.loc 1 236 0
+ 294 009a 07F10807 		add	r7, r7, #8
+ 295 009e BD46     		mov	sp, r7
+ 296 00a0 80BD     		pop	{r7, pc}
+ 297              	.L21:
+ 298 00a2 00BF     		.align	2
+ 299              	.L20:
+ 300 00a4 64000000 		.word	.LC4
+ 301 00a8 84000000 		.word	.LC5
+ 302 00ac A4000000 		.word	.LC6
+ 303 00b0 C4000000 		.word	.LC7
+ 304              		.cfi_endproc
+ 305              	.LFE115:
+ 307              		.section	.rodata
+ 308 00d5 000000   		.align	2
+ 309              	.LC8:
+ 310 00d8 44657669 		.ascii	"Device Descriptor\012\000"
+ 310      63652044 
+ 310      65736372 
+ 310      6970746F 
+ 310      720A00
+ 311 00eb 00       		.align	2
+ 312              	.LC9:
+ 313 00ec 436C6173 		.ascii	"Class : %02Xh\012\000"
+ 313      73203A20 
+ 313      25303258 
+ 313      680A00
+ 314 00fb 00       		.align	2
+ 315              	.LC10:
+ 316 00fc 53756243 		.ascii	"SubClass : %02Xh\012\000"
+ 316      6C617373 
+ 316      203A2025 
+ 316      30325868 
+ 316      0A00
+ 317 010e 0000     		.align	2
+ 318              	.LC11:
+ 319 0110 50726F74 		.ascii	"Protocol : %02Xh\012\000"
+ 319      6F636F6C 
+ 319      203A2025 
+ 319      30325868 
+ 319      0A00
+ 320 0122 0000     		.align	2
+ 321              	.LC12:
+ 322 0124 56494420 		.ascii	"VID : %04Xh\012\000"
+ 322      3A202530 
+ 322      3458680A 
+ 322      00
+ 323 0131 000000   		.align	2
+ 324              	.LC13:
+ 325 0134 50494420 		.ascii	"PID : %04Xh\012\000"
+ 325      3A202530 
+ 325      3458680A 
+ 325      00
+ 326              		.text
+ 327              		.align	2
+ 328              		.global	USBH_USR_Device_DescAvailable
+ 329              		.thumb
+ 330              		.thumb_func
+ 332              	USBH_USR_Device_DescAvailable:
+ 333              	.LFB116:
+ 237:../src/usbh_usr.c **** 
+ 238:../src/usbh_usr.c **** /**
+ 239:../src/usbh_usr.c **** * @brief  USBH_USR_Device_DescAvailable 
+ 240:../src/usbh_usr.c **** *         Displays the message on LCD for device descriptor
+ 241:../src/usbh_usr.c **** * @param  DeviceDesc : device descriptor
+ 242:../src/usbh_usr.c **** * @retval None
+ 243:../src/usbh_usr.c **** */
+ 244:../src/usbh_usr.c **** void USBH_USR_Device_DescAvailable(void *DeviceDesc)
+ 245:../src/usbh_usr.c **** {
+ 334              		.loc 1 245 0
+ 335              		.cfi_startproc
+ 336              		@ args = 0, pretend = 0, frame = 32
+ 337              		@ frame_needed = 1, uses_anonymous_args = 0
+ 338 00b4 80B5     		push	{r7, lr}
+ 339              	.LCFI13:
+ 340              		.cfi_def_cfa_offset 8
+ 341              		.cfi_offset 7, -8
+ 342              		.cfi_offset 14, -4
+ 343 00b6 88B0     		sub	sp, sp, #32
+ 344              	.LCFI14:
+ 345              		.cfi_def_cfa_offset 40
+ 346 00b8 00AF     		add	r7, sp, #0
+ 347              	.LCFI15:
+ 348              		.cfi_def_cfa_register 7
+ 349 00ba 7860     		str	r0, [r7, #4]
+ 246:../src/usbh_usr.c **** #ifdef DEBUG
+ 247:../src/usbh_usr.c ****   uint8_t temp[20];    
+ 248:../src/usbh_usr.c ****   USBH_DevDesc_TypeDef *hs;
+ 249:../src/usbh_usr.c ****   hs = DeviceDesc;  
+ 350              		.loc 1 249 0
+ 351 00bc 7B68     		ldr	r3, [r7, #4]
+ 352 00be FB61     		str	r3, [r7, #28]
+ 250:../src/usbh_usr.c **** 
+ 251:../src/usbh_usr.c ****   xputs("Device Descriptor\n");
+ 353              		.loc 1 251 0
+ 354 00c0 2648     		ldr	r0, .L23
+ 355 00c2 FFF7FEFF 		bl	xputs
+ 252:../src/usbh_usr.c ****   sprintf((char *)temp , "Class : %02Xh\n" , (uint8_t)(*hs).bDeviceClass);
+ 356              		.loc 1 252 0
+ 357 00c6 FB69     		ldr	r3, [r7, #28]
+ 358 00c8 1B79     		ldrb	r3, [r3, #4]	@ zero_extendqisi2
+ 359 00ca 07F10802 		add	r2, r7, #8
+ 360 00ce 1046     		mov	r0, r2
+ 361 00d0 2349     		ldr	r1, .L23+4
+ 362 00d2 1A46     		mov	r2, r3
+ 363 00d4 FFF7FEFF 		bl	sprintf
+ 253:../src/usbh_usr.c ****   xputs(temp);
+ 364              		.loc 1 253 0
+ 365 00d8 07F10803 		add	r3, r7, #8
+ 366 00dc 1846     		mov	r0, r3
+ 367 00de FFF7FEFF 		bl	xputs
+ 254:../src/usbh_usr.c **** 
+ 255:../src/usbh_usr.c ****   sprintf((char *)temp , "SubClass : %02Xh\n" , (uint8_t)(*hs).bDeviceSubClass);
+ 368              		.loc 1 255 0
+ 369 00e2 FB69     		ldr	r3, [r7, #28]
+ 370 00e4 5B79     		ldrb	r3, [r3, #5]	@ zero_extendqisi2
+ 371 00e6 07F10802 		add	r2, r7, #8
+ 372 00ea 1046     		mov	r0, r2
+ 373 00ec 1D49     		ldr	r1, .L23+8
+ 374 00ee 1A46     		mov	r2, r3
+ 375 00f0 FFF7FEFF 		bl	sprintf
+ 256:../src/usbh_usr.c ****   xputs(temp);
+ 376              		.loc 1 256 0
+ 377 00f4 07F10803 		add	r3, r7, #8
+ 378 00f8 1846     		mov	r0, r3
+ 379 00fa FFF7FEFF 		bl	xputs
+ 257:../src/usbh_usr.c **** 
+ 258:../src/usbh_usr.c ****   sprintf((char *)temp , "Protocol : %02Xh\n" , (uint8_t)(*hs).bDeviceProtocol);
+ 380              		.loc 1 258 0
+ 381 00fe FB69     		ldr	r3, [r7, #28]
+ 382 0100 9B79     		ldrb	r3, [r3, #6]	@ zero_extendqisi2
+ 383 0102 07F10802 		add	r2, r7, #8
+ 384 0106 1046     		mov	r0, r2
+ 385 0108 1749     		ldr	r1, .L23+12
+ 386 010a 1A46     		mov	r2, r3
+ 387 010c FFF7FEFF 		bl	sprintf
+ 259:../src/usbh_usr.c ****   xputs(temp);
+ 388              		.loc 1 259 0
+ 389 0110 07F10803 		add	r3, r7, #8
+ 390 0114 1846     		mov	r0, r3
+ 391 0116 FFF7FEFF 		bl	xputs
+ 260:../src/usbh_usr.c **** 
+ 261:../src/usbh_usr.c ****   sprintf((char *)temp , "VID : %04Xh\n" , (uint32_t)(*hs).idVendor); 
+ 392              		.loc 1 261 0
+ 393 011a FB69     		ldr	r3, [r7, #28]
+ 394 011c 1B89     		ldrh	r3, [r3, #8]
+ 395 011e 07F10802 		add	r2, r7, #8
+ 396 0122 1046     		mov	r0, r2
+ 397 0124 1149     		ldr	r1, .L23+16
+ 398 0126 1A46     		mov	r2, r3
+ 399 0128 FFF7FEFF 		bl	sprintf
+ 262:../src/usbh_usr.c ****   xputs(temp);
+ 400              		.loc 1 262 0
+ 401 012c 07F10803 		add	r3, r7, #8
+ 402 0130 1846     		mov	r0, r3
+ 403 0132 FFF7FEFF 		bl	xputs
+ 263:../src/usbh_usr.c **** 
+ 264:../src/usbh_usr.c ****   sprintf((char *)temp , "PID : %04Xh\n" , (uint32_t)(*hs).idProduct); 
+ 404              		.loc 1 264 0
+ 405 0136 FB69     		ldr	r3, [r7, #28]
+ 406 0138 5B89     		ldrh	r3, [r3, #10]
+ 407 013a 07F10802 		add	r2, r7, #8
+ 408 013e 1046     		mov	r0, r2
+ 409 0140 0B49     		ldr	r1, .L23+20
+ 410 0142 1A46     		mov	r2, r3
+ 411 0144 FFF7FEFF 		bl	sprintf
+ 265:../src/usbh_usr.c ****   xputs(temp);
+ 412              		.loc 1 265 0
+ 413 0148 07F10803 		add	r3, r7, #8
+ 414 014c 1846     		mov	r0, r3
+ 415 014e FFF7FEFF 		bl	xputs
+ 266:../src/usbh_usr.c **** #endif
+ 267:../src/usbh_usr.c **** }
+ 416              		.loc 1 267 0
+ 417 0152 07F12007 		add	r7, r7, #32
+ 418 0156 BD46     		mov	sp, r7
+ 419 0158 80BD     		pop	{r7, pc}
+ 420              	.L24:
+ 421 015a 00BF     		.align	2
+ 422              	.L23:
+ 423 015c D8000000 		.word	.LC8
+ 424 0160 EC000000 		.word	.LC9
+ 425 0164 FC000000 		.word	.LC10
+ 426 0168 10010000 		.word	.LC11
+ 427 016c 24010000 		.word	.LC12
+ 428 0170 34010000 		.word	.LC13
+ 429              		.cfi_endproc
+ 430              	.LFE116:
+ 432              		.align	2
+ 433              		.global	USBH_USR_DeviceAddressAssigned
+ 434              		.thumb
+ 435              		.thumb_func
+ 437              	USBH_USR_DeviceAddressAssigned:
+ 438              	.LFB117:
+ 268:../src/usbh_usr.c **** 
+ 269:../src/usbh_usr.c **** /**
+ 270:../src/usbh_usr.c **** * @brief  USBH_USR_DeviceAddressAssigned 
+ 271:../src/usbh_usr.c **** *         USB device is successfully assigned the Address 
+ 272:../src/usbh_usr.c **** * @param  None
+ 273:../src/usbh_usr.c **** * @retval None
+ 274:../src/usbh_usr.c **** */
+ 275:../src/usbh_usr.c **** void USBH_USR_DeviceAddressAssigned(void)
+ 276:../src/usbh_usr.c **** {
+ 439              		.loc 1 276 0
+ 440              		.cfi_startproc
+ 441              		@ args = 0, pretend = 0, frame = 0
+ 442              		@ frame_needed = 1, uses_anonymous_args = 0
+ 443              		@ link register save eliminated.
+ 444 0174 80B4     		push	{r7}
+ 445              	.LCFI16:
+ 446              		.cfi_def_cfa_offset 4
+ 447              		.cfi_offset 7, -4
+ 448 0176 00AF     		add	r7, sp, #0
+ 449              	.LCFI17:
+ 450              		.cfi_def_cfa_register 7
+ 277:../src/usbh_usr.c ****   
+ 278:../src/usbh_usr.c **** }
+ 451              		.loc 1 278 0
+ 452 0178 BD46     		mov	sp, r7
+ 453 017a 80BC     		pop	{r7}
+ 454 017c 7047     		bx	lr
+ 455              		.cfi_endproc
+ 456              	.LFE117:
+ 458              		.section	.rodata
+ 459 0141 000000   		.align	2
+ 460              	.LC14:
+ 461 0144 496E7465 		.ascii	"Interface : %02X %02X\012\000"
+ 461      72666163 
+ 461      65203A20 
+ 461      25303258 
+ 461      20253032 
+ 462 015b 00       		.align	2
+ 463              	.LC15:
+ 464 015c 506F7765 		.ascii	"Power info: bmAttributes:0x%02X, bMaxPower:%d\012\000"
+ 464      7220696E 
+ 464      666F3A20 
+ 464      626D4174 
+ 464      74726962 
+ 465              		.text
+ 466 017e 00BF     		.align	2
+ 467              		.global	USBH_USR_Configuration_DescAvailable
+ 468              		.thumb
+ 469              		.thumb_func
+ 471              	USBH_USR_Configuration_DescAvailable:
+ 472              	.LFB118:
+ 279:../src/usbh_usr.c **** 
+ 280:../src/usbh_usr.c **** 
+ 281:../src/usbh_usr.c **** /**
+ 282:../src/usbh_usr.c **** * @brief  USBH_USR_Conf_Desc 
+ 283:../src/usbh_usr.c **** *         Displays the message on LCD for configuration descriptor
+ 284:../src/usbh_usr.c **** * @param  ConfDesc : Configuration descriptor
+ 285:../src/usbh_usr.c **** * @retval None
+ 286:../src/usbh_usr.c **** */
+ 287:../src/usbh_usr.c **** void USBH_USR_Configuration_DescAvailable(USBH_CfgDesc_TypeDef * cfgDesc,
+ 288:../src/usbh_usr.c ****                                           USBH_InterfaceDesc_TypeDef *itfDesc,
+ 289:../src/usbh_usr.c ****                                           USBH_EpDesc_TypeDef *epDesc)
+ 290:../src/usbh_usr.c **** {
+ 473              		.loc 1 290 0
+ 474              		.cfi_startproc
+ 475              		@ args = 0, pretend = 0, frame = 120
+ 476              		@ frame_needed = 1, uses_anonymous_args = 0
+ 477 0180 80B5     		push	{r7, lr}
+ 478              	.LCFI18:
+ 479              		.cfi_def_cfa_offset 8
+ 480              		.cfi_offset 7, -8
+ 481              		.cfi_offset 14, -4
+ 482 0182 9EB0     		sub	sp, sp, #120
+ 483              	.LCFI19:
+ 484              		.cfi_def_cfa_offset 128
+ 485 0184 00AF     		add	r7, sp, #0
+ 486              	.LCFI20:
+ 487              		.cfi_def_cfa_register 7
+ 488 0186 F860     		str	r0, [r7, #12]
+ 489 0188 B960     		str	r1, [r7, #8]
+ 490 018a 7A60     		str	r2, [r7, #4]
+ 291:../src/usbh_usr.c **** #ifdef DEBUG
+ 292:../src/usbh_usr.c ****   char temp[100];
+ 293:../src/usbh_usr.c ****   USBH_InterfaceDesc_TypeDef *id;
+ 294:../src/usbh_usr.c ****   id = itfDesc;  
+ 491              		.loc 1 294 0
+ 492 018c BB68     		ldr	r3, [r7, #8]
+ 493 018e 7B67     		str	r3, [r7, #116]
+ 295:../src/usbh_usr.c **** 
+ 296:../src/usbh_usr.c ****   sprintf(temp, "Interface : %02X %02X\n", (uint8_t)(*id).bInterfaceClass, (uint8_t)(*id).bInterfac
+ 494              		.loc 1 296 0
+ 495 0190 7B6F     		ldr	r3, [r7, #116]
+ 496 0192 5B79     		ldrb	r3, [r3, #5]	@ zero_extendqisi2
+ 497 0194 1A46     		mov	r2, r3
+ 498 0196 7B6F     		ldr	r3, [r7, #116]
+ 499 0198 9B79     		ldrb	r3, [r3, #6]	@ zero_extendqisi2
+ 500 019a 07F11001 		add	r1, r7, #16
+ 501 019e 0846     		mov	r0, r1
+ 502 01a0 0D49     		ldr	r1, .L27
+ 503 01a2 FFF7FEFF 		bl	sprintf
+ 297:../src/usbh_usr.c ****   xputs(temp);
+ 504              		.loc 1 297 0
+ 505 01a6 07F11003 		add	r3, r7, #16
+ 506 01aa 1846     		mov	r0, r3
+ 507 01ac FFF7FEFF 		bl	xputs
+ 298:../src/usbh_usr.c ****   sprintf((char *)temp , "Power info: bmAttributes:0x%02X, bMaxPower:%d\n",cfgDesc->bmAttributes, c
+ 508              		.loc 1 298 0
+ 509 01b0 FB68     		ldr	r3, [r7, #12]
+ 510 01b2 DB79     		ldrb	r3, [r3, #7]	@ zero_extendqisi2
+ 511 01b4 1A46     		mov	r2, r3
+ 512 01b6 FB68     		ldr	r3, [r7, #12]
+ 513 01b8 1B7A     		ldrb	r3, [r3, #8]	@ zero_extendqisi2
+ 514 01ba 07F11001 		add	r1, r7, #16
+ 515 01be 0846     		mov	r0, r1
+ 516 01c0 0649     		ldr	r1, .L27+4
+ 517 01c2 FFF7FEFF 		bl	sprintf
+ 299:../src/usbh_usr.c ****   xputs(temp);
+ 518              		.loc 1 299 0
+ 519 01c6 07F11003 		add	r3, r7, #16
+ 520 01ca 1846     		mov	r0, r3
+ 521 01cc FFF7FEFF 		bl	xputs
+ 300:../src/usbh_usr.c **** 
+ 301:../src/usbh_usr.c **** #endif
+ 302:../src/usbh_usr.c **** }
+ 522              		.loc 1 302 0
+ 523 01d0 07F17807 		add	r7, r7, #120
+ 524 01d4 BD46     		mov	sp, r7
+ 525 01d6 80BD     		pop	{r7, pc}
+ 526              	.L28:
+ 527              		.align	2
+ 528              	.L27:
+ 529 01d8 44010000 		.word	.LC14
+ 530 01dc 5C010000 		.word	.LC15
+ 531              		.cfi_endproc
+ 532              	.LFE118:
+ 534              		.section	.rodata
+ 535 018b 00       		.align	2
+ 536              	.LC16:
+ 537 018c 4D616E75 		.ascii	"Manufacturer : %s\012\000"
+ 537      66616374 
+ 537      75726572 
+ 537      203A2025 
+ 537      730A00
+ 538              		.text
+ 539              		.align	2
+ 540              		.global	USBH_USR_Manufacturer_String
+ 541              		.thumb
+ 542              		.thumb_func
+ 544              	USBH_USR_Manufacturer_String:
+ 545              	.LFB119:
+ 303:../src/usbh_usr.c **** 
+ 304:../src/usbh_usr.c **** /**
+ 305:../src/usbh_usr.c **** * @brief  USBH_USR_Manufacturer_String 
+ 306:../src/usbh_usr.c **** *         Displays the message on LCD for Manufacturer String 
+ 307:../src/usbh_usr.c **** * @param  ManufacturerString : Manufacturer String of Device
+ 308:../src/usbh_usr.c **** * @retval None
+ 309:../src/usbh_usr.c **** */
+ 310:../src/usbh_usr.c **** void USBH_USR_Manufacturer_String(void *ManufacturerString)
+ 311:../src/usbh_usr.c **** {
+ 546              		.loc 1 311 0
+ 547              		.cfi_startproc
+ 548              		@ args = 0, pretend = 0, frame = 112
+ 549              		@ frame_needed = 1, uses_anonymous_args = 0
+ 550 01e0 80B5     		push	{r7, lr}
+ 551              	.LCFI21:
+ 552              		.cfi_def_cfa_offset 8
+ 553              		.cfi_offset 7, -8
+ 554              		.cfi_offset 14, -4
+ 555 01e2 9CB0     		sub	sp, sp, #112
+ 556              	.LCFI22:
+ 557              		.cfi_def_cfa_offset 120
+ 558 01e4 00AF     		add	r7, sp, #0
+ 559              	.LCFI23:
+ 560              		.cfi_def_cfa_register 7
+ 561 01e6 7860     		str	r0, [r7, #4]
+ 312:../src/usbh_usr.c **** #ifdef DEBUG
+ 313:../src/usbh_usr.c ****   char temp[100];
+ 314:../src/usbh_usr.c ****   sprintf(temp, "Manufacturer : %s\n", (char *)ManufacturerString);
+ 562              		.loc 1 314 0
+ 563 01e8 07F10C03 		add	r3, r7, #12
+ 564 01ec 1846     		mov	r0, r3
+ 565 01ee 0649     		ldr	r1, .L30
+ 566 01f0 7A68     		ldr	r2, [r7, #4]
+ 567 01f2 FFF7FEFF 		bl	sprintf
+ 315:../src/usbh_usr.c ****   xputs(temp);
+ 568              		.loc 1 315 0
+ 569 01f6 07F10C03 		add	r3, r7, #12
+ 570 01fa 1846     		mov	r0, r3
+ 571 01fc FFF7FEFF 		bl	xputs
+ 316:../src/usbh_usr.c **** #endif
+ 317:../src/usbh_usr.c **** }
+ 572              		.loc 1 317 0
+ 573 0200 07F17007 		add	r7, r7, #112
+ 574 0204 BD46     		mov	sp, r7
+ 575 0206 80BD     		pop	{r7, pc}
+ 576              	.L31:
+ 577              		.align	2
+ 578              	.L30:
+ 579 0208 8C010000 		.word	.LC16
+ 580              		.cfi_endproc
+ 581              	.LFE119:
+ 583              		.section	.rodata
+ 584 019f 00       		.align	2
+ 585              	.LC17:
+ 586 01a0 50726F64 		.ascii	"Product : %s\012\000"
+ 586      75637420 
+ 586      3A202573 
+ 586      0A00
+ 587              		.text
+ 588              		.align	2
+ 589              		.global	USBH_USR_Product_String
+ 590              		.thumb
+ 591              		.thumb_func
+ 593              	USBH_USR_Product_String:
+ 594              	.LFB120:
+ 318:../src/usbh_usr.c **** 
+ 319:../src/usbh_usr.c **** /**
+ 320:../src/usbh_usr.c **** * @brief  USBH_USR_Product_String 
+ 321:../src/usbh_usr.c **** *         Displays the message on LCD for Product String
+ 322:../src/usbh_usr.c **** * @param  ProductString : Product String of Device
+ 323:../src/usbh_usr.c **** * @retval None
+ 324:../src/usbh_usr.c **** */
+ 325:../src/usbh_usr.c **** void USBH_USR_Product_String(void *ProductString)
+ 326:../src/usbh_usr.c **** {
+ 595              		.loc 1 326 0
+ 596              		.cfi_startproc
+ 597              		@ args = 0, pretend = 0, frame = 112
+ 598              		@ frame_needed = 1, uses_anonymous_args = 0
+ 599 020c 80B5     		push	{r7, lr}
+ 600              	.LCFI24:
+ 601              		.cfi_def_cfa_offset 8
+ 602              		.cfi_offset 7, -8
+ 603              		.cfi_offset 14, -4
+ 604 020e 9CB0     		sub	sp, sp, #112
+ 605              	.LCFI25:
+ 606              		.cfi_def_cfa_offset 120
+ 607 0210 00AF     		add	r7, sp, #0
+ 608              	.LCFI26:
+ 609              		.cfi_def_cfa_register 7
+ 610 0212 7860     		str	r0, [r7, #4]
+ 327:../src/usbh_usr.c **** #ifdef DEBUG
+ 328:../src/usbh_usr.c ****   char temp[100];
+ 329:../src/usbh_usr.c ****   sprintf((char *)temp, "Product : %s\n", (char *)ProductString);  
+ 611              		.loc 1 329 0
+ 612 0214 07F10C03 		add	r3, r7, #12
+ 613 0218 1846     		mov	r0, r3
+ 614 021a 0649     		ldr	r1, .L33
+ 615 021c 7A68     		ldr	r2, [r7, #4]
+ 616 021e FFF7FEFF 		bl	sprintf
+ 330:../src/usbh_usr.c ****   xputs(temp);
+ 617              		.loc 1 330 0
+ 618 0222 07F10C03 		add	r3, r7, #12
+ 619 0226 1846     		mov	r0, r3
+ 620 0228 FFF7FEFF 		bl	xputs
+ 331:../src/usbh_usr.c **** #endif
+ 332:../src/usbh_usr.c **** }
+ 621              		.loc 1 332 0
+ 622 022c 07F17007 		add	r7, r7, #112
+ 623 0230 BD46     		mov	sp, r7
+ 624 0232 80BD     		pop	{r7, pc}
+ 625              	.L34:
+ 626              		.align	2
+ 627              	.L33:
+ 628 0234 A0010000 		.word	.LC17
+ 629              		.cfi_endproc
+ 630              	.LFE120:
+ 632              		.section	.rodata
+ 633 01ae 0000     		.align	2
+ 634              	.LC18:
+ 635 01b0 53657269 		.ascii	"Serial Number : %s\012\000"
+ 635      616C204E 
+ 635      756D6265 
+ 635      72203A20 
+ 635      25730A00 
+ 636              		.text
+ 637              		.align	2
+ 638              		.global	USBH_USR_SerialNum_String
+ 639              		.thumb
+ 640              		.thumb_func
+ 642              	USBH_USR_SerialNum_String:
+ 643              	.LFB121:
+ 333:../src/usbh_usr.c **** 
+ 334:../src/usbh_usr.c **** /**
+ 335:../src/usbh_usr.c **** * @brief  USBH_USR_SerialNum_String 
+ 336:../src/usbh_usr.c **** *         Displays the message on LCD for SerialNum_String 
+ 337:../src/usbh_usr.c **** * @param  SerialNumString : SerialNum_String of device
+ 338:../src/usbh_usr.c **** * @retval None
+ 339:../src/usbh_usr.c **** */
+ 340:../src/usbh_usr.c **** void USBH_USR_SerialNum_String(void *SerialNumString)
+ 341:../src/usbh_usr.c **** {
+ 644              		.loc 1 341 0
+ 645              		.cfi_startproc
+ 646              		@ args = 0, pretend = 0, frame = 112
+ 647              		@ frame_needed = 1, uses_anonymous_args = 0
+ 648 0238 80B5     		push	{r7, lr}
+ 649              	.LCFI27:
+ 650              		.cfi_def_cfa_offset 8
+ 651              		.cfi_offset 7, -8
+ 652              		.cfi_offset 14, -4
+ 653 023a 9CB0     		sub	sp, sp, #112
+ 654              	.LCFI28:
+ 655              		.cfi_def_cfa_offset 120
+ 656 023c 00AF     		add	r7, sp, #0
+ 657              	.LCFI29:
+ 658              		.cfi_def_cfa_register 7
+ 659 023e 7860     		str	r0, [r7, #4]
+ 342:../src/usbh_usr.c **** #ifdef DEBUG
+ 343:../src/usbh_usr.c ****   uint8_t temp[100];
+ 344:../src/usbh_usr.c ****   sprintf((char *)temp, "Serial Number : %s\n", (char *)SerialNumString);    
+ 660              		.loc 1 344 0
+ 661 0240 07F10C03 		add	r3, r7, #12
+ 662 0244 1846     		mov	r0, r3
+ 663 0246 0649     		ldr	r1, .L36
+ 664 0248 7A68     		ldr	r2, [r7, #4]
+ 665 024a FFF7FEFF 		bl	sprintf
+ 345:../src/usbh_usr.c ****   xputs(temp);
+ 666              		.loc 1 345 0
+ 667 024e 07F10C03 		add	r3, r7, #12
+ 668 0252 1846     		mov	r0, r3
+ 669 0254 FFF7FEFF 		bl	xputs
+ 346:../src/usbh_usr.c **** #endif
+ 347:../src/usbh_usr.c **** } 
+ 670              		.loc 1 347 0
+ 671 0258 07F17007 		add	r7, r7, #112
+ 672 025c BD46     		mov	sp, r7
+ 673 025e 80BD     		pop	{r7, pc}
+ 674              	.L37:
+ 675              		.align	2
+ 676              	.L36:
+ 677 0260 B0010000 		.word	.LC18
+ 678              		.cfi_endproc
+ 679              	.LFE121:
+ 681              		.section	.rodata
+ 682              		.align	2
+ 683              	.LC19:
+ 684 01c4 3E20456E 		.ascii	"> Enumeration completed\012\000"
+ 684      756D6572 
+ 684      6174696F 
+ 684      6E20636F 
+ 684      6D706C65 
+ 685              		.text
+ 686              		.align	2
+ 687              		.global	USBH_USR_EnumerationDone
+ 688              		.thumb
+ 689              		.thumb_func
+ 691              	USBH_USR_EnumerationDone:
+ 692              	.LFB122:
+ 348:../src/usbh_usr.c **** 
+ 349:../src/usbh_usr.c **** /**
+ 350:../src/usbh_usr.c **** * @brief  EnumerationDone 
+ 351:../src/usbh_usr.c **** *         User response request is displayed to ask for
+ 352:../src/usbh_usr.c **** *         application jump to class
+ 353:../src/usbh_usr.c **** * @param  None
+ 354:../src/usbh_usr.c **** * @retval None
+ 355:../src/usbh_usr.c **** */
+ 356:../src/usbh_usr.c **** void USBH_USR_EnumerationDone(void)
+ 357:../src/usbh_usr.c **** {
+ 693              		.loc 1 357 0
+ 694              		.cfi_startproc
+ 695              		@ args = 0, pretend = 0, frame = 0
+ 696              		@ frame_needed = 1, uses_anonymous_args = 0
+ 697 0264 80B5     		push	{r7, lr}
+ 698              	.LCFI30:
+ 699              		.cfi_def_cfa_offset 8
+ 700              		.cfi_offset 7, -8
+ 701              		.cfi_offset 14, -4
+ 702 0266 00AF     		add	r7, sp, #0
+ 703              	.LCFI31:
+ 704              		.cfi_def_cfa_register 7
+ 358:../src/usbh_usr.c **** #ifdef DEBUG
+ 359:../src/usbh_usr.c **** 	  xputs("> Enumeration completed\n");
+ 705              		.loc 1 359 0
+ 706 0268 0148     		ldr	r0, .L39
+ 707 026a FFF7FEFF 		bl	xputs
+ 360:../src/usbh_usr.c **** #endif
+ 361:../src/usbh_usr.c **** } 
+ 708              		.loc 1 361 0
+ 709 026e 80BD     		pop	{r7, pc}
+ 710              	.L40:
+ 711              		.align	2
+ 712              	.L39:
+ 713 0270 C4010000 		.word	.LC19
+ 714              		.cfi_endproc
+ 715              	.LFE122:
+ 717              		.section	.rodata
+ 718 01dd 000000   		.align	2
+ 719              	.LC20:
+ 720 01e0 3E204465 		.ascii	"> Device not supported.\012\000"
+ 720      76696365 
+ 720      206E6F74 
+ 720      20737570 
+ 720      706F7274 
+ 721              		.text
+ 722              		.align	2
+ 723              		.global	USBH_USR_DeviceNotSupported
+ 724              		.thumb
+ 725              		.thumb_func
+ 727              	USBH_USR_DeviceNotSupported:
+ 728              	.LFB123:
+ 362:../src/usbh_usr.c **** 
+ 363:../src/usbh_usr.c **** /**
+ 364:../src/usbh_usr.c **** * @brief  USBH_USR_DeviceNotSupported
+ 365:../src/usbh_usr.c **** *         Device is not supported
+ 366:../src/usbh_usr.c **** * @param  None
+ 367:../src/usbh_usr.c **** * @retval None
+ 368:../src/usbh_usr.c **** */
+ 369:../src/usbh_usr.c **** void USBH_USR_DeviceNotSupported(void)
+ 370:../src/usbh_usr.c **** {
+ 729              		.loc 1 370 0
+ 730              		.cfi_startproc
+ 731              		@ args = 0, pretend = 0, frame = 0
+ 732              		@ frame_needed = 1, uses_anonymous_args = 0
+ 733 0274 80B5     		push	{r7, lr}
+ 734              	.LCFI32:
+ 735              		.cfi_def_cfa_offset 8
+ 736              		.cfi_offset 7, -8
+ 737              		.cfi_offset 14, -4
+ 738 0276 00AF     		add	r7, sp, #0
+ 739              	.LCFI33:
+ 740              		.cfi_def_cfa_register 7
+ 371:../src/usbh_usr.c **** #ifdef DEBUG
+ 372:../src/usbh_usr.c **** 	  xputs("> Device not supported.\n");
+ 741              		.loc 1 372 0
+ 742 0278 0148     		ldr	r0, .L42
+ 743 027a FFF7FEFF 		bl	xputs
+ 373:../src/usbh_usr.c **** #endif
+ 374:../src/usbh_usr.c **** }  
+ 744              		.loc 1 374 0
+ 745 027e 80BD     		pop	{r7, pc}
+ 746              	.L43:
+ 747              		.align	2
+ 748              	.L42:
+ 749 0280 E0010000 		.word	.LC20
+ 750              		.cfi_endproc
+ 751              	.LFE123:
+ 753              		.align	2
+ 754              		.global	USBH_USR_UserInput
+ 755              		.thumb
+ 756              		.thumb_func
+ 758              	USBH_USR_UserInput:
+ 759              	.LFB124:
+ 375:../src/usbh_usr.c **** 
+ 376:../src/usbh_usr.c **** 
+ 377:../src/usbh_usr.c **** /**
+ 378:../src/usbh_usr.c **** * @brief  USBH_USR_UserInput
+ 379:../src/usbh_usr.c **** *         User Action for application state entry
+ 380:../src/usbh_usr.c **** * @param  None
+ 381:../src/usbh_usr.c **** * @retval USBH_USR_Status : User response for key button
+ 382:../src/usbh_usr.c **** */
+ 383:../src/usbh_usr.c **** USBH_USR_Status USBH_USR_UserInput(void)
+ 384:../src/usbh_usr.c **** {
+ 760              		.loc 1 384 0
+ 761              		.cfi_startproc
+ 762              		@ args = 0, pretend = 0, frame = 8
+ 763              		@ frame_needed = 1, uses_anonymous_args = 0
+ 764              		@ link register save eliminated.
+ 765 0284 80B4     		push	{r7}
+ 766              	.LCFI34:
+ 767              		.cfi_def_cfa_offset 4
+ 768              		.cfi_offset 7, -4
+ 769 0286 83B0     		sub	sp, sp, #12
+ 770              	.LCFI35:
+ 771              		.cfi_def_cfa_offset 16
+ 772 0288 00AF     		add	r7, sp, #0
+ 773              	.LCFI36:
+ 774              		.cfi_def_cfa_register 7
+ 385:../src/usbh_usr.c ****   
+ 386:../src/usbh_usr.c ****   USBH_USR_Status usbh_usr_status;
+ 387:../src/usbh_usr.c ****   
+ 388:../src/usbh_usr.c **** //  usbh_usr_status = USBH_USR_NO_RESP;
+ 389:../src/usbh_usr.c ****     usbh_usr_status = USBH_USR_RESP_OK;
+ 775              		.loc 1 389 0
+ 776 028a 4FF00103 		mov	r3, #1
+ 777 028e FB71     		strb	r3, [r7, #7]
+ 390:../src/usbh_usr.c ****   
+ 391:../src/usbh_usr.c ****   /*Key B3 is in polling mode to detect user action */
+ 392:../src/usbh_usr.c **** //  if(STM_EVAL_PBGetState(Button_KEY) == RESET)
+ 393:../src/usbh_usr.c **** //  {
+ 394:../src/usbh_usr.c **** //
+ 395:../src/usbh_usr.c **** //    usbh_usr_status = USBH_USR_RESP_OK;
+ 396:../src/usbh_usr.c **** //
+ 397:../src/usbh_usr.c **** //  }
+ 398:../src/usbh_usr.c ****   
+ 399:../src/usbh_usr.c ****   
+ 400:../src/usbh_usr.c ****   return usbh_usr_status;
+ 778              		.loc 1 400 0
+ 779 0290 FB79     		ldrb	r3, [r7, #7]	@ zero_extendqisi2
+ 401:../src/usbh_usr.c ****   
+ 402:../src/usbh_usr.c **** } 
+ 780              		.loc 1 402 0
+ 781 0292 1846     		mov	r0, r3
+ 782 0294 07F10C07 		add	r7, r7, #12
+ 783 0298 BD46     		mov	sp, r7
+ 784 029a 80BC     		pop	{r7}
+ 785 029c 7047     		bx	lr
+ 786              		.cfi_endproc
+ 787              	.LFE124:
+ 789              		.section	.rodata
+ 790 01f9 000000   		.align	2
+ 791              	.LC21:
+ 792 01fc 4F766572 		.ascii	"Overcurrent detected.\012\000"
+ 792      63757272 
+ 792      656E7420 
+ 792      64657465 
+ 792      63746564 
+ 793              		.text
+ 794 029e 00BF     		.align	2
+ 795              		.global	USBH_USR_OverCurrentDetected
+ 796              		.thumb
+ 797              		.thumb_func
+ 799              	USBH_USR_OverCurrentDetected:
+ 800              	.LFB125:
+ 403:../src/usbh_usr.c **** 
+ 404:../src/usbh_usr.c **** /**
+ 405:../src/usbh_usr.c **** * @brief  USBH_USR_OverCurrentDetected
+ 406:../src/usbh_usr.c **** *         Device Overcurrent detection event
+ 407:../src/usbh_usr.c **** * @param  None
+ 408:../src/usbh_usr.c **** * @retval None
+ 409:../src/usbh_usr.c **** */
+ 410:../src/usbh_usr.c **** void USBH_USR_OverCurrentDetected (void)
+ 411:../src/usbh_usr.c **** {
+ 801              		.loc 1 411 0
+ 802              		.cfi_startproc
+ 803              		@ args = 0, pretend = 0, frame = 0
+ 804              		@ frame_needed = 1, uses_anonymous_args = 0
+ 805 02a0 80B5     		push	{r7, lr}
+ 806              	.LCFI37:
+ 807              		.cfi_def_cfa_offset 8
+ 808              		.cfi_offset 7, -8
+ 809              		.cfi_offset 14, -4
+ 810 02a2 00AF     		add	r7, sp, #0
+ 811              	.LCFI38:
+ 812              		.cfi_def_cfa_register 7
+ 412:../src/usbh_usr.c **** #ifdef DEBUG
+ 413:../src/usbh_usr.c **** 	  xputs("Overcurrent detected.\n");
+ 813              		.loc 1 413 0
+ 814 02a4 0148     		ldr	r0, .L47
+ 815 02a6 FFF7FEFF 		bl	xputs
+ 414:../src/usbh_usr.c **** #endif
+ 415:../src/usbh_usr.c **** }
+ 816              		.loc 1 415 0
+ 817 02aa 80BD     		pop	{r7, pc}
+ 818              	.L48:
+ 819              		.align	2
+ 820              	.L47:
+ 821 02ac FC010000 		.word	.LC21
+ 822              		.cfi_endproc
+ 823              	.LFE125:
+ 825              		.align	2
+ 826              		.global	USBH_USR_DeInit
+ 827              		.thumb
+ 828              		.thumb_func
+ 830              	USBH_USR_DeInit:
+ 831              	.LFB126:
+ 416:../src/usbh_usr.c **** 
+ 417:../src/usbh_usr.c **** 
+ 418:../src/usbh_usr.c **** /**
+ 419:../src/usbh_usr.c **** * @brief  USBH_USR_DeInit
+ 420:../src/usbh_usr.c **** *         Deint User state and associated variables
+ 421:../src/usbh_usr.c **** * @param  None
+ 422:../src/usbh_usr.c **** * @retval None
+ 423:../src/usbh_usr.c **** */
+ 424:../src/usbh_usr.c **** void USBH_USR_DeInit(void)
+ 425:../src/usbh_usr.c **** {
+ 832              		.loc 1 425 0
+ 833              		.cfi_startproc
+ 834              		@ args = 0, pretend = 0, frame = 0
+ 835              		@ frame_needed = 1, uses_anonymous_args = 0
+ 836              		@ link register save eliminated.
+ 837 02b0 80B4     		push	{r7}
+ 838              	.LCFI39:
+ 839              		.cfi_def_cfa_offset 4
+ 840              		.cfi_offset 7, -4
+ 841 02b2 00AF     		add	r7, sp, #0
+ 842              	.LCFI40:
+ 843              		.cfi_def_cfa_register 7
+ 426:../src/usbh_usr.c **** }
+ 844              		.loc 1 426 0
+ 845 02b4 BD46     		mov	sp, r7
+ 846 02b6 80BC     		pop	{r7}
+ 847 02b8 7047     		bx	lr
+ 848              		.cfi_endproc
+ 849              	.LFE126:
+ 851              		.section	.rodata
+ 852 0213 00       		.align	2
+ 853              	.LC22:
+ 854 0214 3E205553 		.ascii	"> USBH_USR_ADK_Application\012\000"
+ 854      42485F55 
+ 854      53525F41 
+ 854      444B5F41 
+ 854      70706C69 
+ 855              		.text
+ 856 02ba 00BF     		.align	2
+ 857              		.global	USBH_USR_ADK_Application
+ 858              		.thumb
+ 859              		.thumb_func
+ 861              	USBH_USR_ADK_Application:
+ 862              	.LFB127:
+ 427:../src/usbh_usr.c **** 
+ 428:../src/usbh_usr.c **** /**
+ 429:../src/usbh_usr.c **** * @brief  USBH_USR_ADK_Application
+ 430:../src/usbh_usr.c **** *         Application for ADK
+ 431:../src/usbh_usr.c **** * @param  None
+ 432:../src/usbh_usr.c **** * @retval Staus
+ 433:../src/usbh_usr.c **** */
+ 434:../src/usbh_usr.c **** int USBH_USR_ADK_Application(void)
+ 435:../src/usbh_usr.c **** {
+ 863              		.loc 1 435 0
+ 864              		.cfi_startproc
+ 865              		@ args = 0, pretend = 0, frame = 0
+ 866              		@ frame_needed = 1, uses_anonymous_args = 0
+ 867 02bc 80B5     		push	{r7, lr}
+ 868              	.LCFI41:
+ 869              		.cfi_def_cfa_offset 8
+ 870              		.cfi_offset 7, -8
+ 871              		.cfi_offset 14, -4
+ 872 02be 00AF     		add	r7, sp, #0
+ 873              	.LCFI42:
+ 874              		.cfi_def_cfa_register 7
+ 436:../src/usbh_usr.c **** #ifdef DEBUG
+ 437:../src/usbh_usr.c **** 	  xputs("> USBH_USR_ADK_Application\n");
+ 875              		.loc 1 437 0
+ 876 02c0 0348     		ldr	r0, .L52
+ 877 02c2 FFF7FEFF 		bl	xputs
+ 438:../src/usbh_usr.c **** #endif
+ 439:../src/usbh_usr.c ****   return(0);
+ 878              		.loc 1 439 0
+ 879 02c6 4FF00003 		mov	r3, #0
+ 440:../src/usbh_usr.c **** }
+ 880              		.loc 1 440 0
+ 881 02ca 1846     		mov	r0, r3
+ 882 02cc 80BD     		pop	{r7, pc}
+ 883              	.L53:
+ 884 02ce 00BF     		.align	2
+ 885              	.L52:
+ 886 02d0 14020000 		.word	.LC22
+ 887              		.cfi_endproc
+ 888              	.LFE127:
+ 890              		.bss
+ 891              	startup.9463:
+ 892 0000 00       		.space	1
+ 893              		.text
+ 894              	.Letext0:
+ 895              		.file 2 "/opt/CodeSourcery/bin/../lib/gcc/arm-none-eabi/4.7.2/../../../../arm-none-eabi/include/st
+ 896              		.file 3 "/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/STM32_USB_HOST_Libr
+ 897              		.file 4 "/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/STM32_USB_HOST_Libr
+ 898              		.file 5 "/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_
+DEFINED SYMBOLS
+                            *ABS*:00000000 usbh_usr.c
+     /tmp/ccQvWbHK.s:23     .data:00000000 USR_Callbacks
+     /tmp/ccQvWbHK.s:20     .data:00000000 $d
+     /tmp/ccQvWbHK.s:52     .text:00000000 USBH_USR_Init
+     /tmp/ccQvWbHK.s:830    .text:000002b0 USBH_USR_DeInit
+     /tmp/ccQvWbHK.s:100    .text:00000024 USBH_USR_DeviceAttached
+     /tmp/ccQvWbHK.s:203    .text:00000054 USBH_USR_ResetDevice
+     /tmp/ccQvWbHK.s:172    .text:00000044 USBH_USR_DeviceDisconnected
+     /tmp/ccQvWbHK.s:799    .text:000002a0 USBH_USR_OverCurrentDetected
+     /tmp/ccQvWbHK.s:243    .text:00000060 USBH_USR_DeviceSpeedDetected
+     /tmp/ccQvWbHK.s:332    .text:000000b4 USBH_USR_Device_DescAvailable
+     /tmp/ccQvWbHK.s:437    .text:00000174 USBH_USR_DeviceAddressAssigned
+     /tmp/ccQvWbHK.s:471    .text:00000180 USBH_USR_Configuration_DescAvailable
+     /tmp/ccQvWbHK.s:544    .text:000001e0 USBH_USR_Manufacturer_String
+     /tmp/ccQvWbHK.s:593    .text:0000020c USBH_USR_Product_String
+     /tmp/ccQvWbHK.s:642    .text:00000238 USBH_USR_SerialNum_String
+     /tmp/ccQvWbHK.s:691    .text:00000264 USBH_USR_EnumerationDone
+     /tmp/ccQvWbHK.s:758    .text:00000284 USBH_USR_UserInput
+     /tmp/ccQvWbHK.s:861    .text:000002bc USBH_USR_ADK_Application
+     /tmp/ccQvWbHK.s:727    .text:00000274 USBH_USR_DeviceNotSupported
+     /tmp/ccQvWbHK.s:136    .text:00000034 USBH_USR_UnrecoveredError
+     /tmp/ccQvWbHK.s:43     .rodata:00000000 $d
+     /tmp/ccQvWbHK.s:47     .text:00000000 $t
+     /tmp/ccQvWbHK.s:85     .text:0000001c $d
+     /tmp/ccQvWbHK.s:891    .bss:00000000 startup.9463
+     /tmp/ccQvWbHK.s:95     .text:00000024 $t
+     /tmp/ccQvWbHK.s:122    .text:00000030 $d
+     /tmp/ccQvWbHK.s:131    .text:00000034 $t
+     /tmp/ccQvWbHK.s:158    .text:00000040 $d
+     /tmp/ccQvWbHK.s:167    .text:00000044 $t
+     /tmp/ccQvWbHK.s:194    .text:00000050 $d
+     /tmp/ccQvWbHK.s:198    .text:00000054 $t
+     /tmp/ccQvWbHK.s:300    .text:000000a4 $d
+     /tmp/ccQvWbHK.s:327    .text:000000b4 $t
+     /tmp/ccQvWbHK.s:423    .text:0000015c $d
+     /tmp/ccQvWbHK.s:432    .text:00000174 $t
+     /tmp/ccQvWbHK.s:529    .text:000001d8 $d
+     /tmp/ccQvWbHK.s:539    .text:000001e0 $t
+     /tmp/ccQvWbHK.s:579    .text:00000208 $d
+     /tmp/ccQvWbHK.s:588    .text:0000020c $t
+     /tmp/ccQvWbHK.s:628    .text:00000234 $d
+     /tmp/ccQvWbHK.s:637    .text:00000238 $t
+     /tmp/ccQvWbHK.s:677    .text:00000260 $d
+     /tmp/ccQvWbHK.s:686    .text:00000264 $t
+     /tmp/ccQvWbHK.s:713    .text:00000270 $d
+     /tmp/ccQvWbHK.s:722    .text:00000274 $t
+     /tmp/ccQvWbHK.s:749    .text:00000280 $d
+     /tmp/ccQvWbHK.s:753    .text:00000284 $t
+     /tmp/ccQvWbHK.s:821    .text:000002ac $d
+     /tmp/ccQvWbHK.s:825    .text:000002b0 $t
+     /tmp/ccQvWbHK.s:886    .text:000002d0 $d
+     /tmp/ccQvWbHK.s:892    .bss:00000000 $d
+                     .debug_frame:00000010 $d
+                           .group:00000000 wm4.1.ee386580922180e5cad1057f989de60d
+                           .group:00000000 wm4.stm32f4xx.h.54.6e1f0ee5c76cc1e53c8ea6d18297b5fd
+                           .group:00000000 wm4.core_cm4.h.32.f824aba4d431a5bb4a51726bd5b62834
+                           .group:00000000 wm4.stdint.h.10.90b695f550ca6cc3fb08fa83baf01e05
+                           .group:00000000 wm4.core_cmInstr.h.25.f50f886f2edf670cf199b35fd96f5c91
+                           .group:00000000 wm4.core_cm4_simd.h.29.b4a3fdfb606cb3b26119424324d4b963
+                           .group:00000000 wm4.core_cm4.h.153.5393ef7e6cebf34dd51ca528f9218ab3
+                           .group:00000000 wm4.stm32f4xx.h.289.fa68dcae75666a037ce29b5a1b57e3b3
+                           .group:00000000 wm4.stm32f4xx_adc.h.108.1710484bf41297b93f825b3b15cbdff8
+                           .group:00000000 wm4.stm32f4xx_can.h.31.3bb56c6436c7a6e6af1611046e81f48c
+                           .group:00000000 wm4.stm32f4xx_cryp.h.31.94bbbb19b99df10306f31e78c333a77b
+                           .group:00000000 wm4.stm32f4xx_dac.h.31.b8d45e7eaf71ee4bf01c1317dbc06f77
+                           .group:00000000 wm4.stm32f4xx_dbgmcu.h.30.70a81ec54c2707baa9fca77391eeeaaa
+                           .group:00000000 wm4.stm32f4xx_dcmi.h.30.9d0942d58c357d2eed15e044bf9b4a77
+                           .group:00000000 wm4.stm32f4xx_dma.h.31.815bb924b30b1c776b3cd51113fdfe60
+                           .group:00000000 wm4.stm32f4xx_exti.h.31.86bd18e979f97217bb1d3b80fde0231e
+                           .group:00000000 wm4.stm32f4xx_flash.h.31.74f2ed42d890f144ca7eb5ae8172f0d0
+                           .group:00000000 wm4.stm32f4xx_fsmc.h.31.ff58629e0c603fb2f9b3f00c0657fdfa
+                           .group:00000000 wm4.stm32f4xx_hash.h.31.5c109425d30f0b9cc0a26ad38182d91f
+                           .group:00000000 wm4.stm32f4xx_gpio.h.31.d9aeae10cfa353d85d475c0d4900c452
+                           .group:00000000 wm4.stm32f4xx_i2c.h.31.edf5baa611075c49ae13f56be9040be3
+                           .group:00000000 wm4.stm32f4xx_iwdg.h.31.30e376e6d8d424aab7fddd66cf691c7b
+                           .group:00000000 wm4.stm32f4xx_pwr.h.31.bb774fc1b632cb8d2ecaec8c6524d2c0
+                           .group:00000000 wm4.stm32f4xx_rcc.h.30.820e94551583d2b835c8cf3ad722e16c
+                           .group:00000000 wm4.stm32f4xx_rng.h.31.1ec493d56b7a8e5a71238519cae6dea7
+                           .group:00000000 wm4.stm32f4xx_rtc.h.31.bddeb98c63c8fa06fac80b5dd8296471
+                           .group:00000000 wm4.stm32f4xx_sdio.h.31.8c6dff42ffa718b444c3420717601ff2
+                           .group:00000000 wm4.stm32f4xx_spi.h.31.fb1b2c8214b87a47d4457633b7c31c3c
+                           .group:00000000 wm4.stm32f4xx_syscfg.h.31.5a680f88d55b7816ae613c20f199cbd9
+                           .group:00000000 wm4.stm32f4xx_tim.h.31.b1d608fbde729347e4ccf70799e654d2
+                           .group:00000000 wm4.stm32f4xx_usart.h.31.f8d29b14aa4d39de5495adcc92749d3c
+                           .group:00000000 wm4.stm32f4xx_wwdg.h.31.b45a80fa1ec64984adf786f7e489f31b
+                           .group:00000000 wm4.misc.h.31.041217492a6cb86f2fb26099f373a465
+                           .group:00000000 wm4.stm32f4xx.h.6975.cdbdae9d5de06f1ba6b770f59cbe4d6c
+                           .group:00000000 wm4.usb_conf.h.69.07474af79ba33c49defd0cb9b2ee7820
+                           .group:00000000 wm4.usb_regs.h.50.f7704d11166068cc3538b5ba24faf52e
+                           .group:00000000 wm4.usb_defines.h.30.25e1682f38ca1ccb768b1b48e673a175
+                           .group:00000000 wm4.usb_core.h.52.b8138d1f1482be33e5028c0dc9d2a5d3
+                           .group:00000000 wm4.usbh_def.h.42.eb4a6bc03c1613f622529e01c7f1c051
+                           .group:00000000 wm4.usbh_conf.h.24.1e4ade5fba437d91fca18dcf5f2907c4
+                           .group:00000000 wm4.usbh_core.h.55.3283e920dd206a3762220f568a9515d1
+                           .group:00000000 wm4.stm32f4_discovery.h.25.f2884f43a6dee9f5df9a2d77e91107bd
+                           .group:00000000 wm4.newlib.h.8.e1d498e57c12962fc6d7be5061a6981a
+                           .group:00000000 wm4.config.h.148.52fe83653334d06815a0c57b59a3e584
+                           .group:00000000 wm4._ansi.h.23.95dee4059009fe3ab635a191bb73dc66
+                           .group:00000000 wm4.stdio.h.31.f48311dde756a2aec27351b58a280fb9
+                           .group:00000000 wm4.stddef.h.187.9e651b6b8b16e149c1353259404973ea
+                           .group:00000000 wm4.stdarg.h.34.3a23a216c0c293b3d2ea2e89281481e6
+                           .group:00000000 wm4._default_types.h.6.1dbd2e581fd590860c7c17f21d147e91
+                           .group:00000000 wm4.lock.h.2.9bc98482741e5e2a9450b12934a684ea
+                           .group:00000000 wm4.stddef.h.349.31f4c5baff3fa2689010b32028da9c47
+                           .group:00000000 wm4.reent.h.16.4b443e0a625b48622aee485d980b00f4
+                           .group:00000000 wm4.assert.h.11.060c3dc511517628fd4f958fa9448dce
+                           .group:00000000 wm4.reent.h.492.84a17b766fc6e12f346fb69d05439229
+                           .group:00000000 wm4.types.h.23.0d949686bbcadd1621462d4fa1f884f9
+                           .group:00000000 wm4.stddef.h.40.cf962ebbec441b3ac67502735f0765db
+                           .group:00000000 wm4.types.h.2.e9cec8c90ab35f77d9f499e06ae02400
+                           .group:00000000 wm4.types.h.80.f2bfdfeee9f340633702c07fad9b5e01
+                           .group:00000000 wm4.stdio.h.2.4aa87247282eca6c8f36f9de33d8df1a
+                           .group:00000000 wm4.stdio.h.63.1f4bc553faa62c5c69dd9cb47f9f1417
+                           .group:00000000 wm4.xprintf.h.6.00689df3f6a5f182b13a53f215fa2291
+
+UNDEFINED SYMBOLS
+xputs
+sprintf

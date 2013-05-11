@@ -1,0 +1,1607 @@
+   1              		.syntax unified
+   2              		.cpu cortex-m4
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 6
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.file	"stm32f4xx_pwr.c"
+  15              		.text
+  16              	.Ltext0:
+  17              		.cfi_sections	.debug_frame
+  18              		.align	2
+  19              		.global	PWR_DeInit
+  20              		.thumb
+  21              		.thumb_func
+  23              	PWR_DeInit:
+  24              	.LFB110:
+  25              		.file 1 "../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c"
+   1:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** /**
+   2:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   ******************************************************************************
+   3:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   * @file    stm32f4xx_pwr.c
+   4:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   * @author  MCD Application Team
+   5:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   * @version V1.0.2
+   6:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   * @date    05-March-2012
+   7:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   * @brief   This file provides firmware functions to manage the following 
+   8:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   *          functionalities of the Power Controller (PWR) peripheral:           
+   9:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   *           - Backup Domain Access
+  10:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   *           - PVD configuration
+  11:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   *           - WakeUp pin configuration
+  12:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   *           - Main and Backup Regulators configuration
+  13:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   *           - FLASH Power Down configuration
+  14:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   *           - Low Power modes configuration
+  15:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   *           - Flags management
+  16:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   *               
+  17:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   ******************************************************************************
+  18:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   * @attention
+  19:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   *
+  20:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   * <h2><center>&copy; COPYRIGHT 2012 STMicroelectronics</center></h2>
+  21:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   *
+  22:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   * Licensed under MCD-ST Liberty SW License Agreement V2, (the "License");
+  23:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   * You may not use this file except in compliance with the License.
+  24:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   * You may obtain a copy of the License at:
+  25:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   *
+  26:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   *        http://www.st.com/software_license_agreement_liberty_v2
+  27:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   *
+  28:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   * Unless required by applicable law or agreed to in writing, software 
+  29:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   * distributed under the License is distributed on an "AS IS" BASIS, 
+  30:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  31:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   * See the License for the specific language governing permissions and
+  32:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   * limitations under the License.
+  33:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   *
+  34:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   ******************************************************************************
+  35:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   */ 
+  36:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** 
+  37:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** /* Includes ------------------------------------------------------------------*/
+  38:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** #include "stm32f4xx_pwr.h"
+  39:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** #include "stm32f4xx_rcc.h"
+  40:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** 
+  41:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** /** @addtogroup STM32F4xx_StdPeriph_Driver
+  42:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   * @{
+  43:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   */
+  44:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** 
+  45:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** /** @defgroup PWR 
+  46:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   * @brief PWR driver modules
+  47:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   * @{
+  48:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   */ 
+  49:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** 
+  50:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** /* Private typedef -----------------------------------------------------------*/
+  51:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** /* Private define ------------------------------------------------------------*/
+  52:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** /* --------- PWR registers bit address in the alias region ---------- */
+  53:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** #define PWR_OFFSET               (PWR_BASE - PERIPH_BASE)
+  54:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** 
+  55:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** /* --- CR Register ---*/
+  56:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** 
+  57:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** /* Alias word address of DBP bit */
+  58:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** #define CR_OFFSET                (PWR_OFFSET + 0x00)
+  59:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** #define DBP_BitNumber            0x08
+  60:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** #define CR_DBP_BB                (PERIPH_BB_BASE + (CR_OFFSET * 32) + (DBP_BitNumber * 4))
+  61:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** 
+  62:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** /* Alias word address of PVDE bit */
+  63:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** #define PVDE_BitNumber           0x04
+  64:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** #define CR_PVDE_BB               (PERIPH_BB_BASE + (CR_OFFSET * 32) + (PVDE_BitNumber * 4))
+  65:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** 
+  66:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** /* Alias word address of FPDS bit */
+  67:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** #define FPDS_BitNumber           0x09
+  68:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** #define CR_FPDS_BB               (PERIPH_BB_BASE + (CR_OFFSET * 32) + (FPDS_BitNumber * 4))
+  69:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** 
+  70:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** /* Alias word address of PMODE bit */
+  71:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** #define PMODE_BitNumber           0x0E
+  72:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** #define CR_PMODE_BB               (PERIPH_BB_BASE + (CR_OFFSET * 32) + (PMODE_BitNumber * 4))
+  73:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** 
+  74:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** 
+  75:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** /* --- CSR Register ---*/
+  76:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** 
+  77:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** /* Alias word address of EWUP bit */
+  78:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** #define CSR_OFFSET               (PWR_OFFSET + 0x04)
+  79:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** #define EWUP_BitNumber           0x08
+  80:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** #define CSR_EWUP_BB              (PERIPH_BB_BASE + (CSR_OFFSET * 32) + (EWUP_BitNumber * 4))
+  81:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** 
+  82:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** /* Alias word address of BRE bit */
+  83:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** #define BRE_BitNumber            0x09
+  84:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** #define CSR_BRE_BB              (PERIPH_BB_BASE + (CSR_OFFSET * 32) + (BRE_BitNumber * 4))
+  85:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** 
+  86:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** /* ------------------ PWR registers bit mask ------------------------ */
+  87:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** 
+  88:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** /* CR register bit mask */
+  89:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** #define CR_DS_MASK               ((uint32_t)0xFFFFFFFC)
+  90:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** #define CR_PLS_MASK              ((uint32_t)0xFFFFFF1F)
+  91:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** 
+  92:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** /* Private macro -------------------------------------------------------------*/
+  93:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** /* Private variables ---------------------------------------------------------*/
+  94:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** /* Private function prototypes -----------------------------------------------*/
+  95:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** /* Private functions ---------------------------------------------------------*/
+  96:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** 
+  97:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** /** @defgroup PWR_Private_Functions
+  98:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   * @{
+  99:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   */
+ 100:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** 
+ 101:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** /** @defgroup PWR_Group1 Backup Domain Access function 
+ 102:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****  *  @brief   Backup Domain Access function  
+ 103:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****  *
+ 104:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** @verbatim   
+ 105:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****  ===============================================================================
+ 106:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****                             Backup Domain Access function 
+ 107:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****  ===============================================================================  
+ 108:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** 
+ 109:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   After reset, the backup domain (RTC registers, RTC backup data 
+ 110:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   registers and backup SRAM) is protected against possible unwanted 
+ 111:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   write accesses. 
+ 112:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   To enable access to the RTC Domain and RTC registers, proceed as follows:
+ 113:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****     - Enable the Power Controller (PWR) APB1 interface clock using the
+ 114:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****       RCC_APB1PeriphClockCmd() function.
+ 115:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****     - Enable access to RTC domain using the PWR_BackupAccessCmd() function.
+ 116:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** 
+ 117:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** @endverbatim
+ 118:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   * @{
+ 119:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   */
+ 120:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** 
+ 121:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** /**
+ 122:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   * @brief  Deinitializes the PWR peripheral registers to their default reset values.     
+ 123:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   * @param  None
+ 124:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   * @retval None
+ 125:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   */
+ 126:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** void PWR_DeInit(void)
+ 127:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** {
+  26              		.loc 1 127 0
+  27              		.cfi_startproc
+  28              		@ args = 0, pretend = 0, frame = 0
+  29              		@ frame_needed = 1, uses_anonymous_args = 0
+  30 0000 80B5     		push	{r7, lr}
+  31              	.LCFI0:
+  32              		.cfi_def_cfa_offset 8
+  33              		.cfi_offset 7, -8
+  34              		.cfi_offset 14, -4
+  35 0002 00AF     		add	r7, sp, #0
+  36              	.LCFI1:
+  37              		.cfi_def_cfa_register 7
+ 128:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   RCC_APB1PeriphResetCmd(RCC_APB1Periph_PWR, ENABLE);
+  38              		.loc 1 128 0
+  39 0004 4FF08050 		mov	r0, #268435456
+  40 0008 4FF00101 		mov	r1, #1
+  41 000c FFF7FEFF 		bl	RCC_APB1PeriphResetCmd
+ 129:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   RCC_APB1PeriphResetCmd(RCC_APB1Periph_PWR, DISABLE);
+  42              		.loc 1 129 0
+  43 0010 4FF08050 		mov	r0, #268435456
+  44 0014 4FF00001 		mov	r1, #0
+  45 0018 FFF7FEFF 		bl	RCC_APB1PeriphResetCmd
+ 130:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** }
+  46              		.loc 1 130 0
+  47 001c 80BD     		pop	{r7, pc}
+  48              		.cfi_endproc
+  49              	.LFE110:
+  51 001e 00BF     		.align	2
+  52              		.global	PWR_BackupAccessCmd
+  53              		.thumb
+  54              		.thumb_func
+  56              	PWR_BackupAccessCmd:
+  57              	.LFB111:
+ 131:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** 
+ 132:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** /**
+ 133:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   * @brief  Enables or disables access to the backup domain (RTC registers, RTC 
+ 134:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   *         backup data registers and backup SRAM).
+ 135:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   * @note   If the HSE divided by 2, 3, ..31 is used as the RTC clock, the 
+ 136:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   *         Backup Domain Access should be kept enabled.
+ 137:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   * @param  NewState: new state of the access to the backup domain.
+ 138:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   *          This parameter can be: ENABLE or DISABLE.
+ 139:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   * @retval None
+ 140:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   */
+ 141:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** void PWR_BackupAccessCmd(FunctionalState NewState)
+ 142:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** {
+  58              		.loc 1 142 0
+  59              		.cfi_startproc
+  60              		@ args = 0, pretend = 0, frame = 8
+  61              		@ frame_needed = 1, uses_anonymous_args = 0
+  62              		@ link register save eliminated.
+  63 0020 80B4     		push	{r7}
+  64              	.LCFI2:
+  65              		.cfi_def_cfa_offset 4
+  66              		.cfi_offset 7, -4
+  67 0022 83B0     		sub	sp, sp, #12
+  68              	.LCFI3:
+  69              		.cfi_def_cfa_offset 16
+  70 0024 00AF     		add	r7, sp, #0
+  71              	.LCFI4:
+  72              		.cfi_def_cfa_register 7
+  73 0026 0346     		mov	r3, r0
+  74 0028 FB71     		strb	r3, [r7, #7]
+ 143:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   /* Check the parameters */
+ 144:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   assert_param(IS_FUNCTIONAL_STATE(NewState));
+ 145:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   
+ 146:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   *(__IO uint32_t *) CR_DBP_BB = (uint32_t)NewState;
+  75              		.loc 1 146 0
+  76 002a 044B     		ldr	r3, .L3
+  77 002c FA79     		ldrb	r2, [r7, #7]	@ zero_extendqisi2
+  78 002e 1A60     		str	r2, [r3, #0]
+ 147:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** }
+  79              		.loc 1 147 0
+  80 0030 07F10C07 		add	r7, r7, #12
+  81 0034 BD46     		mov	sp, r7
+  82 0036 80BC     		pop	{r7}
+  83 0038 7047     		bx	lr
+  84              	.L4:
+  85 003a 00BF     		.align	2
+  86              	.L3:
+  87 003c 20000E42 		.word	1108213792
+  88              		.cfi_endproc
+  89              	.LFE111:
+  91              		.align	2
+  92              		.global	PWR_PVDLevelConfig
+  93              		.thumb
+  94              		.thumb_func
+  96              	PWR_PVDLevelConfig:
+  97              	.LFB112:
+ 148:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** 
+ 149:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** /**
+ 150:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   * @}
+ 151:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   */
+ 152:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** 
+ 153:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** /** @defgroup PWR_Group2 PVD configuration functions
+ 154:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****  *  @brief   PVD configuration functions 
+ 155:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****  *
+ 156:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** @verbatim   
+ 157:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****  ===============================================================================
+ 158:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****                            PVD configuration functions
+ 159:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****  ===============================================================================  
+ 160:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** 
+ 161:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****  - The PVD is used to monitor the VDD power supply by comparing it to a threshold
+ 162:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****    selected by the PVD Level (PLS[2:0] bits in the PWR_CR).
+ 163:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****  - A PVDO flag is available to indicate if VDD/VDDA is higher or lower than the 
+ 164:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****    PVD threshold. This event is internally connected to the EXTI line16
+ 165:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****    and can generate an interrupt if enabled through the EXTI registers.
+ 166:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****  - The PVD is stopped in Standby mode.
+ 167:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** 
+ 168:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** @endverbatim
+ 169:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   * @{
+ 170:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   */
+ 171:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** 
+ 172:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** /**
+ 173:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   * @brief  Configures the voltage threshold detected by the Power Voltage Detector(PVD).
+ 174:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   * @param  PWR_PVDLevel: specifies the PVD detection level
+ 175:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   *          This parameter can be one of the following values:
+ 176:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   *            @arg PWR_PVDLevel_0
+ 177:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   *            @arg PWR_PVDLevel_1
+ 178:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   *            @arg PWR_PVDLevel_2
+ 179:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   *            @arg PWR_PVDLevel_3
+ 180:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   *            @arg PWR_PVDLevel_4
+ 181:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   *            @arg PWR_PVDLevel_5
+ 182:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   *            @arg PWR_PVDLevel_6
+ 183:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   *            @arg PWR_PVDLevel_7
+ 184:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   * @note   Refer to the electrical characteristics of your device datasheet for
+ 185:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   *         more details about the voltage threshold corresponding to each 
+ 186:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   *         detection level.
+ 187:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   * @retval None
+ 188:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   */
+ 189:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** void PWR_PVDLevelConfig(uint32_t PWR_PVDLevel)
+ 190:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** {
+  98              		.loc 1 190 0
+  99              		.cfi_startproc
+ 100              		@ args = 0, pretend = 0, frame = 16
+ 101              		@ frame_needed = 1, uses_anonymous_args = 0
+ 102              		@ link register save eliminated.
+ 103 0040 80B4     		push	{r7}
+ 104              	.LCFI5:
+ 105              		.cfi_def_cfa_offset 4
+ 106              		.cfi_offset 7, -4
+ 107 0042 85B0     		sub	sp, sp, #20
+ 108              	.LCFI6:
+ 109              		.cfi_def_cfa_offset 24
+ 110 0044 00AF     		add	r7, sp, #0
+ 111              	.LCFI7:
+ 112              		.cfi_def_cfa_register 7
+ 113 0046 7860     		str	r0, [r7, #4]
+ 191:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   uint32_t tmpreg = 0;
+ 114              		.loc 1 191 0
+ 115 0048 4FF00003 		mov	r3, #0
+ 116 004c FB60     		str	r3, [r7, #12]
+ 192:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   
+ 193:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   /* Check the parameters */
+ 194:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   assert_param(IS_PWR_PVD_LEVEL(PWR_PVDLevel));
+ 195:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   
+ 196:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   tmpreg = PWR->CR;
+ 117              		.loc 1 196 0
+ 118 004e 094B     		ldr	r3, .L6
+ 119 0050 1B68     		ldr	r3, [r3, #0]
+ 120 0052 FB60     		str	r3, [r7, #12]
+ 197:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   
+ 198:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   /* Clear PLS[7:5] bits */
+ 199:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   tmpreg &= CR_PLS_MASK;
+ 121              		.loc 1 199 0
+ 122 0054 FB68     		ldr	r3, [r7, #12]
+ 123 0056 23F0E003 		bic	r3, r3, #224
+ 124 005a FB60     		str	r3, [r7, #12]
+ 200:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   
+ 201:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   /* Set PLS[7:5] bits according to PWR_PVDLevel value */
+ 202:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   tmpreg |= PWR_PVDLevel;
+ 125              		.loc 1 202 0
+ 126 005c FA68     		ldr	r2, [r7, #12]
+ 127 005e 7B68     		ldr	r3, [r7, #4]
+ 128 0060 1343     		orrs	r3, r3, r2
+ 129 0062 FB60     		str	r3, [r7, #12]
+ 203:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   
+ 204:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   /* Store the new value */
+ 205:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   PWR->CR = tmpreg;
+ 130              		.loc 1 205 0
+ 131 0064 034B     		ldr	r3, .L6
+ 132 0066 FA68     		ldr	r2, [r7, #12]
+ 133 0068 1A60     		str	r2, [r3, #0]
+ 206:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** }
+ 134              		.loc 1 206 0
+ 135 006a 07F11407 		add	r7, r7, #20
+ 136 006e BD46     		mov	sp, r7
+ 137 0070 80BC     		pop	{r7}
+ 138 0072 7047     		bx	lr
+ 139              	.L7:
+ 140              		.align	2
+ 141              	.L6:
+ 142 0074 00700040 		.word	1073770496
+ 143              		.cfi_endproc
+ 144              	.LFE112:
+ 146              		.align	2
+ 147              		.global	PWR_PVDCmd
+ 148              		.thumb
+ 149              		.thumb_func
+ 151              	PWR_PVDCmd:
+ 152              	.LFB113:
+ 207:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** 
+ 208:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** /**
+ 209:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   * @brief  Enables or disables the Power Voltage Detector(PVD).
+ 210:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   * @param  NewState: new state of the PVD.
+ 211:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   *         This parameter can be: ENABLE or DISABLE.
+ 212:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   * @retval None
+ 213:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   */
+ 214:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** void PWR_PVDCmd(FunctionalState NewState)
+ 215:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** {
+ 153              		.loc 1 215 0
+ 154              		.cfi_startproc
+ 155              		@ args = 0, pretend = 0, frame = 8
+ 156              		@ frame_needed = 1, uses_anonymous_args = 0
+ 157              		@ link register save eliminated.
+ 158 0078 80B4     		push	{r7}
+ 159              	.LCFI8:
+ 160              		.cfi_def_cfa_offset 4
+ 161              		.cfi_offset 7, -4
+ 162 007a 83B0     		sub	sp, sp, #12
+ 163              	.LCFI9:
+ 164              		.cfi_def_cfa_offset 16
+ 165 007c 00AF     		add	r7, sp, #0
+ 166              	.LCFI10:
+ 167              		.cfi_def_cfa_register 7
+ 168 007e 0346     		mov	r3, r0
+ 169 0080 FB71     		strb	r3, [r7, #7]
+ 216:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   /* Check the parameters */
+ 217:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   assert_param(IS_FUNCTIONAL_STATE(NewState));
+ 218:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   
+ 219:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   *(__IO uint32_t *) CR_PVDE_BB = (uint32_t)NewState;
+ 170              		.loc 1 219 0
+ 171 0082 044B     		ldr	r3, .L9
+ 172 0084 FA79     		ldrb	r2, [r7, #7]	@ zero_extendqisi2
+ 173 0086 1A60     		str	r2, [r3, #0]
+ 220:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** }
+ 174              		.loc 1 220 0
+ 175 0088 07F10C07 		add	r7, r7, #12
+ 176 008c BD46     		mov	sp, r7
+ 177 008e 80BC     		pop	{r7}
+ 178 0090 7047     		bx	lr
+ 179              	.L10:
+ 180 0092 00BF     		.align	2
+ 181              	.L9:
+ 182 0094 10000E42 		.word	1108213776
+ 183              		.cfi_endproc
+ 184              	.LFE113:
+ 186              		.align	2
+ 187              		.global	PWR_WakeUpPinCmd
+ 188              		.thumb
+ 189              		.thumb_func
+ 191              	PWR_WakeUpPinCmd:
+ 192              	.LFB114:
+ 221:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** 
+ 222:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** /**
+ 223:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   * @}
+ 224:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   */
+ 225:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** 
+ 226:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** /** @defgroup PWR_Group3 WakeUp pin configuration functions
+ 227:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****  *  @brief   WakeUp pin configuration functions 
+ 228:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****  *
+ 229:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** @verbatim   
+ 230:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****  ===============================================================================
+ 231:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****                     WakeUp pin configuration functions
+ 232:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****  ===============================================================================  
+ 233:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** 
+ 234:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****  - WakeUp pin is used to wakeup the system from Standby mode. This pin is 
+ 235:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****    forced in input pull down configuration and is active on rising edges.
+ 236:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****  - There is only one WakeUp pin: WakeUp Pin 1 on PA.00.
+ 237:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** 
+ 238:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** @endverbatim
+ 239:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   * @{
+ 240:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   */
+ 241:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** 
+ 242:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** /**
+ 243:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   * @brief  Enables or disables the WakeUp Pin functionality.
+ 244:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   * @param  NewState: new state of the WakeUp Pin functionality.
+ 245:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   *         This parameter can be: ENABLE or DISABLE.
+ 246:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   * @retval None
+ 247:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   */
+ 248:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** void PWR_WakeUpPinCmd(FunctionalState NewState)
+ 249:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** {
+ 193              		.loc 1 249 0
+ 194              		.cfi_startproc
+ 195              		@ args = 0, pretend = 0, frame = 8
+ 196              		@ frame_needed = 1, uses_anonymous_args = 0
+ 197              		@ link register save eliminated.
+ 198 0098 80B4     		push	{r7}
+ 199              	.LCFI11:
+ 200              		.cfi_def_cfa_offset 4
+ 201              		.cfi_offset 7, -4
+ 202 009a 83B0     		sub	sp, sp, #12
+ 203              	.LCFI12:
+ 204              		.cfi_def_cfa_offset 16
+ 205 009c 00AF     		add	r7, sp, #0
+ 206              	.LCFI13:
+ 207              		.cfi_def_cfa_register 7
+ 208 009e 0346     		mov	r3, r0
+ 209 00a0 FB71     		strb	r3, [r7, #7]
+ 250:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   /* Check the parameters */  
+ 251:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   assert_param(IS_FUNCTIONAL_STATE(NewState));
+ 252:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** 
+ 253:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   *(__IO uint32_t *) CSR_EWUP_BB = (uint32_t)NewState;
+ 210              		.loc 1 253 0
+ 211 00a2 044B     		ldr	r3, .L12
+ 212 00a4 FA79     		ldrb	r2, [r7, #7]	@ zero_extendqisi2
+ 213 00a6 1A60     		str	r2, [r3, #0]
+ 254:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** }
+ 214              		.loc 1 254 0
+ 215 00a8 07F10C07 		add	r7, r7, #12
+ 216 00ac BD46     		mov	sp, r7
+ 217 00ae 80BC     		pop	{r7}
+ 218 00b0 7047     		bx	lr
+ 219              	.L13:
+ 220 00b2 00BF     		.align	2
+ 221              	.L12:
+ 222 00b4 A0000E42 		.word	1108213920
+ 223              		.cfi_endproc
+ 224              	.LFE114:
+ 226              		.align	2
+ 227              		.global	PWR_BackupRegulatorCmd
+ 228              		.thumb
+ 229              		.thumb_func
+ 231              	PWR_BackupRegulatorCmd:
+ 232              	.LFB115:
+ 255:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** 
+ 256:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** /**
+ 257:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   * @}
+ 258:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   */
+ 259:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** 
+ 260:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** /** @defgroup PWR_Group4 Main and Backup Regulators configuration functions
+ 261:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****  *  @brief   Main and Backup Regulators configuration functions 
+ 262:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****  *
+ 263:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** @verbatim   
+ 264:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****  ===============================================================================
+ 265:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****                     Main and Backup Regulators configuration functions
+ 266:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****  ===============================================================================  
+ 267:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** 
+ 268:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****  - The backup domain includes 4 Kbytes of backup SRAM accessible only from the 
+ 269:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****    CPU, and address in 32-bit, 16-bit or 8-bit mode. Its content is retained 
+ 270:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****    even in Standby or VBAT mode when the low power backup regulator is enabled. 
+ 271:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****    It can be considered as an internal EEPROM when VBAT is always present.
+ 272:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****    You can use the PWR_BackupRegulatorCmd() function to enable the low power
+ 273:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****    backup regulator and use the PWR_GetFlagStatus(PWR_FLAG_BRR) to check if it is
+ 274:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****    ready or not. 
+ 275:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** 
+ 276:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****  - When the backup domain is supplied by VDD (analog switch connected to VDD) 
+ 277:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****    the backup SRAM is powered from VDD which replaces the VBAT power supply to 
+ 278:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****    save battery life.
+ 279:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** 
+ 280:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****  - The backup SRAM is not mass erased by an tamper event. It is read protected 
+ 281:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****    to prevent confidential data, such as cryptographic private key, from being 
+ 282:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****    accessed. The backup SRAM can be erased only through the Flash interface when
+ 283:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****    a protection level change from level 1 to level 0 is requested. 
+ 284:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****    Refer to the description of Read protection (RDP) in the Flash programming manual.
+ 285:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** 
+ 286:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****  - The main internal regulator can be configured to have a tradeoff between performance
+ 287:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****    and power consumption when the device does not operate at the maximum frequency. 
+ 288:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****    This is done through PWR_MainRegulatorModeConfig() function which configure VOS bit
+ 289:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****    in PWR_CR register: 
+ 290:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****       - When this bit is set (Regulator voltage output Scale 1 mode selected) the System
+ 291:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****         frequency can go up to 168 MHz. 
+ 292:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****       - When this bit is reset (Regulator voltage output Scale 2 mode selected) the System
+ 293:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****         frequency can go up to 144 MHz. 
+ 294:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****    Refer to the datasheets for more details.
+ 295:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****            
+ 296:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** @endverbatim
+ 297:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   * @{
+ 298:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   */
+ 299:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** 
+ 300:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** /**
+ 301:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   * @brief  Enables or disables the Backup Regulator.
+ 302:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   * @param  NewState: new state of the Backup Regulator.
+ 303:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   *          This parameter can be: ENABLE or DISABLE.
+ 304:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   * @retval None
+ 305:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   */
+ 306:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** void PWR_BackupRegulatorCmd(FunctionalState NewState)
+ 307:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** {
+ 233              		.loc 1 307 0
+ 234              		.cfi_startproc
+ 235              		@ args = 0, pretend = 0, frame = 8
+ 236              		@ frame_needed = 1, uses_anonymous_args = 0
+ 237              		@ link register save eliminated.
+ 238 00b8 80B4     		push	{r7}
+ 239              	.LCFI14:
+ 240              		.cfi_def_cfa_offset 4
+ 241              		.cfi_offset 7, -4
+ 242 00ba 83B0     		sub	sp, sp, #12
+ 243              	.LCFI15:
+ 244              		.cfi_def_cfa_offset 16
+ 245 00bc 00AF     		add	r7, sp, #0
+ 246              	.LCFI16:
+ 247              		.cfi_def_cfa_register 7
+ 248 00be 0346     		mov	r3, r0
+ 249 00c0 FB71     		strb	r3, [r7, #7]
+ 308:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   /* Check the parameters */
+ 309:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   assert_param(IS_FUNCTIONAL_STATE(NewState));
+ 310:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** 
+ 311:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   *(__IO uint32_t *) CSR_BRE_BB = (uint32_t)NewState;
+ 250              		.loc 1 311 0
+ 251 00c2 044B     		ldr	r3, .L15
+ 252 00c4 FA79     		ldrb	r2, [r7, #7]	@ zero_extendqisi2
+ 253 00c6 1A60     		str	r2, [r3, #0]
+ 312:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** }
+ 254              		.loc 1 312 0
+ 255 00c8 07F10C07 		add	r7, r7, #12
+ 256 00cc BD46     		mov	sp, r7
+ 257 00ce 80BC     		pop	{r7}
+ 258 00d0 7047     		bx	lr
+ 259              	.L16:
+ 260 00d2 00BF     		.align	2
+ 261              	.L15:
+ 262 00d4 A4000E42 		.word	1108213924
+ 263              		.cfi_endproc
+ 264              	.LFE115:
+ 266              		.align	2
+ 267              		.global	PWR_MainRegulatorModeConfig
+ 268              		.thumb
+ 269              		.thumb_func
+ 271              	PWR_MainRegulatorModeConfig:
+ 272              	.LFB116:
+ 313:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** 
+ 314:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** /**
+ 315:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   * @brief  Configures the main internal regulator output voltage.
+ 316:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   * @param  PWR_Regulator_Voltage: specifies the regulator output voltage to achieve
+ 317:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   *         a tradeoff between performance and power consumption when the device does
+ 318:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   *         not operate at the maximum frequency (refer to the datasheets for more details).
+ 319:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   *          This parameter can be one of the following values:
+ 320:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   *            @arg PWR_Regulator_Voltage_Scale1: Regulator voltage output Scale 1 mode, 
+ 321:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   *                                                System frequency up to 168 MHz. 
+ 322:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   *            @arg PWR_Regulator_Voltage_Scale2: Regulator voltage output Scale 2 mode, 
+ 323:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   *                                                System frequency up to 144 MHz.    
+ 324:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   * @retval None
+ 325:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   */
+ 326:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** void PWR_MainRegulatorModeConfig(uint32_t PWR_Regulator_Voltage)
+ 327:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** {
+ 273              		.loc 1 327 0
+ 274              		.cfi_startproc
+ 275              		@ args = 0, pretend = 0, frame = 8
+ 276              		@ frame_needed = 1, uses_anonymous_args = 0
+ 277              		@ link register save eliminated.
+ 278 00d8 80B4     		push	{r7}
+ 279              	.LCFI17:
+ 280              		.cfi_def_cfa_offset 4
+ 281              		.cfi_offset 7, -4
+ 282 00da 83B0     		sub	sp, sp, #12
+ 283              	.LCFI18:
+ 284              		.cfi_def_cfa_offset 16
+ 285 00dc 00AF     		add	r7, sp, #0
+ 286              	.LCFI19:
+ 287              		.cfi_def_cfa_register 7
+ 288 00de 7860     		str	r0, [r7, #4]
+ 328:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   /* Check the parameters */
+ 329:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   assert_param(IS_PWR_REGULATOR_VOLTAGE(PWR_Regulator_Voltage));
+ 330:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** 
+ 331:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   if (PWR_Regulator_Voltage == PWR_Regulator_Voltage_Scale2)
+ 289              		.loc 1 331 0
+ 290 00e0 7B68     		ldr	r3, [r7, #4]
+ 291 00e2 002B     		cmp	r3, #0
+ 292 00e4 06D1     		bne	.L18
+ 332:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   {
+ 333:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****     PWR->CR &= ~PWR_Regulator_Voltage_Scale1;
+ 293              		.loc 1 333 0
+ 294 00e6 094B     		ldr	r3, .L20
+ 295 00e8 084A     		ldr	r2, .L20
+ 296 00ea 1268     		ldr	r2, [r2, #0]
+ 297 00ec 22F48042 		bic	r2, r2, #16384
+ 298 00f0 1A60     		str	r2, [r3, #0]
+ 299 00f2 05E0     		b	.L17
+ 300              	.L18:
+ 334:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   }
+ 335:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   else
+ 336:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   {    
+ 337:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****     PWR->CR |= PWR_Regulator_Voltage_Scale1;
+ 301              		.loc 1 337 0
+ 302 00f4 054B     		ldr	r3, .L20
+ 303 00f6 054A     		ldr	r2, .L20
+ 304 00f8 1268     		ldr	r2, [r2, #0]
+ 305 00fa 42F48042 		orr	r2, r2, #16384
+ 306 00fe 1A60     		str	r2, [r3, #0]
+ 307              	.L17:
+ 338:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   }
+ 339:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** }
+ 308              		.loc 1 339 0
+ 309 0100 07F10C07 		add	r7, r7, #12
+ 310 0104 BD46     		mov	sp, r7
+ 311 0106 80BC     		pop	{r7}
+ 312 0108 7047     		bx	lr
+ 313              	.L21:
+ 314 010a 00BF     		.align	2
+ 315              	.L20:
+ 316 010c 00700040 		.word	1073770496
+ 317              		.cfi_endproc
+ 318              	.LFE116:
+ 320              		.align	2
+ 321              		.global	PWR_FlashPowerDownCmd
+ 322              		.thumb
+ 323              		.thumb_func
+ 325              	PWR_FlashPowerDownCmd:
+ 326              	.LFB117:
+ 340:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** 
+ 341:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** /**
+ 342:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   * @}
+ 343:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   */
+ 344:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** 
+ 345:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** /** @defgroup PWR_Group5 FLASH Power Down configuration functions
+ 346:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****  *  @brief   FLASH Power Down configuration functions 
+ 347:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****  *
+ 348:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** @verbatim   
+ 349:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****  ===============================================================================
+ 350:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****            FLASH Power Down configuration functions
+ 351:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****  ===============================================================================  
+ 352:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** 
+ 353:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****  - By setting the FPDS bit in the PWR_CR register by using the PWR_FlashPowerDownCmd()
+ 354:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****    function, the Flash memory also enters power down mode when the device enters 
+ 355:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****    Stop mode. When the Flash memory is in power down mode, an additional startup 
+ 356:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****    delay is incurred when waking up from Stop mode.
+ 357:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** 
+ 358:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** @endverbatim
+ 359:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   * @{
+ 360:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   */
+ 361:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** 
+ 362:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** /**
+ 363:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   * @brief  Enables or disables the Flash Power Down in STOP mode.
+ 364:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   * @param  NewState: new state of the Flash power mode.
+ 365:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   *          This parameter can be: ENABLE or DISABLE.
+ 366:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   * @retval None
+ 367:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   */
+ 368:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** void PWR_FlashPowerDownCmd(FunctionalState NewState)
+ 369:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** {
+ 327              		.loc 1 369 0
+ 328              		.cfi_startproc
+ 329              		@ args = 0, pretend = 0, frame = 8
+ 330              		@ frame_needed = 1, uses_anonymous_args = 0
+ 331              		@ link register save eliminated.
+ 332 0110 80B4     		push	{r7}
+ 333              	.LCFI20:
+ 334              		.cfi_def_cfa_offset 4
+ 335              		.cfi_offset 7, -4
+ 336 0112 83B0     		sub	sp, sp, #12
+ 337              	.LCFI21:
+ 338              		.cfi_def_cfa_offset 16
+ 339 0114 00AF     		add	r7, sp, #0
+ 340              	.LCFI22:
+ 341              		.cfi_def_cfa_register 7
+ 342 0116 0346     		mov	r3, r0
+ 343 0118 FB71     		strb	r3, [r7, #7]
+ 370:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   /* Check the parameters */
+ 371:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   assert_param(IS_FUNCTIONAL_STATE(NewState));
+ 372:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** 
+ 373:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   *(__IO uint32_t *) CR_FPDS_BB = (uint32_t)NewState;
+ 344              		.loc 1 373 0
+ 345 011a 044B     		ldr	r3, .L23
+ 346 011c FA79     		ldrb	r2, [r7, #7]	@ zero_extendqisi2
+ 347 011e 1A60     		str	r2, [r3, #0]
+ 374:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** }
+ 348              		.loc 1 374 0
+ 349 0120 07F10C07 		add	r7, r7, #12
+ 350 0124 BD46     		mov	sp, r7
+ 351 0126 80BC     		pop	{r7}
+ 352 0128 7047     		bx	lr
+ 353              	.L24:
+ 354 012a 00BF     		.align	2
+ 355              	.L23:
+ 356 012c 24000E42 		.word	1108213796
+ 357              		.cfi_endproc
+ 358              	.LFE117:
+ 360              		.align	2
+ 361              		.global	PWR_EnterSTOPMode
+ 362              		.thumb
+ 363              		.thumb_func
+ 365              	PWR_EnterSTOPMode:
+ 366              	.LFB118:
+ 375:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** 
+ 376:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** /**
+ 377:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   * @}
+ 378:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   */
+ 379:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** 
+ 380:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** /** @defgroup PWR_Group6 Low Power modes configuration functions
+ 381:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****  *  @brief   Low Power modes configuration functions 
+ 382:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****  *
+ 383:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** @verbatim   
+ 384:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****  ===============================================================================
+ 385:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****                     Low Power modes configuration functions
+ 386:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****  ===============================================================================  
+ 387:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** 
+ 388:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   The devices feature 3 low-power modes:
+ 389:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****    - Sleep mode: Cortex-M4 core stopped, peripherals kept running.
+ 390:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****    - Stop mode: all clocks are stopped, regulator running, regulator in low power mode
+ 391:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****    - Standby mode: 1.2V domain powered off.
+ 392:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****    
+ 393:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****    Sleep mode
+ 394:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****    ===========
+ 395:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****     - Entry:
+ 396:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****       - The Sleep mode is entered by using the __WFI() or __WFE() functions.
+ 397:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****     - Exit:
+ 398:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****       - Any peripheral interrupt acknowledged by the nested vectored interrupt 
+ 399:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****         controller (NVIC) can wake up the device from Sleep mode.
+ 400:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** 
+ 401:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****    Stop mode
+ 402:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****    ==========
+ 403:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****    In Stop mode, all clocks in the 1.2V domain are stopped, the PLL, the HSI,
+ 404:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****    and the HSE RC oscillators are disabled. Internal SRAM and register contents 
+ 405:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****    are preserved.
+ 406:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****    The voltage regulator can be configured either in normal or low-power mode.
+ 407:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****    To minimize the consumption In Stop mode, FLASH can be powered off before 
+ 408:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****    entering the Stop mode. It can be switched on again by software after exiting 
+ 409:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****    the Stop mode using the PWR_FlashPowerDownCmd() function. 
+ 410:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****    
+ 411:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****     - Entry:
+ 412:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****       - The Stop mode is entered using the PWR_EnterSTOPMode(PWR_Regulator_LowPower,) 
+ 413:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****         function with regulator in LowPower or with Regulator ON.
+ 414:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****     - Exit:
+ 415:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****       - Any EXTI Line (Internal or External) configured in Interrupt/Event mode.
+ 416:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****       
+ 417:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****    Standby mode
+ 418:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****    ============
+ 419:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****    The Standby mode allows to achieve the lowest power consumption. It is based 
+ 420:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****    on the Cortex-M4 deepsleep mode, with the voltage regulator disabled. 
+ 421:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****    The 1.2V domain is consequently powered off. The PLL, the HSI oscillator and 
+ 422:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****    the HSE oscillator are also switched off. SRAM and register contents are lost 
+ 423:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****    except for the RTC registers, RTC backup registers, backup SRAM and Standby 
+ 424:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****    circuitry.
+ 425:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****    
+ 426:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****    The voltage regulator is OFF.
+ 427:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****       
+ 428:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****     - Entry:
+ 429:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****       - The Standby mode is entered using the PWR_EnterSTANDBYMode() function.
+ 430:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****     - Exit:
+ 431:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****       - WKUP pin rising edge, RTC alarm (Alarm A and Alarm B), RTC wakeup,
+ 432:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****         tamper event, time-stamp event, external reset in NRST pin, IWDG reset.              
+ 433:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** 
+ 434:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****    Auto-wakeup (AWU) from low-power mode
+ 435:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****    =====================================
+ 436:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****    The MCU can be woken up from low-power mode by an RTC Alarm event, an RTC 
+ 437:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****    Wakeup event, a tamper event, a time-stamp event, or a comparator event, 
+ 438:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****    without depending on an external interrupt (Auto-wakeup mode).
+ 439:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** 
+ 440:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****    - RTC auto-wakeup (AWU) from the Stop mode
+ 441:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****      ----------------------------------------
+ 442:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****      
+ 443:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****      - To wake up from the Stop mode with an RTC alarm event, it is necessary to:
+ 444:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****        - Configure the EXTI Line 17 to be sensitive to rising edges (Interrupt 
+ 445:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****          or Event modes) using the EXTI_Init() function.
+ 446:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****        - Enable the RTC Alarm Interrupt using the RTC_ITConfig() function
+ 447:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****        - Configure the RTC to generate the RTC alarm using the RTC_SetAlarm() 
+ 448:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****          and RTC_AlarmCmd() functions.
+ 449:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****      - To wake up from the Stop mode with an RTC Tamper or time stamp event, it 
+ 450:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****        is necessary to:
+ 451:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****        - Configure the EXTI Line 21 to be sensitive to rising edges (Interrupt 
+ 452:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****          or Event modes) using the EXTI_Init() function.
+ 453:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****        - Enable the RTC Tamper or time stamp Interrupt using the RTC_ITConfig() 
+ 454:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****          function
+ 455:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****        - Configure the RTC to detect the tamper or time stamp event using the
+ 456:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****          RTC_TimeStampConfig(), RTC_TamperTriggerConfig() and RTC_TamperCmd()
+ 457:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****          functions.
+ 458:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****      - To wake up from the Stop mode with an RTC WakeUp event, it is necessary to:
+ 459:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****        - Configure the EXTI Line 22 to be sensitive to rising edges (Interrupt 
+ 460:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****          or Event modes) using the EXTI_Init() function.
+ 461:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****        - Enable the RTC WakeUp Interrupt using the RTC_ITConfig() function
+ 462:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****        - Configure the RTC to generate the RTC WakeUp event using the RTC_WakeUpClockConfig(), 
+ 463:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****          RTC_SetWakeUpCounter() and RTC_WakeUpCmd() functions.
+ 464:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** 
+ 465:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****    - RTC auto-wakeup (AWU) from the Standby mode
+ 466:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****      -------------------------------------------
+ 467:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****      - To wake up from the Standby mode with an RTC alarm event, it is necessary to:
+ 468:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****        - Enable the RTC Alarm Interrupt using the RTC_ITConfig() function
+ 469:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****        - Configure the RTC to generate the RTC alarm using the RTC_SetAlarm() 
+ 470:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****          and RTC_AlarmCmd() functions.
+ 471:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****      - To wake up from the Standby mode with an RTC Tamper or time stamp event, it 
+ 472:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****        is necessary to:
+ 473:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****        - Enable the RTC Tamper or time stamp Interrupt using the RTC_ITConfig() 
+ 474:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****          function
+ 475:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****        - Configure the RTC to detect the tamper or time stamp event using the
+ 476:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****          RTC_TimeStampConfig(), RTC_TamperTriggerConfig() and RTC_TamperCmd()
+ 477:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****          functions.
+ 478:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****      - To wake up from the Standby mode with an RTC WakeUp event, it is necessary to:
+ 479:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****        - Enable the RTC WakeUp Interrupt using the RTC_ITConfig() function
+ 480:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****        - Configure the RTC to generate the RTC WakeUp event using the RTC_WakeUpClockConfig(), 
+ 481:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****          RTC_SetWakeUpCounter() and RTC_WakeUpCmd() functions.
+ 482:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** 
+ 483:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** @endverbatim
+ 484:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   * @{
+ 485:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   */
+ 486:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** 
+ 487:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** /**
+ 488:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   * @brief  Enters STOP mode.
+ 489:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   *   
+ 490:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   * @note   In Stop mode, all I/O pins keep the same state as in Run mode.
+ 491:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   * @note   When exiting Stop mode by issuing an interrupt or a wakeup event, 
+ 492:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   *         the HSI RC oscillator is selected as system clock.
+ 493:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   * @note   When the voltage regulator operates in low power mode, an additional 
+ 494:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   *         startup delay is incurred when waking up from Stop mode. 
+ 495:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   *         By keeping the internal regulator ON during Stop mode, the consumption 
+ 496:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   *         is higher although the startup time is reduced.           
+ 497:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   *     
+ 498:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   * @param  PWR_Regulator: specifies the regulator state in STOP mode.
+ 499:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   *          This parameter can be one of the following values:
+ 500:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   *            @arg PWR_Regulator_ON: STOP mode with regulator ON
+ 501:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   *            @arg PWR_Regulator_LowPower: STOP mode with regulator in low power mode
+ 502:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   * @param  PWR_STOPEntry: specifies if STOP mode in entered with WFI or WFE instruction.
+ 503:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   *          This parameter can be one of the following values:
+ 504:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   *            @arg PWR_STOPEntry_WFI: enter STOP mode with WFI instruction
+ 505:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   *            @arg PWR_STOPEntry_WFE: enter STOP mode with WFE instruction
+ 506:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   * @retval None
+ 507:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   */
+ 508:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** void PWR_EnterSTOPMode(uint32_t PWR_Regulator, uint8_t PWR_STOPEntry)
+ 509:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** {
+ 367              		.loc 1 509 0
+ 368              		.cfi_startproc
+ 369              		@ args = 0, pretend = 0, frame = 16
+ 370              		@ frame_needed = 1, uses_anonymous_args = 0
+ 371              		@ link register save eliminated.
+ 372 0130 80B4     		push	{r7}
+ 373              	.LCFI23:
+ 374              		.cfi_def_cfa_offset 4
+ 375              		.cfi_offset 7, -4
+ 376 0132 85B0     		sub	sp, sp, #20
+ 377              	.LCFI24:
+ 378              		.cfi_def_cfa_offset 24
+ 379 0134 00AF     		add	r7, sp, #0
+ 380              	.LCFI25:
+ 381              		.cfi_def_cfa_register 7
+ 382 0136 7860     		str	r0, [r7, #4]
+ 383 0138 0B46     		mov	r3, r1
+ 384 013a FB70     		strb	r3, [r7, #3]
+ 510:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   uint32_t tmpreg = 0;
+ 385              		.loc 1 510 0
+ 386 013c 4FF00003 		mov	r3, #0
+ 387 0140 FB60     		str	r3, [r7, #12]
+ 511:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   
+ 512:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   /* Check the parameters */
+ 513:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   assert_param(IS_PWR_REGULATOR(PWR_Regulator));
+ 514:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   assert_param(IS_PWR_STOP_ENTRY(PWR_STOPEntry));
+ 515:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   
+ 516:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   /* Select the regulator state in STOP mode ---------------------------------*/
+ 517:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   tmpreg = PWR->CR;
+ 388              		.loc 1 517 0
+ 389 0142 124B     		ldr	r3, .L28
+ 390 0144 1B68     		ldr	r3, [r3, #0]
+ 391 0146 FB60     		str	r3, [r7, #12]
+ 518:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   /* Clear PDDS and LPDSR bits */
+ 519:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   tmpreg &= CR_DS_MASK;
+ 392              		.loc 1 519 0
+ 393 0148 FB68     		ldr	r3, [r7, #12]
+ 394 014a 23F00303 		bic	r3, r3, #3
+ 395 014e FB60     		str	r3, [r7, #12]
+ 520:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   
+ 521:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   /* Set LPDSR bit according to PWR_Regulator value */
+ 522:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   tmpreg |= PWR_Regulator;
+ 396              		.loc 1 522 0
+ 397 0150 FA68     		ldr	r2, [r7, #12]
+ 398 0152 7B68     		ldr	r3, [r7, #4]
+ 399 0154 1343     		orrs	r3, r3, r2
+ 400 0156 FB60     		str	r3, [r7, #12]
+ 523:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   
+ 524:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   /* Store the new value */
+ 525:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   PWR->CR = tmpreg;
+ 401              		.loc 1 525 0
+ 402 0158 0C4B     		ldr	r3, .L28
+ 403 015a FA68     		ldr	r2, [r7, #12]
+ 404 015c 1A60     		str	r2, [r3, #0]
+ 526:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   
+ 527:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   /* Set SLEEPDEEP bit of Cortex System Control Register */
+ 528:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   SCB->SCR |= SCB_SCR_SLEEPDEEP_Msk;
+ 405              		.loc 1 528 0
+ 406 015e 0C4B     		ldr	r3, .L28+4
+ 407 0160 0B4A     		ldr	r2, .L28+4
+ 408 0162 1269     		ldr	r2, [r2, #16]
+ 409 0164 42F00402 		orr	r2, r2, #4
+ 410 0168 1A61     		str	r2, [r3, #16]
+ 529:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   
+ 530:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   /* Select STOP mode entry --------------------------------------------------*/
+ 531:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   if(PWR_STOPEntry == PWR_STOPEntry_WFI)
+ 411              		.loc 1 531 0
+ 412 016a FB78     		ldrb	r3, [r7, #3]	@ zero_extendqisi2
+ 413 016c 012B     		cmp	r3, #1
+ 414 016e 01D1     		bne	.L26
+ 415              	.LBB8:
+ 416              	.LBB9:
+ 417              		.file 2 "/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_
+   1:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /**************************************************************************//**
+   2:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  * @file     core_cmInstr.h
+   3:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  * @brief    CMSIS Cortex-M Core Instruction Access Header File
+   4:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  * @version  V2.10
+   5:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  * @date     19. July 2011
+   6:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  *
+   7:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  * @note
+   8:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  * Copyright (C) 2009-2011 ARM Limited. All rights reserved.
+   9:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  *
+  10:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  * @par
+  11:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  * ARM Limited (ARM) is supplying this software for use with Cortex-M 
+  12:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  * processor based microcontrollers.  This file can be freely distributed 
+  13:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  * within development tools that are supporting such ARM based processors. 
+  14:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  *
+  15:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  * @par
+  16:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  * THIS SOFTWARE IS PROVIDED "AS IS".  NO WARRANTIES, WHETHER EXPRESS, IMPLIED
+  17:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  * OR STATUTORY, INCLUDING, BUT NOT LIMITED TO, IMPLIED WARRANTIES OF
+  18:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE APPLY TO THIS SOFTWARE.
+  19:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  * ARM SHALL NOT, IN ANY CIRCUMSTANCES, BE LIABLE FOR SPECIAL, INCIDENTAL, OR
+  20:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  * CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
+  21:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  *
+  22:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  ******************************************************************************/
+  23:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+  24:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** #ifndef __CORE_CMINSTR_H
+  25:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** #define __CORE_CMINSTR_H
+  26:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+  27:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+  28:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /* ##########################  Core Instruction Access  ######################### */
+  29:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /** \defgroup CMSIS_Core_InstructionInterface CMSIS Core Instruction Interface
+  30:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****   Access to dedicated instructions
+  31:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****   @{
+  32:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** */
+  33:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+  34:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** #if   defined ( __CC_ARM ) /*------------------RealView Compiler -----------------*/
+  35:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /* ARM armcc specific functions */
+  36:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+  37:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** #if (__ARMCC_VERSION < 400677)
+  38:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****   #error "Please use ARM Compiler Toolchain V4.0.677 or later!"
+  39:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** #endif
+  40:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+  41:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+  42:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /** \brief  No Operation
+  43:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+  44:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     No Operation does nothing. This instruction can be used for code alignment purposes.
+  45:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  */
+  46:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** #define __NOP                             __nop
+  47:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+  48:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+  49:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /** \brief  Wait For Interrupt
+  50:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+  51:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     Wait For Interrupt is a hint instruction that suspends execution
+  52:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     until one of a number of events occurs.
+  53:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  */
+  54:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** #define __WFI                             __wfi
+  55:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+  56:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+  57:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /** \brief  Wait For Event
+  58:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+  59:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     Wait For Event is a hint instruction that permits the processor to enter
+  60:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     a low-power state until one of a number of events occurs.
+  61:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  */
+  62:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** #define __WFE                             __wfe
+  63:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+  64:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+  65:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /** \brief  Send Event
+  66:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+  67:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     Send Event is a hint instruction. It causes an event to be signaled to the CPU.
+  68:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  */
+  69:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** #define __SEV                             __sev
+  70:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+  71:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+  72:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /** \brief  Instruction Synchronization Barrier
+  73:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+  74:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     Instruction Synchronization Barrier flushes the pipeline in the processor, 
+  75:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     so that all instructions following the ISB are fetched from cache or 
+  76:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     memory, after the instruction has been completed.
+  77:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  */
+  78:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** #define __ISB()                           __isb(0xF)
+  79:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+  80:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+  81:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /** \brief  Data Synchronization Barrier
+  82:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+  83:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     This function acts as a special kind of Data Memory Barrier. 
+  84:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     It completes when all explicit memory accesses before this instruction complete.
+  85:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  */
+  86:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** #define __DSB()                           __dsb(0xF)
+  87:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+  88:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+  89:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /** \brief  Data Memory Barrier
+  90:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+  91:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     This function ensures the apparent order of the explicit memory operations before 
+  92:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     and after the instruction, without ensuring their completion.
+  93:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  */
+  94:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** #define __DMB()                           __dmb(0xF)
+  95:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+  96:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+  97:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /** \brief  Reverse byte order (32 bit)
+  98:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+  99:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     This function reverses the byte order in integer value.
+ 100:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 101:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \param [in]    value  Value to reverse
+ 102:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \return               Reversed value
+ 103:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  */
+ 104:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** #define __REV                             __rev
+ 105:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 106:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 107:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /** \brief  Reverse byte order (16 bit)
+ 108:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 109:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     This function reverses the byte order in two unsigned short values.
+ 110:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 111:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \param [in]    value  Value to reverse
+ 112:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \return               Reversed value
+ 113:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  */
+ 114:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** static __INLINE __ASM uint32_t __REV16(uint32_t value)
+ 115:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** {
+ 116:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****   rev16 r0, r0
+ 117:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****   bx lr
+ 118:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** }
+ 119:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 120:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 121:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /** \brief  Reverse byte order in signed short value
+ 122:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 123:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     This function reverses the byte order in a signed short value with sign extension to integer.
+ 124:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 125:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \param [in]    value  Value to reverse
+ 126:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \return               Reversed value
+ 127:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  */
+ 128:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** static __INLINE __ASM int32_t __REVSH(int32_t value)
+ 129:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** {
+ 130:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****   revsh r0, r0
+ 131:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****   bx lr
+ 132:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** }
+ 133:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 134:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 135:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** #if       (__CORTEX_M >= 0x03)
+ 136:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 137:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /** \brief  Reverse bit order of value
+ 138:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 139:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     This function reverses the bit order of the given value.
+ 140:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 141:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \param [in]    value  Value to reverse
+ 142:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \return               Reversed value
+ 143:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  */
+ 144:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** #define __RBIT                            __rbit
+ 145:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 146:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 147:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /** \brief  LDR Exclusive (8 bit)
+ 148:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 149:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     This function performs a exclusive LDR command for 8 bit value.
+ 150:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 151:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \param [in]    ptr  Pointer to data
+ 152:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \return             value of type uint8_t at (*ptr)
+ 153:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  */
+ 154:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** #define __LDREXB(ptr)                     ((uint8_t ) __ldrex(ptr))
+ 155:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 156:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 157:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /** \brief  LDR Exclusive (16 bit)
+ 158:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 159:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     This function performs a exclusive LDR command for 16 bit values.
+ 160:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 161:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \param [in]    ptr  Pointer to data
+ 162:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \return        value of type uint16_t at (*ptr)
+ 163:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  */
+ 164:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** #define __LDREXH(ptr)                     ((uint16_t) __ldrex(ptr))
+ 165:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 166:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 167:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /** \brief  LDR Exclusive (32 bit)
+ 168:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 169:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     This function performs a exclusive LDR command for 32 bit values.
+ 170:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 171:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \param [in]    ptr  Pointer to data
+ 172:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \return        value of type uint32_t at (*ptr)
+ 173:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  */
+ 174:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** #define __LDREXW(ptr)                     ((uint32_t ) __ldrex(ptr))
+ 175:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 176:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 177:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /** \brief  STR Exclusive (8 bit)
+ 178:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 179:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     This function performs a exclusive STR command for 8 bit values.
+ 180:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 181:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \param [in]  value  Value to store
+ 182:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \param [in]    ptr  Pointer to location
+ 183:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \return          0  Function succeeded
+ 184:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \return          1  Function failed
+ 185:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  */
+ 186:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** #define __STREXB(value, ptr)              __strex(value, ptr)
+ 187:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 188:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 189:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /** \brief  STR Exclusive (16 bit)
+ 190:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 191:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     This function performs a exclusive STR command for 16 bit values.
+ 192:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 193:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \param [in]  value  Value to store
+ 194:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \param [in]    ptr  Pointer to location
+ 195:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \return          0  Function succeeded
+ 196:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \return          1  Function failed
+ 197:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  */
+ 198:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** #define __STREXH(value, ptr)              __strex(value, ptr)
+ 199:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 200:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 201:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /** \brief  STR Exclusive (32 bit)
+ 202:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 203:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     This function performs a exclusive STR command for 32 bit values.
+ 204:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 205:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \param [in]  value  Value to store
+ 206:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \param [in]    ptr  Pointer to location
+ 207:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \return          0  Function succeeded
+ 208:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \return          1  Function failed
+ 209:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  */
+ 210:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** #define __STREXW(value, ptr)              __strex(value, ptr)
+ 211:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 212:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 213:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /** \brief  Remove the exclusive lock
+ 214:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 215:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     This function removes the exclusive lock which is created by LDREX.
+ 216:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 217:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  */
+ 218:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** #define __CLREX                           __clrex
+ 219:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 220:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 221:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /** \brief  Signed Saturate
+ 222:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 223:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     This function saturates a signed value.
+ 224:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 225:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \param [in]  value  Value to be saturated
+ 226:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \param [in]    sat  Bit position to saturate to (1..32)
+ 227:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \return             Saturated value
+ 228:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  */
+ 229:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** #define __SSAT                            __ssat
+ 230:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 231:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 232:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /** \brief  Unsigned Saturate
+ 233:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 234:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     This function saturates an unsigned value.
+ 235:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 236:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \param [in]  value  Value to be saturated
+ 237:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \param [in]    sat  Bit position to saturate to (0..31)
+ 238:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \return             Saturated value
+ 239:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  */
+ 240:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** #define __USAT                            __usat
+ 241:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 242:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 243:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /** \brief  Count leading zeros
+ 244:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 245:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     This function counts the number of leading zeros of a data value.
+ 246:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 247:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \param [in]  value  Value to count the leading zeros
+ 248:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     \return             number of leading zeros in value
+ 249:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  */
+ 250:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** #define __CLZ                             __clz 
+ 251:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 252:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** #endif /* (__CORTEX_M >= 0x03) */
+ 253:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 254:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 255:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 256:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** #elif defined ( __ICCARM__ ) /*------------------ ICC Compiler -------------------*/
+ 257:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /* IAR iccarm specific functions */
+ 258:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 259:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** #include <cmsis_iar.h>
+ 260:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 261:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 262:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** #elif defined ( __GNUC__ ) /*------------------ GNU Compiler ---------------------*/
+ 263:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /* GNU gcc specific functions */
+ 264:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 265:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /** \brief  No Operation
+ 266:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 267:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     No Operation does nothing. This instruction can be used for code alignment purposes.
+ 268:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  */
+ 269:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** __attribute__( ( always_inline ) ) static __INLINE void __NOP(void)
+ 270:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** {
+ 271:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****   __ASM volatile ("nop");
+ 272:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** }
+ 273:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 274:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 275:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /** \brief  Wait For Interrupt
+ 276:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 277:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     Wait For Interrupt is a hint instruction that suspends execution
+ 278:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     until one of a number of events occurs.
+ 279:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  */
+ 280:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** __attribute__( ( always_inline ) ) static __INLINE void __WFI(void)
+ 281:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** {
+ 282:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****   __ASM volatile ("wfi");
+ 418              		.loc 2 282 0
+ 419              	@ 282 "/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmI
+ 420 0170 30BF     		wfi
+ 421              	@ 0 "" 2
+ 422              		.thumb
+ 423 0172 00E0     		b	.L27
+ 424              	.L26:
+ 425              	.LBE9:
+ 426              	.LBE8:
+ 427              	.LBB10:
+ 428              	.LBB11:
+ 283:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** }
+ 284:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 285:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 286:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** /** \brief  Wait For Event
+ 287:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** 
+ 288:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     Wait For Event is a hint instruction that permits the processor to enter
+ 289:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****     a low-power state until one of a number of events occurs.
+ 290:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****  */
+ 291:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** __attribute__( ( always_inline ) ) static __INLINE void __WFE(void)
+ 292:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h **** {
+ 293:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****   __ASM volatile ("wfe");
+ 429              		.loc 2 293 0
+ 430              	@ 293 "/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmI
+ 431 0174 20BF     		wfe
+ 432              	@ 0 "" 2
+ 433              		.thumb
+ 434              	.L27:
+ 435              	.LBE11:
+ 436              	.LBE10:
+ 532:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   {   
+ 533:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****     /* Request Wait For Interrupt */
+ 534:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****     __WFI();
+ 535:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   }
+ 536:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   else
+ 537:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   {
+ 538:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****     /* Request Wait For Event */
+ 539:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****     __WFE();
+ 540:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   }
+ 541:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   /* Reset SLEEPDEEP bit of Cortex System Control Register */
+ 542:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   SCB->SCR &= (uint32_t)~((uint32_t)SCB_SCR_SLEEPDEEP_Msk);  
+ 437              		.loc 1 542 0
+ 438 0176 064B     		ldr	r3, .L28+4
+ 439 0178 054A     		ldr	r2, .L28+4
+ 440 017a 1269     		ldr	r2, [r2, #16]
+ 441 017c 22F00402 		bic	r2, r2, #4
+ 442 0180 1A61     		str	r2, [r3, #16]
+ 543:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** }
+ 443              		.loc 1 543 0
+ 444 0182 07F11407 		add	r7, r7, #20
+ 445 0186 BD46     		mov	sp, r7
+ 446 0188 80BC     		pop	{r7}
+ 447 018a 7047     		bx	lr
+ 448              	.L29:
+ 449              		.align	2
+ 450              	.L28:
+ 451 018c 00700040 		.word	1073770496
+ 452 0190 00ED00E0 		.word	-536810240
+ 453              		.cfi_endproc
+ 454              	.LFE118:
+ 456              		.align	2
+ 457              		.global	PWR_EnterSTANDBYMode
+ 458              		.thumb
+ 459              		.thumb_func
+ 461              	PWR_EnterSTANDBYMode:
+ 462              	.LFB119:
+ 544:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** 
+ 545:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** /**
+ 546:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   * @brief  Enters STANDBY mode.
+ 547:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   * @note   In Standby mode, all I/O pins are high impedance except for:
+ 548:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   *          - Reset pad (still available) 
+ 549:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   *          - RTC_AF1 pin (PC13) if configured for tamper, time-stamp, RTC 
+ 550:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   *            Alarm out, or RTC clock calibration out.
+ 551:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   *          - RTC_AF2 pin (PI8) if configured for tamper or time-stamp.  
+ 552:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   *          - WKUP pin 1 (PA0) if enabled.       
+ 553:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   * @param  None
+ 554:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   * @retval None
+ 555:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   */
+ 556:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** void PWR_EnterSTANDBYMode(void)
+ 557:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** {
+ 463              		.loc 1 557 0
+ 464              		.cfi_startproc
+ 465              		@ args = 0, pretend = 0, frame = 0
+ 466              		@ frame_needed = 1, uses_anonymous_args = 0
+ 467              		@ link register save eliminated.
+ 468 0194 80B4     		push	{r7}
+ 469              	.LCFI26:
+ 470              		.cfi_def_cfa_offset 4
+ 471              		.cfi_offset 7, -4
+ 472 0196 00AF     		add	r7, sp, #0
+ 473              	.LCFI27:
+ 474              		.cfi_def_cfa_register 7
+ 558:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   /* Clear Wakeup flag */
+ 559:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   PWR->CR |= PWR_CR_CWUF;
+ 475              		.loc 1 559 0
+ 476 0198 0A4B     		ldr	r3, .L31
+ 477 019a 0A4A     		ldr	r2, .L31
+ 478 019c 1268     		ldr	r2, [r2, #0]
+ 479 019e 42F00402 		orr	r2, r2, #4
+ 480 01a2 1A60     		str	r2, [r3, #0]
+ 560:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   
+ 561:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   /* Select STANDBY mode */
+ 562:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   PWR->CR |= PWR_CR_PDDS;
+ 481              		.loc 1 562 0
+ 482 01a4 074B     		ldr	r3, .L31
+ 483 01a6 074A     		ldr	r2, .L31
+ 484 01a8 1268     		ldr	r2, [r2, #0]
+ 485 01aa 42F00202 		orr	r2, r2, #2
+ 486 01ae 1A60     		str	r2, [r3, #0]
+ 563:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   
+ 564:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   /* Set SLEEPDEEP bit of Cortex System Control Register */
+ 565:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   SCB->SCR |= SCB_SCR_SLEEPDEEP_Msk;
+ 487              		.loc 1 565 0
+ 488 01b0 054B     		ldr	r3, .L31+4
+ 489 01b2 054A     		ldr	r2, .L31+4
+ 490 01b4 1269     		ldr	r2, [r2, #16]
+ 491 01b6 42F00402 		orr	r2, r2, #4
+ 492 01ba 1A61     		str	r2, [r3, #16]
+ 493              	.LBB12:
+ 494              	.LBB13:
+ 282:/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmInstr.h ****   __ASM volatile ("wfi");
+ 495              		.loc 2 282 0
+ 496              	@ 282 "/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_cmI
+ 497 01bc 30BF     		wfi
+ 498              	@ 0 "" 2
+ 499              		.thumb
+ 500              	.LBE13:
+ 501              	.LBE12:
+ 566:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   
+ 567:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** /* This option is used to ensure that store operations are completed */
+ 568:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** #if defined ( __CC_ARM   )
+ 569:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   __force_stores();
+ 570:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** #endif
+ 571:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   /* Request Wait For Interrupt */
+ 572:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   __WFI();
+ 573:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** }
+ 502              		.loc 1 573 0
+ 503 01be BD46     		mov	sp, r7
+ 504 01c0 80BC     		pop	{r7}
+ 505 01c2 7047     		bx	lr
+ 506              	.L32:
+ 507              		.align	2
+ 508              	.L31:
+ 509 01c4 00700040 		.word	1073770496
+ 510 01c8 00ED00E0 		.word	-536810240
+ 511              		.cfi_endproc
+ 512              	.LFE119:
+ 514              		.align	2
+ 515              		.global	PWR_GetFlagStatus
+ 516              		.thumb
+ 517              		.thumb_func
+ 519              	PWR_GetFlagStatus:
+ 520              	.LFB120:
+ 574:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** 
+ 575:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** /**
+ 576:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   * @}
+ 577:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   */
+ 578:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** 
+ 579:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** /** @defgroup PWR_Group7 Flags management functions
+ 580:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****  *  @brief   Flags management functions 
+ 581:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****  *
+ 582:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** @verbatim   
+ 583:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****  ===============================================================================
+ 584:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****                            Flags management functions
+ 585:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****  ===============================================================================  
+ 586:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** 
+ 587:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** @endverbatim
+ 588:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   * @{
+ 589:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   */
+ 590:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** 
+ 591:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** /**
+ 592:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   * @brief  Checks whether the specified PWR flag is set or not.
+ 593:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   * @param  PWR_FLAG: specifies the flag to check.
+ 594:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   *          This parameter can be one of the following values:
+ 595:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   *            @arg PWR_FLAG_WU: Wake Up flag. This flag indicates that a wakeup event 
+ 596:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   *                  was received from the WKUP pin or from the RTC alarm (Alarm A 
+ 597:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   *                  or Alarm B), RTC Tamper event, RTC TimeStamp event or RTC Wakeup.
+ 598:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   *                  An additional wakeup event is detected if the WKUP pin is enabled 
+ 599:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   *                  (by setting the EWUP bit) when the WKUP pin level is already high.  
+ 600:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   *            @arg PWR_FLAG_SB: StandBy flag. This flag indicates that the system was
+ 601:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   *                  resumed from StandBy mode.    
+ 602:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   *            @arg PWR_FLAG_PVDO: PVD Output. This flag is valid only if PVD is enabled 
+ 603:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   *                  by the PWR_PVDCmd() function. The PVD is stopped by Standby mode 
+ 604:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   *                  For this reason, this bit is equal to 0 after Standby or reset
+ 605:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   *                  until the PVDE bit is set.
+ 606:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   *            @arg PWR_FLAG_BRR: Backup regulator ready flag. This bit is not reset 
+ 607:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   *                  when the device wakes up from Standby mode or by a system reset 
+ 608:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   *                  or power reset.  
+ 609:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   *            @arg PWR_FLAG_VOSRDY: This flag indicates that the Regulator voltage 
+ 610:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   *                 scaling output selection is ready. 
+ 611:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   * @retval The new state of PWR_FLAG (SET or RESET).
+ 612:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   */
+ 613:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** FlagStatus PWR_GetFlagStatus(uint32_t PWR_FLAG)
+ 614:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** {
+ 521              		.loc 1 614 0
+ 522              		.cfi_startproc
+ 523              		@ args = 0, pretend = 0, frame = 16
+ 524              		@ frame_needed = 1, uses_anonymous_args = 0
+ 525              		@ link register save eliminated.
+ 526 01cc 80B4     		push	{r7}
+ 527              	.LCFI28:
+ 528              		.cfi_def_cfa_offset 4
+ 529              		.cfi_offset 7, -4
+ 530 01ce 85B0     		sub	sp, sp, #20
+ 531              	.LCFI29:
+ 532              		.cfi_def_cfa_offset 24
+ 533 01d0 00AF     		add	r7, sp, #0
+ 534              	.LCFI30:
+ 535              		.cfi_def_cfa_register 7
+ 536 01d2 7860     		str	r0, [r7, #4]
+ 615:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   FlagStatus bitstatus = RESET;
+ 537              		.loc 1 615 0
+ 538 01d4 4FF00003 		mov	r3, #0
+ 539 01d8 FB73     		strb	r3, [r7, #15]
+ 616:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   
+ 617:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   /* Check the parameters */
+ 618:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   assert_param(IS_PWR_GET_FLAG(PWR_FLAG));
+ 619:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   
+ 620:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   if ((PWR->CSR & PWR_FLAG) != (uint32_t)RESET)
+ 540              		.loc 1 620 0
+ 541 01da 0A4B     		ldr	r3, .L37
+ 542 01dc 5A68     		ldr	r2, [r3, #4]
+ 543 01de 7B68     		ldr	r3, [r7, #4]
+ 544 01e0 1340     		ands	r3, r3, r2
+ 545 01e2 002B     		cmp	r3, #0
+ 546 01e4 03D0     		beq	.L34
+ 621:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   {
+ 622:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****     bitstatus = SET;
+ 547              		.loc 1 622 0
+ 548 01e6 4FF00103 		mov	r3, #1
+ 549 01ea FB73     		strb	r3, [r7, #15]
+ 550 01ec 02E0     		b	.L35
+ 551              	.L34:
+ 623:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   }
+ 624:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   else
+ 625:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   {
+ 626:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****     bitstatus = RESET;
+ 552              		.loc 1 626 0
+ 553 01ee 4FF00003 		mov	r3, #0
+ 554 01f2 FB73     		strb	r3, [r7, #15]
+ 555              	.L35:
+ 627:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   }
+ 628:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   /* Return the flag status */
+ 629:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   return bitstatus;
+ 556              		.loc 1 629 0
+ 557 01f4 FB7B     		ldrb	r3, [r7, #15]	@ zero_extendqisi2
+ 630:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** }
+ 558              		.loc 1 630 0
+ 559 01f6 1846     		mov	r0, r3
+ 560 01f8 07F11407 		add	r7, r7, #20
+ 561 01fc BD46     		mov	sp, r7
+ 562 01fe 80BC     		pop	{r7}
+ 563 0200 7047     		bx	lr
+ 564              	.L38:
+ 565 0202 00BF     		.align	2
+ 566              	.L37:
+ 567 0204 00700040 		.word	1073770496
+ 568              		.cfi_endproc
+ 569              	.LFE120:
+ 571              		.align	2
+ 572              		.global	PWR_ClearFlag
+ 573              		.thumb
+ 574              		.thumb_func
+ 576              	PWR_ClearFlag:
+ 577              	.LFB121:
+ 631:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** 
+ 632:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** /**
+ 633:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   * @brief  Clears the PWR's pending flags.
+ 634:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   * @param  PWR_FLAG: specifies the flag to clear.
+ 635:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   *          This parameter can be one of the following values:
+ 636:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   *            @arg PWR_FLAG_WU: Wake Up flag
+ 637:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   *            @arg PWR_FLAG_SB: StandBy flag
+ 638:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   * @retval None
+ 639:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   */
+ 640:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** void PWR_ClearFlag(uint32_t PWR_FLAG)
+ 641:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** {
+ 578              		.loc 1 641 0
+ 579              		.cfi_startproc
+ 580              		@ args = 0, pretend = 0, frame = 8
+ 581              		@ frame_needed = 1, uses_anonymous_args = 0
+ 582              		@ link register save eliminated.
+ 583 0208 80B4     		push	{r7}
+ 584              	.LCFI31:
+ 585              		.cfi_def_cfa_offset 4
+ 586              		.cfi_offset 7, -4
+ 587 020a 83B0     		sub	sp, sp, #12
+ 588              	.LCFI32:
+ 589              		.cfi_def_cfa_offset 16
+ 590 020c 00AF     		add	r7, sp, #0
+ 591              	.LCFI33:
+ 592              		.cfi_def_cfa_register 7
+ 593 020e 7860     		str	r0, [r7, #4]
+ 642:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   /* Check the parameters */
+ 643:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   assert_param(IS_PWR_CLEAR_FLAG(PWR_FLAG));
+ 644:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****          
+ 645:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c ****   PWR->CR |=  PWR_FLAG << 2;
+ 594              		.loc 1 645 0
+ 595 0210 064B     		ldr	r3, .L40
+ 596 0212 064A     		ldr	r2, .L40
+ 597 0214 1168     		ldr	r1, [r2, #0]
+ 598 0216 7A68     		ldr	r2, [r7, #4]
+ 599 0218 4FEA8202 		lsl	r2, r2, #2
+ 600 021c 0A43     		orrs	r2, r2, r1
+ 601 021e 1A60     		str	r2, [r3, #0]
+ 646:../Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.c **** }
+ 602              		.loc 1 646 0
+ 603 0220 07F10C07 		add	r7, r7, #12
+ 604 0224 BD46     		mov	sp, r7
+ 605 0226 80BC     		pop	{r7}
+ 606 0228 7047     		bx	lr
+ 607              	.L41:
+ 608 022a 00BF     		.align	2
+ 609              	.L40:
+ 610 022c 00700040 		.word	1073770496
+ 611              		.cfi_endproc
+ 612              	.LFE121:
+ 614              	.Letext0:
+ 615              		.file 3 "/opt/CodeSourcery/bin/../lib/gcc/arm-none-eabi/4.7.2/../../../../arm-none-eabi/include/st
+ 616              		.file 4 "/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_
+ 617              		.file 5 "/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Device/ST/STM
+DEFINED SYMBOLS
+                            *ABS*:00000000 stm32f4xx_pwr.c
+     /tmp/ccHK56k9.s:18     .text:00000000 $t
+     /tmp/ccHK56k9.s:23     .text:00000000 PWR_DeInit
+     /tmp/ccHK56k9.s:56     .text:00000020 PWR_BackupAccessCmd
+     /tmp/ccHK56k9.s:87     .text:0000003c $d
+     /tmp/ccHK56k9.s:91     .text:00000040 $t
+     /tmp/ccHK56k9.s:96     .text:00000040 PWR_PVDLevelConfig
+     /tmp/ccHK56k9.s:142    .text:00000074 $d
+     /tmp/ccHK56k9.s:146    .text:00000078 $t
+     /tmp/ccHK56k9.s:151    .text:00000078 PWR_PVDCmd
+     /tmp/ccHK56k9.s:182    .text:00000094 $d
+     /tmp/ccHK56k9.s:186    .text:00000098 $t
+     /tmp/ccHK56k9.s:191    .text:00000098 PWR_WakeUpPinCmd
+     /tmp/ccHK56k9.s:222    .text:000000b4 $d
+     /tmp/ccHK56k9.s:226    .text:000000b8 $t
+     /tmp/ccHK56k9.s:231    .text:000000b8 PWR_BackupRegulatorCmd
+     /tmp/ccHK56k9.s:262    .text:000000d4 $d
+     /tmp/ccHK56k9.s:266    .text:000000d8 $t
+     /tmp/ccHK56k9.s:271    .text:000000d8 PWR_MainRegulatorModeConfig
+     /tmp/ccHK56k9.s:316    .text:0000010c $d
+     /tmp/ccHK56k9.s:320    .text:00000110 $t
+     /tmp/ccHK56k9.s:325    .text:00000110 PWR_FlashPowerDownCmd
+     /tmp/ccHK56k9.s:356    .text:0000012c $d
+     /tmp/ccHK56k9.s:360    .text:00000130 $t
+     /tmp/ccHK56k9.s:365    .text:00000130 PWR_EnterSTOPMode
+     /tmp/ccHK56k9.s:451    .text:0000018c $d
+     /tmp/ccHK56k9.s:456    .text:00000194 $t
+     /tmp/ccHK56k9.s:461    .text:00000194 PWR_EnterSTANDBYMode
+     /tmp/ccHK56k9.s:509    .text:000001c4 $d
+     /tmp/ccHK56k9.s:514    .text:000001cc $t
+     /tmp/ccHK56k9.s:519    .text:000001cc PWR_GetFlagStatus
+     /tmp/ccHK56k9.s:567    .text:00000204 $d
+     /tmp/ccHK56k9.s:571    .text:00000208 $t
+     /tmp/ccHK56k9.s:576    .text:00000208 PWR_ClearFlag
+     /tmp/ccHK56k9.s:610    .text:0000022c $d
+                     .debug_frame:00000010 $d
+                           .group:00000000 wm4.1.ee386580922180e5cad1057f989de60d
+                           .group:00000000 wm4.stm32f4xx.h.54.6e1f0ee5c76cc1e53c8ea6d18297b5fd
+                           .group:00000000 wm4.core_cm4.h.32.f824aba4d431a5bb4a51726bd5b62834
+                           .group:00000000 wm4.stdint.h.10.90b695f550ca6cc3fb08fa83baf01e05
+                           .group:00000000 wm4.core_cmInstr.h.25.f50f886f2edf670cf199b35fd96f5c91
+                           .group:00000000 wm4.core_cm4_simd.h.29.b4a3fdfb606cb3b26119424324d4b963
+                           .group:00000000 wm4.core_cm4.h.153.5393ef7e6cebf34dd51ca528f9218ab3
+                           .group:00000000 wm4.stm32f4xx.h.289.fa68dcae75666a037ce29b5a1b57e3b3
+                           .group:00000000 wm4.stm32f4xx_adc.h.108.1710484bf41297b93f825b3b15cbdff8
+                           .group:00000000 wm4.stm32f4xx_can.h.31.3bb56c6436c7a6e6af1611046e81f48c
+                           .group:00000000 wm4.stm32f4xx_cryp.h.31.94bbbb19b99df10306f31e78c333a77b
+                           .group:00000000 wm4.stm32f4xx_dac.h.31.b8d45e7eaf71ee4bf01c1317dbc06f77
+                           .group:00000000 wm4.stm32f4xx_dbgmcu.h.30.70a81ec54c2707baa9fca77391eeeaaa
+                           .group:00000000 wm4.stm32f4xx_dcmi.h.30.9d0942d58c357d2eed15e044bf9b4a77
+                           .group:00000000 wm4.stm32f4xx_dma.h.31.815bb924b30b1c776b3cd51113fdfe60
+                           .group:00000000 wm4.stm32f4xx_exti.h.31.86bd18e979f97217bb1d3b80fde0231e
+                           .group:00000000 wm4.stm32f4xx_flash.h.31.74f2ed42d890f144ca7eb5ae8172f0d0
+                           .group:00000000 wm4.stm32f4xx_fsmc.h.31.ff58629e0c603fb2f9b3f00c0657fdfa
+                           .group:00000000 wm4.stm32f4xx_hash.h.31.5c109425d30f0b9cc0a26ad38182d91f
+                           .group:00000000 wm4.stm32f4xx_gpio.h.31.d9aeae10cfa353d85d475c0d4900c452
+                           .group:00000000 wm4.stm32f4xx_i2c.h.31.edf5baa611075c49ae13f56be9040be3
+                           .group:00000000 wm4.stm32f4xx_iwdg.h.31.30e376e6d8d424aab7fddd66cf691c7b
+                           .group:00000000 wm4.stm32f4xx_rcc.h.30.820e94551583d2b835c8cf3ad722e16c
+                           .group:00000000 wm4.stm32f4xx_rng.h.31.1ec493d56b7a8e5a71238519cae6dea7
+                           .group:00000000 wm4.stm32f4xx_rtc.h.31.bddeb98c63c8fa06fac80b5dd8296471
+                           .group:00000000 wm4.stm32f4xx_sdio.h.31.8c6dff42ffa718b444c3420717601ff2
+                           .group:00000000 wm4.stm32f4xx_spi.h.31.fb1b2c8214b87a47d4457633b7c31c3c
+                           .group:00000000 wm4.stm32f4xx_syscfg.h.31.5a680f88d55b7816ae613c20f199cbd9
+                           .group:00000000 wm4.stm32f4xx_tim.h.31.b1d608fbde729347e4ccf70799e654d2
+                           .group:00000000 wm4.stm32f4xx_usart.h.31.f8d29b14aa4d39de5495adcc92749d3c
+                           .group:00000000 wm4.stm32f4xx_wwdg.h.31.b45a80fa1ec64984adf786f7e489f31b
+                           .group:00000000 wm4.misc.h.31.041217492a6cb86f2fb26099f373a465
+                           .group:00000000 wm4.stm32f4xx.h.6975.cdbdae9d5de06f1ba6b770f59cbe4d6c
+                           .group:00000000 wm4.stm32f4xx_pwr.h.59.387cbececd43cd20a6b7433ecfd5bafb
+
+UNDEFINED SYMBOLS
+RCC_APB1PeriphResetCmd

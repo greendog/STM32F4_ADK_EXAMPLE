@@ -1,0 +1,461 @@
+   1              		.syntax unified
+   2              		.cpu cortex-m4
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 6
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.file	"uart_debug.c"
+  15              		.text
+  16              	.Ltext0:
+  17              		.cfi_sections	.debug_frame
+  18              		.global	COM_USART
+  19              		.data
+  20              		.align	2
+  23              	COM_USART:
+  24 0000 00440040 		.word	1073759232
+  25              		.global	COM_TX_PORT
+  26              		.align	2
+  29              	COM_TX_PORT:
+  30 0004 00000240 		.word	1073872896
+  31              		.global	COM_RX_PORT
+  32              		.align	2
+  35              	COM_RX_PORT:
+  36 0008 00000240 		.word	1073872896
+  37              		.global	COM_USART_CLK
+  38              		.section	.rodata
+  39              		.align	2
+  42              	COM_USART_CLK:
+  43 0000 00000200 		.word	131072
+  44              		.global	COM_TX_PORT_CLK
+  45              		.align	2
+  48              	COM_TX_PORT_CLK:
+  49 0004 01000000 		.word	1
+  50              		.global	COM_RX_PORT_CLK
+  51              		.align	2
+  54              	COM_RX_PORT_CLK:
+  55 0008 01000000 		.word	1
+  56              		.global	COM_TX_PIN
+  57              		.align	1
+  60              	COM_TX_PIN:
+  61 000c 0400     		.short	4
+  62              		.global	COM_RX_PIN
+  63              		.align	1
+  66              	COM_RX_PIN:
+  67 000e 0800     		.short	8
+  68              		.global	COM_TX_PIN_SOURCE
+  69              		.align	1
+  72              	COM_TX_PIN_SOURCE:
+  73 0010 0200     		.short	2
+  74              		.global	COM_RX_PIN_SOURCE
+  75              		.align	1
+  78              	COM_RX_PIN_SOURCE:
+  79 0012 0300     		.short	3
+  80              		.global	COM_TX_AF
+  81              		.align	1
+  84              	COM_TX_AF:
+  85 0014 0700     		.short	7
+  86              		.global	COM_RX_AF
+  87              		.align	1
+  90              	COM_RX_AF:
+  91 0016 0700     		.short	7
+  92              		.text
+  93              		.align	2
+  94              		.global	uart_debug_init
+  95              		.thumb
+  96              		.thumb_func
+  98              	uart_debug_init:
+  99              	.LFB110:
+ 100              		.file 1 "../src/uart_debug.c"
+   1:../src/uart_debug.c **** /**
+   2:../src/uart_debug.c ****   ******************************************************************************
+   3:../src/uart_debug.c ****   * @file    uart_debug.c
+   4:../src/uart_debug.c ****   * @author  Yuuichi Akagawa
+   5:../src/uart_debug.c ****   * @version V1.0.0
+   6:../src/uart_debug.c ****   * @date    2012/02/27
+   7:../src/uart_debug.c ****   * @brief   UART debug out utility
+   8:../src/uart_debug.c ****   ******************************************************************************
+   9:../src/uart_debug.c ****   * @attention
+  10:../src/uart_debug.c ****   *
+  11:../src/uart_debug.c ****   * Licensed under the Apache License, Version 2.0 (the "License");
+  12:../src/uart_debug.c ****   * you may not use this file except in compliance with the License.
+  13:../src/uart_debug.c ****   * You may obtain a copy of the License at
+  14:../src/uart_debug.c ****   *
+  15:../src/uart_debug.c ****   *      http://www.apache.org/licenses/LICENSE-2.0
+  16:../src/uart_debug.c ****   *
+  17:../src/uart_debug.c ****   * Unless required by applicable law or agreed to in writing, software
+  18:../src/uart_debug.c ****   * distributed under the License is distributed on an "AS IS" BASIS,
+  19:../src/uart_debug.c ****   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  20:../src/uart_debug.c ****   * See the License for the specific language governing permissions and
+  21:../src/uart_debug.c ****   * limitations under the License.
+  22:../src/uart_debug.c ****   * <h2><center>&copy; COPYRIGHT (C)2012 Yuuichi Akagawa</center></h2>
+  23:../src/uart_debug.c ****   *
+  24:../src/uart_debug.c ****   ******************************************************************************
+  25:../src/uart_debug.c ****   */
+  26:../src/uart_debug.c **** 
+  27:../src/uart_debug.c **** /* Includes */
+  28:../src/uart_debug.c **** #include "stm32f4xx.h"
+  29:../src/uart_debug.c **** #include "stm32f4_discovery.h"
+  30:../src/uart_debug.c **** #include "uart_debug.h"
+  31:../src/uart_debug.c **** 
+  32:../src/uart_debug.c **** //USART2
+  33:../src/uart_debug.c **** USART_TypeDef* COM_USART        = USART2;
+  34:../src/uart_debug.c **** GPIO_TypeDef*  COM_TX_PORT      = GPIOA;
+  35:../src/uart_debug.c **** GPIO_TypeDef*  COM_RX_PORT      = GPIOA;
+  36:../src/uart_debug.c **** const uint32_t COM_USART_CLK    = RCC_APB1Periph_USART2;
+  37:../src/uart_debug.c **** const uint32_t COM_TX_PORT_CLK  = RCC_AHB1Periph_GPIOA;
+  38:../src/uart_debug.c **** const uint32_t COM_RX_PORT_CLK  = RCC_AHB1Periph_GPIOA;
+  39:../src/uart_debug.c **** const uint16_t COM_TX_PIN       = GPIO_Pin_2;
+  40:../src/uart_debug.c **** const uint16_t COM_RX_PIN       = GPIO_Pin_3;
+  41:../src/uart_debug.c **** const uint16_t COM_TX_PIN_SOURCE= GPIO_PinSource2;
+  42:../src/uart_debug.c **** const uint16_t COM_RX_PIN_SOURCE= GPIO_PinSource3;
+  43:../src/uart_debug.c **** const uint16_t COM_TX_AF        = GPIO_AF_USART2;
+  44:../src/uart_debug.c **** const uint16_t COM_RX_AF        = GPIO_AF_USART2;
+  45:../src/uart_debug.c **** 
+  46:../src/uart_debug.c **** void uart_debug_init()
+  47:../src/uart_debug.c **** {
+ 101              		.loc 1 47 0
+ 102              		.cfi_startproc
+ 103              		@ args = 0, pretend = 0, frame = 24
+ 104              		@ frame_needed = 1, uses_anonymous_args = 0
+ 105 0000 80B5     		push	{r7, lr}
+ 106              	.LCFI0:
+ 107              		.cfi_def_cfa_offset 8
+ 108              		.cfi_offset 7, -8
+ 109              		.cfi_offset 14, -4
+ 110 0002 86B0     		sub	sp, sp, #24
+ 111              	.LCFI1:
+ 112              		.cfi_def_cfa_offset 32
+ 113 0004 00AF     		add	r7, sp, #0
+ 114              	.LCFI2:
+ 115              		.cfi_def_cfa_register 7
+  48:../src/uart_debug.c **** 	  USART_InitTypeDef USART_InitStructure;
+  49:../src/uart_debug.c **** 	  GPIO_InitTypeDef GPIO_InitStructure;
+  50:../src/uart_debug.c **** 	  /* USARTx configured as follow:
+  51:../src/uart_debug.c **** 	        - BaudRate = 230400 baud
+  52:../src/uart_debug.c **** 	        - Word Length = 8 Bits
+  53:../src/uart_debug.c **** 	        - One Stop Bit
+  54:../src/uart_debug.c **** 	        - No parity
+  55:../src/uart_debug.c **** 	        - Hardware flow control disabled (RTS and CTS signals)
+  56:../src/uart_debug.c **** 	        - Receive and transmit enabled
+  57:../src/uart_debug.c **** 	  */
+  58:../src/uart_debug.c **** 	  USART_InitStructure.USART_BaudRate = 230400;
+ 116              		.loc 1 58 0
+ 117 0006 4FF46133 		mov	r3, #230400
+ 118 000a BB60     		str	r3, [r7, #8]
+  59:../src/uart_debug.c **** 	  USART_InitStructure.USART_WordLength = USART_WordLength_8b;
+ 119              		.loc 1 59 0
+ 120 000c 4FF00003 		mov	r3, #0
+ 121 0010 BB81     		strh	r3, [r7, #12]	@ movhi
+  60:../src/uart_debug.c **** 	  USART_InitStructure.USART_StopBits = USART_StopBits_1;
+ 122              		.loc 1 60 0
+ 123 0012 4FF00003 		mov	r3, #0
+ 124 0016 FB81     		strh	r3, [r7, #14]	@ movhi
+  61:../src/uart_debug.c **** 	  USART_InitStructure.USART_Parity = USART_Parity_No;
+ 125              		.loc 1 61 0
+ 126 0018 4FF00003 		mov	r3, #0
+ 127 001c 3B82     		strh	r3, [r7, #16]	@ movhi
+  62:../src/uart_debug.c **** 	  USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
+ 128              		.loc 1 62 0
+ 129 001e 4FF00003 		mov	r3, #0
+ 130 0022 BB82     		strh	r3, [r7, #20]	@ movhi
+  63:../src/uart_debug.c **** 	  USART_InitStructure.USART_Mode = USART_Mode_Tx | USART_Mode_Rx;
+ 131              		.loc 1 63 0
+ 132 0024 4FF00C03 		mov	r3, #12
+ 133 0028 7B82     		strh	r3, [r7, #18]	@ movhi
+  64:../src/uart_debug.c **** 	  /* Enable GPIO clock */
+  65:../src/uart_debug.c **** 	  RCC_AHB1PeriphClockCmd(COM_TX_PORT_CLK | COM_RX_PORT_CLK, ENABLE);
+ 134              		.loc 1 65 0
+ 135 002a 334B     		ldr	r3, .L2
+ 136 002c 1A68     		ldr	r2, [r3, #0]
+ 137 002e 334B     		ldr	r3, .L2+4
+ 138 0030 1B68     		ldr	r3, [r3, #0]
+ 139 0032 1343     		orrs	r3, r3, r2
+ 140 0034 1846     		mov	r0, r3
+ 141 0036 4FF00101 		mov	r1, #1
+ 142 003a FFF7FEFF 		bl	RCC_AHB1PeriphClockCmd
+  66:../src/uart_debug.c **** 	  /* Enable UART clock */
+  67:../src/uart_debug.c **** 	  RCC_APB1PeriphClockCmd(COM_USART_CLK, ENABLE);
+ 143              		.loc 1 67 0
+ 144 003e 304B     		ldr	r3, .L2+8
+ 145 0040 1B68     		ldr	r3, [r3, #0]
+ 146 0042 1846     		mov	r0, r3
+ 147 0044 4FF00101 		mov	r1, #1
+ 148 0048 FFF7FEFF 		bl	RCC_APB1PeriphClockCmd
+  68:../src/uart_debug.c **** 
+  69:../src/uart_debug.c **** 	  /* Connect PXx to USARTx_Tx*/
+  70:../src/uart_debug.c **** 	  GPIO_PinAFConfig(COM_TX_PORT, COM_TX_PIN_SOURCE, COM_TX_AF);
+ 149              		.loc 1 70 0
+ 150 004c 2D4B     		ldr	r3, .L2+12
+ 151 004e 1968     		ldr	r1, [r3, #0]
+ 152 0050 2D4B     		ldr	r3, .L2+16
+ 153 0052 1A88     		ldrh	r2, [r3, #0]
+ 154 0054 2D4B     		ldr	r3, .L2+20
+ 155 0056 1B88     		ldrh	r3, [r3, #0]
+ 156 0058 DBB2     		uxtb	r3, r3
+ 157 005a 0846     		mov	r0, r1
+ 158 005c 1146     		mov	r1, r2
+ 159 005e 1A46     		mov	r2, r3
+ 160 0060 FFF7FEFF 		bl	GPIO_PinAFConfig
+  71:../src/uart_debug.c **** 
+  72:../src/uart_debug.c **** 	  /* Connect PXx to USARTx_Rx*/
+  73:../src/uart_debug.c **** 	  GPIO_PinAFConfig(COM_RX_PORT, COM_RX_PIN_SOURCE, COM_RX_AF);
+ 161              		.loc 1 73 0
+ 162 0064 2A4B     		ldr	r3, .L2+24
+ 163 0066 1968     		ldr	r1, [r3, #0]
+ 164 0068 2A4B     		ldr	r3, .L2+28
+ 165 006a 1A88     		ldrh	r2, [r3, #0]
+ 166 006c 2A4B     		ldr	r3, .L2+32
+ 167 006e 1B88     		ldrh	r3, [r3, #0]
+ 168 0070 DBB2     		uxtb	r3, r3
+ 169 0072 0846     		mov	r0, r1
+ 170 0074 1146     		mov	r1, r2
+ 171 0076 1A46     		mov	r2, r3
+ 172 0078 FFF7FEFF 		bl	GPIO_PinAFConfig
+  74:../src/uart_debug.c **** 
+  75:../src/uart_debug.c **** 	  /* Configure USART Tx as alternate function  */
+  76:../src/uart_debug.c **** 	  GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+ 173              		.loc 1 76 0
+ 174 007c 4FF00003 		mov	r3, #0
+ 175 0080 BB71     		strb	r3, [r7, #6]
+  77:../src/uart_debug.c **** 	  GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
+ 176              		.loc 1 77 0
+ 177 0082 4FF00103 		mov	r3, #1
+ 178 0086 FB71     		strb	r3, [r7, #7]
+  78:../src/uart_debug.c **** 	  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
+ 179              		.loc 1 78 0
+ 180 0088 4FF00203 		mov	r3, #2
+ 181 008c 3B71     		strb	r3, [r7, #4]
+  79:../src/uart_debug.c **** 
+  80:../src/uart_debug.c **** 	  GPIO_InitStructure.GPIO_Pin = COM_TX_PIN;
+ 182              		.loc 1 80 0
+ 183 008e 234B     		ldr	r3, .L2+36
+ 184 0090 1B88     		ldrh	r3, [r3, #0]
+ 185 0092 3B60     		str	r3, [r7, #0]
+  81:../src/uart_debug.c **** 	  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+ 186              		.loc 1 81 0
+ 187 0094 4FF00203 		mov	r3, #2
+ 188 0098 7B71     		strb	r3, [r7, #5]
+  82:../src/uart_debug.c **** 	  GPIO_Init(COM_TX_PORT, &GPIO_InitStructure);
+ 189              		.loc 1 82 0
+ 190 009a 1A4B     		ldr	r3, .L2+12
+ 191 009c 1A68     		ldr	r2, [r3, #0]
+ 192 009e 3B46     		mov	r3, r7
+ 193 00a0 1046     		mov	r0, r2
+ 194 00a2 1946     		mov	r1, r3
+ 195 00a4 FFF7FEFF 		bl	GPIO_Init
+  83:../src/uart_debug.c **** 
+  84:../src/uart_debug.c **** 	  /* Configure USART Rx as alternate function  */
+  85:../src/uart_debug.c **** 	  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
+ 196              		.loc 1 85 0
+ 197 00a8 4FF00203 		mov	r3, #2
+ 198 00ac 3B71     		strb	r3, [r7, #4]
+  86:../src/uart_debug.c **** 	  GPIO_InitStructure.GPIO_Pin = COM_RX_PIN;
+ 199              		.loc 1 86 0
+ 200 00ae 1C4B     		ldr	r3, .L2+40
+ 201 00b0 1B88     		ldrh	r3, [r3, #0]
+ 202 00b2 3B60     		str	r3, [r7, #0]
+  87:../src/uart_debug.c **** 	  GPIO_Init(COM_RX_PORT, &GPIO_InitStructure);
+ 203              		.loc 1 87 0
+ 204 00b4 164B     		ldr	r3, .L2+24
+ 205 00b6 1A68     		ldr	r2, [r3, #0]
+ 206 00b8 3B46     		mov	r3, r7
+ 207 00ba 1046     		mov	r0, r2
+ 208 00bc 1946     		mov	r1, r3
+ 209 00be FFF7FEFF 		bl	GPIO_Init
+  88:../src/uart_debug.c **** 
+  89:../src/uart_debug.c **** 	  /* USART configuration */
+  90:../src/uart_debug.c **** 	  USART_Init(COM_USART, &USART_InitStructure);
+ 210              		.loc 1 90 0
+ 211 00c2 184B     		ldr	r3, .L2+44
+ 212 00c4 1A68     		ldr	r2, [r3, #0]
+ 213 00c6 07F10803 		add	r3, r7, #8
+ 214 00ca 1046     		mov	r0, r2
+ 215 00cc 1946     		mov	r1, r3
+ 216 00ce FFF7FEFF 		bl	USART_Init
+  91:../src/uart_debug.c **** 
+  92:../src/uart_debug.c **** 	  /* Enable USART */
+  93:../src/uart_debug.c **** 	  USART_Cmd(COM_USART, ENABLE);
+ 217              		.loc 1 93 0
+ 218 00d2 144B     		ldr	r3, .L2+44
+ 219 00d4 1B68     		ldr	r3, [r3, #0]
+ 220 00d6 1846     		mov	r0, r3
+ 221 00d8 4FF00101 		mov	r1, #1
+ 222 00dc FFF7FEFF 		bl	USART_Cmd
+  94:../src/uart_debug.c **** 	  USART_SendData(USART2, (uint8_t) 'o');
+ 223              		.loc 1 94 0
+ 224 00e0 1148     		ldr	r0, .L2+48
+ 225 00e2 4FF06F01 		mov	r1, #111
+ 226 00e6 FFF7FEFF 		bl	USART_SendData
+  95:../src/uart_debug.c **** 
+  96:../src/uart_debug.c **** 	  /* Attach ChaN's xprintf interface */
+  97:../src/uart_debug.c **** 	  xdev_out(uart_debug_putc);
+ 227              		.loc 1 97 0
+ 228 00ea 104B     		ldr	r3, .L2+52
+ 229 00ec 104A     		ldr	r2, .L2+56
+ 230 00ee 1A60     		str	r2, [r3, #0]
+  98:../src/uart_debug.c **** }
+ 231              		.loc 1 98 0
+ 232 00f0 07F11807 		add	r7, r7, #24
+ 233 00f4 BD46     		mov	sp, r7
+ 234 00f6 80BD     		pop	{r7, pc}
+ 235              	.L3:
+ 236              		.align	2
+ 237              	.L2:
+ 238 00f8 00000000 		.word	COM_TX_PORT_CLK
+ 239 00fc 00000000 		.word	COM_RX_PORT_CLK
+ 240 0100 00000000 		.word	COM_USART_CLK
+ 241 0104 00000000 		.word	COM_TX_PORT
+ 242 0108 00000000 		.word	COM_TX_PIN_SOURCE
+ 243 010c 00000000 		.word	COM_TX_AF
+ 244 0110 00000000 		.word	COM_RX_PORT
+ 245 0114 00000000 		.word	COM_RX_PIN_SOURCE
+ 246 0118 00000000 		.word	COM_RX_AF
+ 247 011c 00000000 		.word	COM_TX_PIN
+ 248 0120 00000000 		.word	COM_RX_PIN
+ 249 0124 00000000 		.word	COM_USART
+ 250 0128 00440040 		.word	1073759232
+ 251 012c 00000000 		.word	xfunc_out
+ 252 0130 00000000 		.word	uart_debug_putc
+ 253              		.cfi_endproc
+ 254              	.LFE110:
+ 256              		.align	2
+ 257              		.global	uart_debug_putc
+ 258              		.thumb
+ 259              		.thumb_func
+ 261              	uart_debug_putc:
+ 262              	.LFB111:
+  99:../src/uart_debug.c **** 
+ 100:../src/uart_debug.c **** void uart_debug_putc( unsigned char c)
+ 101:../src/uart_debug.c **** {
+ 263              		.loc 1 101 0
+ 264              		.cfi_startproc
+ 265              		@ args = 0, pretend = 0, frame = 8
+ 266              		@ frame_needed = 1, uses_anonymous_args = 0
+ 267 0134 80B5     		push	{r7, lr}
+ 268              	.LCFI3:
+ 269              		.cfi_def_cfa_offset 8
+ 270              		.cfi_offset 7, -8
+ 271              		.cfi_offset 14, -4
+ 272 0136 82B0     		sub	sp, sp, #8
+ 273              	.LCFI4:
+ 274              		.cfi_def_cfa_offset 16
+ 275 0138 00AF     		add	r7, sp, #0
+ 276              	.LCFI5:
+ 277              		.cfi_def_cfa_register 7
+ 278 013a 0346     		mov	r3, r0
+ 279 013c FB71     		strb	r3, [r7, #7]
+ 102:../src/uart_debug.c **** 	USART_SendData(USART2, (uint8_t) c);
+ 280              		.loc 1 102 0
+ 281 013e FB79     		ldrb	r3, [r7, #7]	@ zero_extendqisi2
+ 282 0140 9BB2     		uxth	r3, r3
+ 283 0142 0848     		ldr	r0, .L6
+ 284 0144 1946     		mov	r1, r3
+ 285 0146 FFF7FEFF 		bl	USART_SendData
+ 103:../src/uart_debug.c **** 	  /* Loop until the end of transmission */
+ 104:../src/uart_debug.c **** 	  while (USART_GetFlagStatus(USART2, USART_FLAG_TC) == RESET)
+ 286              		.loc 1 104 0
+ 287 014a 00BF     		nop
+ 288              	.L5:
+ 289              		.loc 1 104 0 is_stmt 0 discriminator 1
+ 290 014c 0548     		ldr	r0, .L6
+ 291 014e 4FF04001 		mov	r1, #64
+ 292 0152 FFF7FEFF 		bl	USART_GetFlagStatus
+ 293 0156 0346     		mov	r3, r0
+ 294 0158 002B     		cmp	r3, #0
+ 295 015a F7D0     		beq	.L5
+ 105:../src/uart_debug.c **** 	  {}
+ 106:../src/uart_debug.c **** }
+ 296              		.loc 1 106 0 is_stmt 1
+ 297 015c 07F10807 		add	r7, r7, #8
+ 298 0160 BD46     		mov	sp, r7
+ 299 0162 80BD     		pop	{r7, pc}
+ 300              	.L7:
+ 301              		.align	2
+ 302              	.L6:
+ 303 0164 00440040 		.word	1073759232
+ 304              		.cfi_endproc
+ 305              	.LFE111:
+ 307              	.Letext0:
+ 308              		.file 2 "/opt/CodeSourcery/bin/../lib/gcc/arm-none-eabi/4.7.2/../../../../arm-none-eabi/include/st
+ 309              		.file 3 "/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Device/ST/STM
+ 310              		.file 4 "/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/STM32F4xx_StdPeriph
+ 311              		.file 5 "/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/STM32F4xx_StdPeriph
+ 312              		.file 6 "/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/Libraries/CMSIS/Include/core_
+ 313              		.file 7 "/home/dev/arm/stm32/stm32f4/stm32f4-discovery/apps/template/inc/xprintf.h"
+DEFINED SYMBOLS
+                            *ABS*:00000000 uart_debug.c
+     /tmp/cceGwHE4.s:23     .data:00000000 COM_USART
+     /tmp/cceGwHE4.s:20     .data:00000000 $d
+     /tmp/cceGwHE4.s:29     .data:00000004 COM_TX_PORT
+     /tmp/cceGwHE4.s:35     .data:00000008 COM_RX_PORT
+     /tmp/cceGwHE4.s:42     .rodata:00000000 COM_USART_CLK
+     /tmp/cceGwHE4.s:39     .rodata:00000000 $d
+     /tmp/cceGwHE4.s:48     .rodata:00000004 COM_TX_PORT_CLK
+     /tmp/cceGwHE4.s:54     .rodata:00000008 COM_RX_PORT_CLK
+     /tmp/cceGwHE4.s:60     .rodata:0000000c COM_TX_PIN
+     /tmp/cceGwHE4.s:66     .rodata:0000000e COM_RX_PIN
+     /tmp/cceGwHE4.s:72     .rodata:00000010 COM_TX_PIN_SOURCE
+     /tmp/cceGwHE4.s:78     .rodata:00000012 COM_RX_PIN_SOURCE
+     /tmp/cceGwHE4.s:84     .rodata:00000014 COM_TX_AF
+     /tmp/cceGwHE4.s:90     .rodata:00000016 COM_RX_AF
+     /tmp/cceGwHE4.s:93     .text:00000000 $t
+     /tmp/cceGwHE4.s:98     .text:00000000 uart_debug_init
+     /tmp/cceGwHE4.s:238    .text:000000f8 $d
+     /tmp/cceGwHE4.s:261    .text:00000134 uart_debug_putc
+     /tmp/cceGwHE4.s:256    .text:00000134 $t
+     /tmp/cceGwHE4.s:303    .text:00000164 $d
+                     .debug_frame:00000010 $d
+                           .group:00000000 wm4.1.ee386580922180e5cad1057f989de60d
+                           .group:00000000 wm4.stm32f4xx.h.54.6e1f0ee5c76cc1e53c8ea6d18297b5fd
+                           .group:00000000 wm4.core_cm4.h.32.f824aba4d431a5bb4a51726bd5b62834
+                           .group:00000000 wm4.stdint.h.10.90b695f550ca6cc3fb08fa83baf01e05
+                           .group:00000000 wm4.core_cmInstr.h.25.f50f886f2edf670cf199b35fd96f5c91
+                           .group:00000000 wm4.core_cm4_simd.h.29.b4a3fdfb606cb3b26119424324d4b963
+                           .group:00000000 wm4.core_cm4.h.153.5393ef7e6cebf34dd51ca528f9218ab3
+                           .group:00000000 wm4.stm32f4xx.h.289.fa68dcae75666a037ce29b5a1b57e3b3
+                           .group:00000000 wm4.stm32f4xx_adc.h.108.1710484bf41297b93f825b3b15cbdff8
+                           .group:00000000 wm4.stm32f4xx_can.h.31.3bb56c6436c7a6e6af1611046e81f48c
+                           .group:00000000 wm4.stm32f4xx_cryp.h.31.94bbbb19b99df10306f31e78c333a77b
+                           .group:00000000 wm4.stm32f4xx_dac.h.31.b8d45e7eaf71ee4bf01c1317dbc06f77
+                           .group:00000000 wm4.stm32f4xx_dbgmcu.h.30.70a81ec54c2707baa9fca77391eeeaaa
+                           .group:00000000 wm4.stm32f4xx_dcmi.h.30.9d0942d58c357d2eed15e044bf9b4a77
+                           .group:00000000 wm4.stm32f4xx_dma.h.31.815bb924b30b1c776b3cd51113fdfe60
+                           .group:00000000 wm4.stm32f4xx_exti.h.31.86bd18e979f97217bb1d3b80fde0231e
+                           .group:00000000 wm4.stm32f4xx_flash.h.31.74f2ed42d890f144ca7eb5ae8172f0d0
+                           .group:00000000 wm4.stm32f4xx_fsmc.h.31.ff58629e0c603fb2f9b3f00c0657fdfa
+                           .group:00000000 wm4.stm32f4xx_hash.h.31.5c109425d30f0b9cc0a26ad38182d91f
+                           .group:00000000 wm4.stm32f4xx_gpio.h.31.d9aeae10cfa353d85d475c0d4900c452
+                           .group:00000000 wm4.stm32f4xx_i2c.h.31.edf5baa611075c49ae13f56be9040be3
+                           .group:00000000 wm4.stm32f4xx_iwdg.h.31.30e376e6d8d424aab7fddd66cf691c7b
+                           .group:00000000 wm4.stm32f4xx_pwr.h.31.bb774fc1b632cb8d2ecaec8c6524d2c0
+                           .group:00000000 wm4.stm32f4xx_rcc.h.30.820e94551583d2b835c8cf3ad722e16c
+                           .group:00000000 wm4.stm32f4xx_rng.h.31.1ec493d56b7a8e5a71238519cae6dea7
+                           .group:00000000 wm4.stm32f4xx_rtc.h.31.bddeb98c63c8fa06fac80b5dd8296471
+                           .group:00000000 wm4.stm32f4xx_sdio.h.31.8c6dff42ffa718b444c3420717601ff2
+                           .group:00000000 wm4.stm32f4xx_spi.h.31.fb1b2c8214b87a47d4457633b7c31c3c
+                           .group:00000000 wm4.stm32f4xx_syscfg.h.31.5a680f88d55b7816ae613c20f199cbd9
+                           .group:00000000 wm4.stm32f4xx_tim.h.31.b1d608fbde729347e4ccf70799e654d2
+                           .group:00000000 wm4.stm32f4xx_usart.h.31.f8d29b14aa4d39de5495adcc92749d3c
+                           .group:00000000 wm4.stm32f4xx_wwdg.h.31.b45a80fa1ec64984adf786f7e489f31b
+                           .group:00000000 wm4.misc.h.31.041217492a6cb86f2fb26099f373a465
+                           .group:00000000 wm4.stm32f4xx.h.6975.cdbdae9d5de06f1ba6b770f59cbe4d6c
+                           .group:00000000 wm4.stm32f4_discovery.h.25.f2884f43a6dee9f5df9a2d77e91107bd
+                           .group:00000000 wm4.xprintf.h.6.00689df3f6a5f182b13a53f215fa2291
+
+UNDEFINED SYMBOLS
+RCC_AHB1PeriphClockCmd
+RCC_APB1PeriphClockCmd
+GPIO_PinAFConfig
+GPIO_Init
+USART_Init
+USART_Cmd
+USART_SendData
+xfunc_out
+USART_GetFlagStatus
